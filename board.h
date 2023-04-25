@@ -30,3 +30,11 @@ typedef struct _board {
 #define O_BOARD_ROOK 256
 #define O_BOARD_BISHOP 320
 #define O_BOARD_KNIGHT 384
+
+#define ROOK_PLACE 129
+#define BISHOP_PLACE 36
+#define KNIGHT_PLACE 66
+#define PAWN_PLACE 255
+#define COLOR_PLACE 65535
+
+t_board* initializeBoard();
