@@ -1,3 +1,4 @@
+#include <cstdint>
 #ifndef KINGOFTHEHILL_KI_BOARD_H
 #define KINGOFTHEHILL_KI_BOARD_H
 
@@ -31,10 +32,26 @@ typedef struct _board {
 #define O_BOARD_BISHOP 320
 #define O_BOARD_KNIGHT 384
 
+#define UNICODE_WHITE_KING 0x2654
+#define UNICODE_WHITE_QUEEN 0x2655
+#define UNICODE_WHITE_ROOK 0x2656
+#define UNICODE_WHITE_BISHOP 0x2657
+#define UNICODE_WHITE_KNIGHT 0x2658
+#define UNICODE_WHITE_PAWN 0x2659
+
+#define UNICODE_BLACK_KING 0x265A
+#define UNICODE_BLACK_QUEEN 0x265B
+#define UNICODE_BLACK_ROOK 0x265C
+#define UNICODE_BLACK_BISHOP 0x265D
+#define UNICODE_BLACK_KNIGHT 0x265E
+#define UNICODE_BLACK_PAWN 0x265F
+
+#define UNICODE_SQUARE 0x2610
+
 #define ROOK_PLACE 129
 #define BISHOP_PLACE 36
 #define KNIGHT_PLACE 66
 #define PAWN_PLACE 255
 #define COLOR_PLACE 65535
 
-t_board* initializeBoard();
+t_board* initializeBoard();void printBoard(t_board*);void debug_printSingleBoard(uint64_t singeBoard);
