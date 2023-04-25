@@ -1,5 +1,5 @@
 #include "board.h"
-
+#include "move.h"
 #include <cstdio>
 #include <malloc.h>
 
@@ -145,6 +145,54 @@ void printBoard(t_board* board) {
         printf("\n");
     }
 
+}
+
+void doMove(t_board* board, t_move* move) {
+
+    uint64_t bitOrigin = (uint64_t) 1 << move->origin;
+
+    if ((board->king & bitOrigin) != 0) {
+        board->king&= ~bitOrigin;
+        board->king|= (uint64_t) 1 << move->target;
+    }
+
+    else if ((board->queen & bitOrigin) != 0) {
+        board->queen&= ~bitOrigin;
+        board->queen|= (uint64_t) 1 << move->target;
+    }
+
+    else if ((board->rook & bitOrigin) != 0) {
+        board->rook&= ~bitOrigin;
+        board->rook|= (uint64_t) 1 << move->target;
+    }
+
+    else if ((board->bishop & bitOrigin) != 0) {
+        board->bishop&= ~bitOrigin;
+        board->bishop|= (uint64_t) 1 << move->target;
+    }
+
+    else if ((board->knight & bitOrigin) != 0) {
+        board->knight&= ~bitOrigin;
+        board->knight|= (uint64_t) 1 << move->target;
+    }
+
+    else if ((board->pawn & bitOrigin) != 0) {
+        board->pawn &= ~bitOrigin;
+        board->pawn |= (uint64_t) 1 << move->target;
+    }
+
+    board->black    &= ~bitOrigin;
+    board->white    &= ~bitOrigin;
+
+    if (move->color == 0) {
+        board->white |= (uint64_t) 1 << move->target;
+        board->black &= ~((uint64_t) 1 << move->target);
+    }
+
+    else if (move->color == 1) {
+        board->black |= (uint64_t) 1 << move->target;
+        board->white &= ~((uint64_t) 1 << move->target);
+    }
 }
 
 void debug_printSingleBoard(uint64_t singleBoard) {

@@ -1,4 +1,6 @@
 #include <cstdint>
+#include "move.h"
+
 #ifndef KINGOFTHEHILL_KI_BOARD_H
 #define KINGOFTHEHILL_KI_BOARD_H
 
@@ -54,4 +56,4 @@ typedef struct _board {
 #define PAWN_PLACE 255
 #define COLOR_PLACE 65535
 
-t_board* initializeBoard();void printBoard(t_board*);void debug_printSingleBoard(uint64_t singeBoard);
+t_board* initializeBoard();void printBoard(t_board*);void debug_printSingleBoard(uint64_t singeBoard);void doMove(t_board* board, t_move* move);
