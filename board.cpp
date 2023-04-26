@@ -160,44 +160,74 @@ void printBoard(t_board* board) {
 
 void doMove(t_board* board, t_move* move) {
 
+    //generate bitmask for fields
     uint64_t bitOrigin = (uint64_t) 1 << move->origin;
+    uint64_t bitTarget = (uint64_t) 1 << move->target;
 
+    //set taken figure
+    if ((board->queen & bitTarget) != 0) move->taken_figure = 1;
+    else if ((board->rook & bitTarget) != 0) move->taken_figure = 2;
+    else if ((board->bishop & bitTarget) != 0) move->taken_figure = 3;
+    else if ((board->knight & bitTarget) != 0) move->taken_figure = 4;
+    else if ((board->pawn & bitTarget) != 0) move->taken_figure = 5;
+    else move->taken_figure = 0;
+
+    //clear targetfield
+    board->king &= ~bitTarget;
+    board->queen &= ~bitTarget;
+    board->rook &= ~bitTarget;
+    board->bishop &= ~bitTarget;
+    board->knight &= ~bitTarget;
+    board->pawn &= ~bitTarget;
+    board->white &= ~bitTarget;
+    board->black &= ~bitTarget;
+
+    //get originfigure and move it
     if ((board->king & bitOrigin) != 0) {
         board->king&= ~bitOrigin;
-        board->king|= (uint64_t) 1 << move->target;
+        board->king|= bitTarget;
     }
-
     else if ((board->queen & bitOrigin) != 0) {
         board->queen&= ~bitOrigin;
-        board->queen|= (uint64_t) 1 << move->target;
+        board->queen|= bitTarget;
     }
-
     else if ((board->rook & bitOrigin) != 0) {
         board->rook&= ~bitOrigin;
-        board->rook|= (uint64_t) 1 << move->target;
+        board->rook|= bitTarget;
     }
-
     else if ((board->bishop & bitOrigin) != 0) {
         board->bishop&= ~bitOrigin;
-        board->bishop|= (uint64_t) 1 << move->target;
+        board->bishop|= bitTarget;
     }
-
     else if ((board->knight & bitOrigin) != 0) {
         board->knight&= ~bitOrigin;
-        board->knight|= (uint64_t) 1 << move->target;
+        board->knight|= bitTarget;
     }
-
     else if ((board->pawn & bitOrigin) != 0) {
         board->pawn &= ~bitOrigin;
-        board->pawn |= (uint64_t) 1 << move->target;
+        board->pawn |= bitTarget;
     }
 
-    board->black    &= ~bitOrigin;
-    board->white    &= ~bitOrigin;
+    //clear originfield and set move color
+    if ((board->black & bitOrigin) != 0) {
+        board->black &= ~bitOrigin;
+        move->color = 1;
+    }
+    else if ((board->white & bitOrigin) != 0) {
+        board->white &= ~bitOrigin;
+        move->color = 0;
+    }
 
+    //set color of targefield to move color
     if (move->color == 0) {
-        board->black |= (uint64_t) 1 << move->target;
-        board->white &= ~((uint64_t) 1 << move->target);
+        board->black &= ~bitTarget;
+        board->white |= bitTarget;
+    }
+    else if (move->color == 1) {
+        board->white &= ~bitTarget;
+        board->black |= bitTarget;
+    }
+}
     }
 
     else if (move->color == 1) {
