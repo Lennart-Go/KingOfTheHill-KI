@@ -228,12 +228,75 @@ void doMove(t_board* board, t_move* move) {
         board->black |= bitTarget;
     }
 }
+
+void undoMove(t_board* board, t_move* move) {
+
+    //generate bitmask for fields
+    uint64_t bitOrigin = (uint64_t) 1 << move->origin;
+    uint64_t bitTarget = (uint64_t) 1 << move->target;
+
+    //get targetfigure and move it
+    if ((board->king & bitTarget) != 0) {
+        board->king&= ~bitTarget;
+        board->king|= bitOrigin;
     }
 
-    else if (move->color == 1) {
-        board->white |= (uint64_t) 1 << move->target;
-        board->black &= ~((uint64_t) 1 << move->target);
+    else if ((board->queen & bitTarget) != 0) {
+        board->queen&= ~bitTarget;
+        board->queen|= bitOrigin;
     }
+
+    else if ((board->rook & bitTarget) != 0) {
+        board->rook&= ~bitTarget;
+        board->rook|= bitOrigin;
+    }
+
+    else if ((board->bishop & bitTarget) != 0) {
+        board->bishop&= ~bitTarget;
+        board->bishop|= bitOrigin;
+    }
+
+    else if ((board->knight & bitTarget) != 0) {
+        board->knight&= ~bitTarget;
+        board->knight|= bitOrigin;
+    }
+
+    else if ((board->pawn & bitTarget) != 0) {
+        board->pawn &= ~bitTarget;
+        board->pawn |= bitOrigin;
+    }
+
+    //clear targetfield
+    board->black    &= ~bitTarget;
+    board->white    &= ~bitTarget;
+
+
+    board->black &= ~bitTarget;
+    board->white |= bitTarget;
+
+    //set color of originfield
+    if (move->color == 0) {
+        board->black &= ~bitOrigin;
+        board->white |= bitOrigin;
+
+        board->black |= bitTarget;
+
+    }
+    else if (move->color == 1) {
+        board->white &= ~bitOrigin;
+        board->black |= bitOrigin;
+
+        board->white |= bitTarget;
+    }
+
+    //place takenfigure
+    if (move->taken_figure == 0) {}
+    else if (move->taken_figure == 1) board->queen |= bitTarget;
+    else if (move->taken_figure == 2) board->rook |= bitTarget;
+    else if (move->taken_figure == 3) board->bishop |= bitTarget;
+    else if (move->taken_figure == 4) board->knight |= bitTarget;
+    else if (move->taken_figure == 5) board->pawn |= bitTarget;
+
 }
 
 void debug_printSingleBoard(uint64_t singleBoard) {
