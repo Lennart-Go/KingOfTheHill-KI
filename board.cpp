@@ -141,8 +141,8 @@ void printBoard(t_board* board) {
             boardChar[i] = UNICODE_SQUARE;
         }
     }
-
-    _setmode(_fileno(stdout), _O_U16TEXT);
+    
+    int mode = _setmode(_fileno(stdout), _O_U16TEXT);
 
     wprintf(L"\n");
     for (int i = 0; i < 8; i++) {
@@ -153,6 +153,8 @@ void printBoard(t_board* board) {
         wprintf(L"|\n");
     }
     wprintf(L"\n");
+
+    _setmode(_fileno(stdout), mode);
 
 }
 
