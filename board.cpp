@@ -2,6 +2,7 @@
 #include "move.h"
 #include <cstdio>
 #include <malloc.h>
+#include <fcntl.h>
 
 // TODO: Set/Get?
 // TODO: Print board
@@ -18,7 +19,7 @@ t_board* initializeBoard() {
     board->bishop   |= (uint64_t) BISHOP_PLACE;
     board->knight   |= (uint64_t) KNIGHT_PLACE;
     board->pawn     |= (uint64_t) PAWN_PLACE << 8;
-    board->black    |= (uint64_t) COLOR_PLACE;
+    board->black    |= (uint64_t) COLOR_PLACE << 48;
 
     //white
     board->king     |= (uint64_t) 1 << 60;
@@ -27,7 +28,7 @@ t_board* initializeBoard() {
     board->bishop   |= (uint64_t) BISHOP_PLACE << 56;
     board->knight   |= (uint64_t) KNIGHT_PLACE << 56;
     board->pawn     |= (uint64_t) PAWN_PLACE << 48;
-    board->white    |= (uint64_t) COLOR_PLACE << 48;
+    board->white    |= (uint64_t) COLOR_PLACE;
 
     return board;
 }
@@ -138,12 +139,17 @@ void printBoard(t_board* board) {
         }
     }
 
+    _setmode(_fileno(stdout), _O_U16TEXT);
+
+    wprintf(L"\n");
     for (int i = 0; i < 8; i++) {
+        wprintf(L"|");
         for (int j = 0; j < 8; ++j) {
-            printf("%c ", boardChar[i * 8 + j]);
+            wprintf(L"%lc ", boardChar[i * 8 + j]);
         }
-        printf("\n");
+        wprintf(L"|\n");
     }
+    wprintf(L"\n");
 
 }
 
@@ -185,13 +191,13 @@ void doMove(t_board* board, t_move* move) {
     board->white    &= ~bitOrigin;
 
     if (move->color == 0) {
-        board->white |= (uint64_t) 1 << move->target;
-        board->black &= ~((uint64_t) 1 << move->target);
+        board->black |= (uint64_t) 1 << move->target;
+        board->white &= ~((uint64_t) 1 << move->target);
     }
 
     else if (move->color == 1) {
-        board->black |= (uint64_t) 1 << move->target;
-        board->white &= ~((uint64_t) 1 << move->target);
+        board->white |= (uint64_t) 1 << move->target;
+        board->black &= ~((uint64_t) 1 << move->target);
     }
 }
 
