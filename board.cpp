@@ -20,7 +20,7 @@ t_board* initializeBoard() {
     board->bishop   |= (uint64_t) BISHOP_PLACE;
     board->knight   |= (uint64_t) KNIGHT_PLACE;
     board->pawn     |= (uint64_t) PAWN_PLACE << 8;
-    board->white    |= (uint64_t) COLOR_PLACE;
+    board->white    |= (uint64_t) COLOR_PLACE << 48;
 
     board->king     |= (uint64_t) 1 << 60;
     board->queen    |= (uint64_t) 1 << 59;
@@ -28,10 +28,7 @@ t_board* initializeBoard() {
     board->bishop   |= (uint64_t) BISHOP_PLACE << 56;
     board->knight   |= (uint64_t) KNIGHT_PLACE << 56;
     board->pawn     |= (uint64_t) PAWN_PLACE << 48;
-    board->black    |= (uint64_t) COLOR_PLACE  << 48;
-
-    board->black |= (uint64_t) 1 << 18;
-    board->pawn |= (uint64_t) 1 << 18;
+    board->black    |= (uint64_t) COLOR_PLACE;
 
     return board;
 }
