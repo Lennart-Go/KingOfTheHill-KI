@@ -50,10 +50,31 @@ typedef struct _board {
 
 #define UNICODE_SQUARE L'\x2610'
 
+#define UTF_K 75
+#define UTF_Q 81
+#define UTF_R 82
+#define UTF_B 66
+#define UTF_N 78
+#define UTF_P 80
+#define UTF_SLASH 47
+#define UTF_BIG_SMALL_OFFSET 32
+#define UTF_BIGLETTER_FIRST 65
+#define UTF_BIGLETTER_LAST 90
+#define UTF_NUMBER_FIRST 48
+#define UTF_NUMBER_LAST 57
+
 #define ROOK_PLACE 129
 #define BISHOP_PLACE 36
 #define KNIGHT_PLACE 66
 #define PAWN_PLACE 255
 #define COLOR_PLACE 65535
 
-t_board* initializeBoard();void printBoard(t_board*);void debug_printSingleBoard(uint64_t singeBoard);void doMove(t_board* board, t_move* move);
+t_board* initializeBoard();
+void setFen(t_board* board, char fen[]);
+char* getFen(t_board* board);
+void printBoard(t_board*);
+char* shortenFen(char* fen);
+void doMove(t_board* board, t_move* move);
+void undoMove(t_board* board, t_move* move);
+
+void debug_printSingleBoard(uint64_t singeBoard);
