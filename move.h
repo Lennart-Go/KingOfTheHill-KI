@@ -1,8 +1,5 @@
-#ifndef KINGOFTHEHILL_KI_MOVE_H
-#define KINGOFTHEHILL_KI_MOVE_H
-
-#endif
-
+#include "util.h"
+#include "board.h"
 
 /*
  * Move representation
@@ -13,7 +10,7 @@
  * => Total 16 bit / 2 bytes
  */
 
-typedef struct _move {
+typedef struct move {
     unsigned origin:6;
     unsigned target:6;
     unsigned taken_figure:3;
