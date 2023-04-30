@@ -21,6 +21,3 @@ typedef struct move {
 #define O_MOVE_TARGET 6
 #define O_MOVE_TAKEN_FIGURE 12
 #define O_MOVE_COLOR 15
-
-
-// TODO: Move masks for convolution?
