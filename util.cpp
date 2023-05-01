@@ -1,6 +1,5 @@
 #include "util.h"
 #include <stdexcept>
-#include <cstring>
 
 
 /* #############################################################################
@@ -164,6 +163,7 @@ Position Offset::toPosition() const {
 
 int shift_from_position(Position position) {
     return 63 - (position.y * 8 + (7 - position.x));
+    // return 63 - (position.y * 8 + position.x);
 }
 
 
@@ -172,13 +172,14 @@ Position position_from_shift(int shift) {
 
     int y = val / 8;
     int x = 7 - (val - (y * 8));
+    // int x = val - (y * 8);
 
     return Position {x, y};
 }
 
 
 bool board_value_from_shift(uint64_t board, int shift) {
-    if ((board & 1 << shift ) != 0)
+    if ((board & ((uint64_t) 1 << shift)) != 0)
         return true;
     return false;
 }

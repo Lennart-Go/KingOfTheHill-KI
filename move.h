@@ -34,4 +34,10 @@ bool is_move_legal_nocheck(t_board *board, t_move move, uint64_t color_filter, u
 
 List<t_move> generate_moves(t_board *board, bool color);
 
+void printMove(t_move move);
+
+
+void doMove(t_board* board, t_move* move);
+void undoMove(t_board* board, t_move* move);
+
 #endif //KINGOFTHEHILL_KI_MOVE_H

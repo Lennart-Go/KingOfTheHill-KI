@@ -1,5 +1,4 @@
 #include <cstdint>
-#include "move.h"
 
 #ifndef KINGOFTHEHILL_KI_BOARD_H
 #define KINGOFTHEHILL_KI_BOARD_H
@@ -12,7 +11,7 @@
  * => Total 64 bytes (8 * uint64_t)
  */
 
-typedef struct _board {
+typedef struct board {
     uint64_t white;
     uint64_t black;
     uint64_t king;
@@ -71,8 +70,6 @@ void setFen(t_board* board, char fen[]);
 char* getFen(t_board* board);
 void printBoard(t_board*);
 char* shortenFen(char* fen);
-void doMove(t_board* board, t_move* move);
-void undoMove(t_board* board, t_move* move);
 
 void debug_printSingleBoard(uint64_t singeBoard);
 

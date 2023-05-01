@@ -6,79 +6,73 @@
 
 // King
 const Offset MO_KING[]{
-        Offset {0,  1},  // Up
-        Offset {1,  1},  // Up & Right
-        Offset {1,  0},  // Right
-        Offset {1,  -1},  // Down & Right
-        Offset {0,  -1},  // Down
-        Offset {-1, -1},  // Down & Left
-        Offset {-1, 0},  // Left
-        Offset {-1, 1},  // Up & Left
+        Offset{0, 1},  // Up
+        Offset{1, 1},  // Up & Right
+        Offset{1, 0},  // Right
+        Offset{1, -1},  // Down & Right
+        Offset{0, -1},  // Down
+        Offset{-1, -1},  // Down & Left
+        Offset{-1, 0},  // Left
+        Offset{-1, 1},  // Up & Left
 };
-const List<Offset> M_KING { (Offset *) &MO_KING,8 };
+const List<Offset> M_KING{(Offset *) &MO_KING, 8};
 
-const Offset MO_KING_CASTLE_SHORT[] {
-        Offset {2, 0}  // Short castle to the right
+const Offset MO_KING_CASTLE_SHORT[]{
+        Offset{2, 0}  // Short castle to the right
 };
-const List<Offset> M_KING_CASTLE_SHORT = { (Offset *) &MO_KING_CASTLE_SHORT, 1 };
+const List<Offset> M_KING_CASTLE_SHORT = {(Offset *) &MO_KING_CASTLE_SHORT, 1};
 
-const Offset MO_KING_CASTLE_LONG[] {
-        Offset {-2, 0}
+const Offset MO_KING_CASTLE_LONG[]{
+        Offset{-2, 0}
 };
-const List<Offset> M_KING_CASTLE_LONG = { (Offset *) &MO_KING_CASTLE_LONG, 1 };
+const List<Offset> M_KING_CASTLE_LONG = {(Offset *) &MO_KING_CASTLE_LONG, 1};
 
 // Knight
-const Offset MO_KNIGHT[] {
-        Offset {1, 2},  // Up & Right
-        Offset {2, 1},  // Right & Up
-        Offset {2, -1},  // Right & Down
-        Offset {1, -2},  // Down & Right
-        Offset {-1, -2},  // Down & Left
-        Offset {-2, -1},  // Left & Down
-        Offset {-2, 1},  // Left & Up
-        Offset {-1, 2},  // Up & Left
+const Offset MO_KNIGHT[]{
+        Offset{1, 2},  // Up & Right
+        Offset{2, 1},  // Right & Up
+        Offset{2, -1},  // Right & Down
+        Offset{1, -2},  // Down & Right
+        Offset{-1, -2},  // Down & Left
+        Offset{-2, -1},  // Left & Down
+        Offset{-2, 1},  // Left & Up
+        Offset{-1, 2},  // Up & Left
 };
-const List<Offset> M_KNIGHT = { (Offset *) &MO_KNIGHT, 8 };
+const List<Offset> M_KNIGHT = {(Offset *) &MO_KNIGHT, 8};
 
 // Pawns
-const Offset MO_PAWN_WHITE[] {
-        Offset {0, 1}
+const Offset MO_PAWN_WHITE[]{
+        Offset{0, 1}
 };
-const List<Offset> M_PAWN_WHITE = { (Offset *) &MO_PAWN_WHITE, 1 };
+const List<Offset> M_PAWN_WHITE = {(Offset *) &MO_PAWN_WHITE, 1};
 
-const Offset MO_PAWN_BLACK[] {
-        Offset {0, -1}
+const Offset MO_PAWN_BLACK[]{
+        Offset{0, -1}
 };
-const List<Offset> M_PAWN_BLACK = { (Offset *) &MO_PAWN_BLACK, 1 };
+const List<Offset> M_PAWN_BLACK = {(Offset *) &MO_PAWN_BLACK, 1};
 
-const Offset MO_PAWN_WHITE_TAKE[] {
-        Offset {1, 1},  // Take diagonal right
-        Offset {-1, 1},  // Take diagonal left
+const Offset MO_PAWN_WHITE_TAKE[]{
+        Offset{1, 1},  // Take diagonal right
+        Offset{-1, 1},  // Take diagonal left
 };
-const List<Offset> M_PAWN_WHITE_TAKE = { (Offset *) &MO_PAWN_WHITE_TAKE, 2 };
+const List<Offset> M_PAWN_WHITE_TAKE = {(Offset *) &MO_PAWN_WHITE_TAKE, 2};
 
-const Offset MO_PAWN_WHITE_DOUBLE[] {
-        Offset {0, 2}
+const Offset MO_PAWN_WHITE_DOUBLE[]{
+        Offset{0, 2}
 };
-const List<Offset> M_PAWN_WHITE_DOUBLE = { (Offset *) &MO_PAWN_WHITE_DOUBLE, 1 };
+const List<Offset> M_PAWN_WHITE_DOUBLE = {(Offset *) &MO_PAWN_WHITE_DOUBLE, 1};
 
-const Offset MO_PAWN_BLACK_TAKE[] {
-        Offset {1, -1},  // Take diagonal right
-        Offset {-1, -1},  // Take diagonal left
+const Offset MO_PAWN_BLACK_TAKE[]{
+        Offset{1, -1},  // Take diagonal right
+        Offset{-1, -1},  // Take diagonal left
 };
-const List<Offset>  M_PAWN_BLACK_TAKE = { (Offset *) &MO_PAWN_BLACK_TAKE, 2 };
+const List<Offset> M_PAWN_BLACK_TAKE = {(Offset *) &MO_PAWN_BLACK_TAKE, 2};
 
-const Offset MO_PAWN_BLACK_DOUBLE[] {
-        Offset {0, -2}
+const Offset MO_PAWN_BLACK_DOUBLE[]{
+        Offset{0, -2}
 };
 
-void doMove(t_board *pBoard, t_move *pMove);
-
-void undoMove(t_board *pBoard, t_move *pMove);
-
-const List<Offset> M_PAWN_BLACK_DOUBLE = {(Offset *) &MO_PAWN_BLACK_DOUBLE, 1 };
-
-
+const List<Offset> M_PAWN_BLACK_DOUBLE = {(Offset *) &MO_PAWN_BLACK_DOUBLE, 1};
 
 bool empty_between(t_board *board, t_move move) {
     /*
@@ -93,29 +87,32 @@ bool empty_between(t_board *board, t_move move) {
 
     uint64_t occupied = board->white | board->black;
 
-    Position originPosition = Position(move.origin >> 3, move.origin & 0b111);
-    Position targetPosition = Position(move.target >> 3, move.target & 0b111);
+    Position originPosition = position_from_shift(move.origin);
+    Position targetPosition = position_from_shift(move.target);
 
-    bool xChanged = (originPosition.x == targetPosition.x);
-    bool yChanged = (originPosition.y == targetPosition.y);
+    bool xChanged = (originPosition.x != targetPosition.x);
+    bool yChanged = (originPosition.y != targetPosition.y);
 
     int xChange;
-    int xDiff = ((int )originPosition.x - (int )targetPosition.x);
+    int xDiff = ((int) targetPosition.x - (int) originPosition.x);
     if (xChanged) {
         xChange = xDiff / abs(xDiff);
     } else {
         xChange = 0;
+        xDiff = 1;
     }
 
     int yChange;
-    int yDiff = ((int )originPosition.y - (int )targetPosition.y);
+    int yDiff = ((int) targetPosition.y - (int) originPosition.y);
     if (yChanged) {
         yChange = yDiff / abs(yDiff);
     } else {
         yChange = 0;
+        yDiff = 1;
     }
 
-    for (int xOffset=xChange, yOffset=yChange; abs(xOffset)<abs(xDiff) && abs(yOffset)<abs(xDiff); xOffset+=xChange, yOffset+=yChange) {
+    for (int xOffset = xChange, yOffset = yChange;
+         abs(xOffset) < abs(xDiff) && abs(yOffset) < abs(yDiff); xOffset += xChange, yOffset += yChange) {
         Offset target = Offset(xOffset, yOffset) + originPosition;
 
         if (target.isWithinBounds()) {
@@ -129,7 +126,8 @@ bool empty_between(t_board *board, t_move move) {
     return true;
 }
 
-bool is_move_legal_nocheck(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter, bool checkBetween) {
+bool is_move_legal_nocheck(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter,
+                           bool checkBetween) {
     /*
      * Function to check whether a given move is legal, whilst ignoring restrictions from possible checks
      *
@@ -206,8 +204,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                 Position moveTarget = targetOffset.toPosition();
 
                 t_move possibleMove;
-                possibleMove.origin = (kingPosition.x << 3) | kingPosition.y;
-                possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                possibleMove.origin = shift_from_position(kingPosition);
+                possibleMove.target = shift_from_position(moveTarget);
                 possibleMove.color = color;
 
                 if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, false)) {
@@ -240,8 +238,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (queenPosition.x << 3) | queenPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(queenPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -260,8 +258,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (queenPosition.x << 3) | queenPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(queenPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -280,8 +278,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (queenPosition.x << 3) | queenPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(queenPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -300,8 +298,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (queenPosition.x << 3) | queenPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(queenPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -320,8 +318,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (queenPosition.x << 3) | queenPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(queenPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -340,8 +338,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (queenPosition.x << 3) | queenPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(queenPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -360,8 +358,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (queenPosition.x << 3) | queenPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(queenPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -380,8 +378,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (queenPosition.x << 3) | queenPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(queenPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -414,8 +412,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (rookPosition.x << 3) | rookPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(rookPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -434,8 +432,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (rookPosition.x << 3) | rookPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(rookPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -454,8 +452,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (rookPosition.x << 3) | rookPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(rookPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -474,8 +472,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (rookPosition.x << 3) | rookPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(rookPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -508,8 +506,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (bishopPosition.x << 3) | bishopPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(bishopPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -528,8 +526,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (bishopPosition.x << 3) | bishopPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(bishopPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -548,8 +546,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (bishopPosition.x << 3) | bishopPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(bishopPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -568,8 +566,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                         Position moveTarget = targetOffset.toPosition();
 
                         t_move possibleMove;
-                        possibleMove.origin = (bishopPosition.x << 3) | bishopPosition.y;
-                        possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                        possibleMove.origin = shift_from_position(bishopPosition);
+                        possibleMove.target = shift_from_position(moveTarget);
                         possibleMove.color = color;
 
                         if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -595,8 +593,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                 Position moveTarget = targetOffset.toPosition();
 
                 t_move possibleMove;
-                possibleMove.origin = (knightPosition.x << 3) | knightPosition.y;
-                possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                possibleMove.origin = shift_from_position(knightPosition);
+                possibleMove.target = shift_from_position(moveTarget);
                 possibleMove.color = color;
 
                 if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, false)) {
@@ -619,8 +617,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
                 Position moveTarget = targetOffset.toPosition();
 
                 t_move possibleMove;
-                possibleMove.origin = (pawnPosition.x << 3) | pawnPosition.y;
-                possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+                possibleMove.origin = shift_from_position(pawnPosition);
+                possibleMove.target = shift_from_position(moveTarget);
                 possibleMove.color = color;
 
                 if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, false)) {
@@ -644,7 +642,7 @@ bool is_check(t_board *board, t_move move) {
      *  "true" if the move is causing the moving team's king to be under attack, "false" otherwise
      */
 
-    bool color = (bool ) move.color;
+    bool color = (bool) move.color;
     bool retValue = false;
 
     // TODO: Apply move to board before checking if the king is threatened
@@ -673,14 +671,6 @@ bool is_check(t_board *board, t_move move) {
     return retValue;
 }
 
-void doMove(t_board *pBoard, t_move *pMove) {
-
-}
-
-void undoMove(t_board *pBoard, t_move *pMove) {
-
-}
-
 bool is_move_legal(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter, bool checkBetween) {
     /*
      * Function to check whether a given move is legal
@@ -695,13 +685,8 @@ bool is_move_legal(t_board *board, t_move move, uint64_t color_filter, uint64_t 
      *  "true" if the move is legal considering the information passed to the function, "false" otherwise
      */
 
-    // Extract information from move
-    Position targetPosition = Position(move.target >> 3, move.target & 0b111);
-
-    int targetPositionShift = shift_from_position(targetPosition);
-
     // Check if target field is empty or occupied by enemy piece
-    if (!board_value_from_shift(~color_filter | enemy_color_filter, targetPositionShift)) {
+    if (!board_value_from_shift(~color_filter | enemy_color_filter, move.target)) {
         // Target is occupied by friendly piece
         return false;
     }
@@ -783,8 +768,8 @@ List<t_move> generate_moves(t_board *board, bool color) {
             Position moveTarget = possibleTargets.get(targetIndex);
 
             t_move possibleMove;
-            possibleMove.origin = (kingPosition.x << 3) | kingPosition.y;
-            possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+            possibleMove.origin = shift_from_position(kingPosition);
+            possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, false)) {
@@ -887,8 +872,8 @@ List<t_move> generate_moves(t_board *board, bool color) {
             Position moveTarget = possibleTargets.get(targetIndex);
 
             t_move possibleMove;
-            possibleMove.origin = (queenPosition.x << 3) | queenPosition.y;
-            possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+            possibleMove.origin = shift_from_position(queenPosition);
+            possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -951,8 +936,8 @@ List<t_move> generate_moves(t_board *board, bool color) {
             Position moveTarget = possibleTargets.get(targetIndex);
 
             t_move possibleMove;
-            possibleMove.origin = (rookPosition.x << 3) | rookPosition.y;
-            possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+            possibleMove.origin = shift_from_position(rookPosition);
+            possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -1015,8 +1000,8 @@ List<t_move> generate_moves(t_board *board, bool color) {
             Position moveTarget = possibleTargets.get(targetIndex);
 
             t_move possibleMove;
-            possibleMove.origin = (bishopPosition.x << 3) | bishopPosition.y;
-            possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+            possibleMove.origin = shift_from_position(bishopPosition);
+            possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -1043,8 +1028,8 @@ List<t_move> generate_moves(t_board *board, bool color) {
             Position moveTarget = possibleTargets.get(targetIndex);
 
             t_move possibleMove;
-            possibleMove.origin = (knightPosition.x << 3) | knightPosition.y;
-            possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+            possibleMove.origin = shift_from_position(knightPosition);
+            possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, false)) {
@@ -1073,7 +1058,7 @@ List<t_move> generate_moves(t_board *board, bool color) {
         }
 
         // Double forward move
-        if (pawnPosition.y == 1) {
+        if ((pawnPosition.y == 1 && !color) || (pawnPosition.y == 6 && color)) {
             // Only possible when pawn has not moved yet
             targetOffset = M_PAWN_DOUBLE.get(0) + pawnPosition;
             if (targetOffset.isWithinBounds()) {
@@ -1105,8 +1090,8 @@ List<t_move> generate_moves(t_board *board, bool color) {
             Position moveTarget = possibleTargets.get(targetIndex);
 
             t_move possibleMove;
-            possibleMove.origin = (pawnPosition.x << 3) | pawnPosition.y;
-            possibleMove.target = (moveTarget.x << 3) | moveTarget.y;
+            possibleMove.origin = shift_from_position(pawnPosition);
+            possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
@@ -1116,4 +1101,130 @@ List<t_move> generate_moves(t_board *board, bool color) {
     }
 
     return moves;
+}
+
+
+void doMove(t_board *board, t_move *move) {
+
+    //generate bitmask for fields
+    uint64_t bitOrigin = (uint64_t) 1 << move->origin;
+    uint64_t bitTarget = (uint64_t) 1 << move->target;
+
+    //set taken figure
+    if ((board->queen & bitTarget) != 0) move->taken_figure = 1;
+    else if ((board->rook & bitTarget) != 0) move->taken_figure = 2;
+    else if ((board->bishop & bitTarget) != 0) move->taken_figure = 3;
+    else if ((board->knight & bitTarget) != 0) move->taken_figure = 4;
+    else if ((board->pawn & bitTarget) != 0) move->taken_figure = 5;
+    else move->taken_figure = 0;
+
+    //clear targetfield
+    board->king &= ~bitTarget;
+    board->queen &= ~bitTarget;
+    board->rook &= ~bitTarget;
+    board->bishop &= ~bitTarget;
+    board->knight &= ~bitTarget;
+    board->pawn &= ~bitTarget;
+    board->white &= ~bitTarget;
+    board->black &= ~bitTarget;
+
+    //get originfigure and move it
+    if ((board->king & bitOrigin) != 0) {
+        board->king &= ~bitOrigin;
+        board->king |= bitTarget;
+    } else if ((board->queen & bitOrigin) != 0) {
+        board->queen &= ~bitOrigin;
+        board->queen |= bitTarget;
+    } else if ((board->rook & bitOrigin) != 0) {
+        board->rook &= ~bitOrigin;
+        board->rook |= bitTarget;
+    } else if ((board->bishop & bitOrigin) != 0) {
+        board->bishop &= ~bitOrigin;
+        board->bishop |= bitTarget;
+    } else if ((board->knight & bitOrigin) != 0) {
+        board->knight &= ~bitOrigin;
+        board->knight |= bitTarget;
+    } else if ((board->pawn & bitOrigin) != 0) {
+        board->pawn &= ~bitOrigin;
+        board->pawn |= bitTarget;
+    }
+
+    //clear originfield and set move color
+    if ((board->black & bitOrigin) != 0) {
+        board->black &= ~bitOrigin;
+        move->color = 1;
+    } else if ((board->white & bitOrigin) != 0) {
+        board->white &= ~bitOrigin;
+        move->color = 0;
+    }
+
+    //set color of targefield to move color
+    if (move->color == 0) {
+        board->black &= ~bitTarget;
+        board->white |= bitTarget;
+    } else if (move->color == 1) {
+        board->white &= ~bitTarget;
+        board->black |= bitTarget;
+    }
+}
+
+void undoMove(t_board *board, t_move *move) {
+
+    //generate bitmask for fields
+    uint64_t bitOrigin = (uint64_t) 1 << move->origin;
+    uint64_t bitTarget = (uint64_t) 1 << move->target;
+
+    //get targetfigure and move it
+    if ((board->king & bitTarget) != 0) {
+        board->king &= ~bitTarget;
+        board->king |= bitOrigin;
+    } else if ((board->queen & bitTarget) != 0) {
+        board->queen &= ~bitTarget;
+        board->queen |= bitOrigin;
+    } else if ((board->rook & bitTarget) != 0) {
+        board->rook &= ~bitTarget;
+        board->rook |= bitOrigin;
+    } else if ((board->bishop & bitTarget) != 0) {
+        board->bishop &= ~bitTarget;
+        board->bishop |= bitOrigin;
+    } else if ((board->knight & bitTarget) != 0) {
+        board->knight &= ~bitTarget;
+        board->knight |= bitOrigin;
+    } else if ((board->pawn & bitTarget) != 0) {
+        board->pawn &= ~bitTarget;
+        board->pawn |= bitOrigin;
+    }
+
+    //clear targetfield
+    board->black &= ~bitTarget;
+    board->white &= ~bitTarget;
+
+    //set color of originfield
+    if (move->color == 0) {
+        board->white |= bitOrigin;
+
+        if (move->taken_figure) {
+            board->black |= bitTarget;
+        }
+    } else if (move->color == 1) {
+        board->black |= bitOrigin;
+
+        if (move->taken_figure) {
+            board->white |= bitTarget;
+        }
+    }
+
+    //place takenfigure
+    if (move->taken_figure == 0) {}
+    else if (move->taken_figure == 1) board->queen |= bitTarget;
+    else if (move->taken_figure == 2) board->rook |= bitTarget;
+    else if (move->taken_figure == 3) board->bishop |= bitTarget;
+    else if (move->taken_figure == 4) board->knight |= bitTarget;
+    else if (move->taken_figure == 5) board->pawn |= bitTarget;
+}
+
+void printMove(const t_move move) {
+    Position origin = position_from_shift(move.origin);
+    Position target = position_from_shift(move.target);
+    printf("Move %d/%d -> %d/%d\n", origin.x, origin.y, target.x, target.y);
 }
