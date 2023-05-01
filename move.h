@@ -1,6 +1,9 @@
 #include "util.h"
 #include "board.h"
 
+#ifndef KINGOFTHEHILL_KI_MOVE_H
+#define KINGOFTHEHILL_KI_MOVE_H
+
 /*
  * Move representation
  * Origin Position (1x6 bit)
@@ -30,3 +33,5 @@ bool is_move_legal(t_board *board, t_move move, uint64_t color_filter, uint64_t 
 bool is_move_legal_nocheck(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter, bool checkBetween);
 
 List<t_move> generate_moves(t_board *board, bool color);
+
+#endif //KINGOFTHEHILL_KI_MOVE_H

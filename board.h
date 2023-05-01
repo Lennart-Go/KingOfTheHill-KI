@@ -1,5 +1,8 @@
 #include <cstdint>
 
+#ifndef KINGOFTHEHILL_KI_BOARD_H
+#define KINGOFTHEHILL_KI_BOARD_H
+
 /*
  * Board representation (Bitmaps as 1d arrays):
  * 1x White Positions (8 bytes)
@@ -8,7 +11,7 @@
  * => Total 64 bytes (8 * uint64_t)
  */
 
-typedef struct _board {
+typedef struct board {
     uint64_t white;
     uint64_t black;
     uint64_t king;
@@ -26,3 +29,5 @@ typedef struct _board {
 #define O_BOARD_ROOK 256
 #define O_BOARD_BISHOP 320
 #define O_BOARD_KNIGHT 384
+
+#endif
