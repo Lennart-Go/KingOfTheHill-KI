@@ -4,15 +4,12 @@
 #ifndef KINGOFTHEHILL_KI_BOARD_H
 #define KINGOFTHEHILL_KI_BOARD_H
 
-#endif
-
-
 /*
  * Board representation (Bitmaps as 1d arrays):
  * 1x White Positions (8 bytes)
  * 1x Black Positions (8 bytes)
  * 6x Figure Positions (6x8 bytes)
- * => Total 64 bytes (8 * t_uint64)
+ * => Total 64 bytes (8 * uint64_t)
  */
 
 typedef struct _board {
@@ -78,3 +75,5 @@ void doMove(t_board* board, t_move* move);
 void undoMove(t_board* board, t_move* move);
 
 void debug_printSingleBoard(uint64_t singeBoard);
+
+#endif

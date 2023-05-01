@@ -1,8 +1,8 @@
+#include "util.h"
+#include "board.h"
+
 #ifndef KINGOFTHEHILL_KI_MOVE_H
 #define KINGOFTHEHILL_KI_MOVE_H
-
-#endif
-
 
 /*
  * Move representation
@@ -13,7 +13,7 @@
  * => Total 16 bit / 2 bytes
  */
 
-typedef struct _move {
+typedef struct move {
     unsigned origin:6;
     unsigned target:6;
     unsigned taken_figure:3;
@@ -26,4 +26,12 @@ typedef struct _move {
 #define O_MOVE_COLOR 15
 
 
-// TODO: Move masks for convolution?
+bool empty_between(t_board *board, t_move move);
+bool is_check(t_board *board, t_move move);
+bool is_threatened(t_board *board, Position target, bool color);
+bool is_move_legal(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter, bool checkBetween);
+bool is_move_legal_nocheck(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter, bool checkBetween);
+
+List<t_move> generate_moves(t_board *board, bool color);
+
+#endif //KINGOFTHEHILL_KI_MOVE_H
