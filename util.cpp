@@ -144,6 +144,13 @@ Position Position::operator*(const int multiplier) const {
     return nPosition;
 }
 
+bool Position::operator==(const Position &other) const {
+    if ((this->x == other.x) && (this->y == other.y)) {
+        return true;
+    }
+    return false;
+}
+
 
 /* ###############################################################################
  * ########################## Offset class definitions ###########################
@@ -208,6 +215,20 @@ Offset Offset::operator*(const int multiplier) const {
     nOffset.y = this->y * multiplier;
 
     return nOffset;
+}
+
+bool Offset::operator==(const Offset &other) const {
+    if ((this->x == other.x) && (this->y == other.y)) {
+        return true;
+    }
+    return false;
+}
+
+bool Offset::operator==(const Position &other) const {
+    if ((this->x == other.x) && (this->y == other.y)) {
+        return true;
+    }
+    return false;
 }
 
 bool Offset::isWithinBounds() const {

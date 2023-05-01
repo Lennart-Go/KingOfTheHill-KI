@@ -36,6 +36,7 @@ public:
     Position operator+(const Position &other) const;
     Position operator-(const Position &other) const;
     Position operator*(int multiplier) const;
+    bool operator==(const Position &other) const;
 };
 
 class Offset {
@@ -51,6 +52,8 @@ public:
     Offset operator-(const Offset &other) const;
     Offset operator-(const Position &other) const;
     Offset operator*(int multiplier) const;
+    bool operator==(const Offset &other) const;
+    bool operator==(const Position &other) const;
 
     bool isWithinBounds() const;
 
