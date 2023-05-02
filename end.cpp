@@ -16,7 +16,7 @@ bool isCheckmate(t_board* board, bool moving_color){
         List<t_move> possibleMoves = generate_moves(board,moving_color);
         for(int i=0;i<possibleMoves.length();i++){
             t_move currentMove = possibleMoves.get(i);
-            if(currentMove.taken_figure!=0){ //0 for King
+            if(currentMove.origin==King){ //0 for King
                 continue;
             }else{
                 if(!is_check(board, currentMove)){
