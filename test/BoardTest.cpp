@@ -2,8 +2,6 @@
 
 #include "board.h"
 
-using namespace std;
-
 class BoardTest : public ::testing::Test {
 
 protected:
