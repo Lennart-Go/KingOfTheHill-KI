@@ -1,5 +1,5 @@
 #include "move.h"
-#include "util.h"
+#include "board.h"
 
 
 // Define possible move offsets for all pieces with non-linear or conditional moves
@@ -71,7 +71,12 @@ const List<Offset>  M_PAWN_BLACK_TAKE = { (Offset *) &MO_PAWN_BLACK_TAKE, 2 };
 const Offset MO_PAWN_BLACK_DOUBLE[] {
         Offset {0, -2}
 };
-const List<Offset> M_PAWN_BLACK_DOUBLE = { (Offset *) &MO_PAWN_BLACK_DOUBLE, 1 };
+
+void doMove(t_board *pBoard, t_move *pMove);
+
+void undoMove(t_board *pBoard, t_move *pMove);
+
+const List<Offset> M_PAWN_BLACK_DOUBLE = {(Offset *) &MO_PAWN_BLACK_DOUBLE, 1 };
 
 
 
@@ -666,6 +671,14 @@ bool is_check(t_board *board, t_move move) {
     undoMove(board, &move);
 
     return retValue;
+}
+
+void doMove(t_board *pBoard, t_move *pMove) {
+
+}
+
+void undoMove(t_board *pBoard, t_move *pMove) {
+
 }
 
 bool is_move_legal(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter, bool checkBetween) {
