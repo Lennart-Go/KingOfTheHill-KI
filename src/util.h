@@ -52,7 +52,7 @@ template <typename T> List<T>::~List() {
         return;
     }
 
-    free(this->_items);
+    //free(this->_items);
 }
 
 template <typename T> void List<T>::add(T item) {

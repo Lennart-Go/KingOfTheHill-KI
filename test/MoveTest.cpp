@@ -29,13 +29,13 @@ protected:
 
 };
 
-/*
+
 TEST_F(MoveTest, generateMovesStartBoard) {
 
     List<t_move> moves = generate_moves(startBoard, false);
 
     EXPECT_EQ(20, moves.length());
-} */
+}
 
 
 
