@@ -1,13 +1,10 @@
+#ifndef KINGOFTHEHILL_KI_UTIL_H
+#define KINGOFTHEHILL_KI_UTIL_H
+
 #include <cstdlib>
 #include <cstdint>
 #include <stdexcept>
 #include <cstring>
-
-
-#ifndef KINGOFTHEHILL_KI_UTIL_H
-#define KINGOFTHEHILL_KI_UTIL_H
-
-#include "util.h"
 
 template <typename T> class List {
 private:
@@ -51,6 +48,10 @@ template <typename T> List<T>::List(T *arr, size_t arrLength) {
 }
 
 template <typename T> List<T>::~List() {
+    if (this->_length < 1) {
+        return;
+    }
+
     free(this->_items);
 }
 

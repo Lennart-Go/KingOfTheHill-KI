@@ -1,8 +1,6 @@
 #include "board.h"
 #include "move.h"
-#include <cstdio>
 #include <malloc.h>
-#include <fcntl.h>
 
 // TODO: Set/Get?
 // TODO: Print board
@@ -72,7 +70,7 @@ char* getFen(t_board* board) {
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             uint64_t bitMask = ((uint64_t) 1 << (i*8 + j));
-            int currChar = 0;
+            int currChar;
             if ((board->king & bitMask) != 0) currChar = UTF_K;
             else if ((board->queen & bitMask) != 0) currChar = UTF_Q;
             else if ((board->rook & bitMask) != 0) currChar = UTF_R;
@@ -145,25 +143,25 @@ char* shortenFen(char* fen) {
 }
 
 void printBoard(t_board* board) {
-    wchar_t boardChar[64] = {' '};
+    wchar_t boardChar[64] = {};
 
-    int64_t whiteKing = board->king & board->white;
-    int64_t blackKing = board->king & board->black;
+    uint64_t whiteKing = board->king & board->white;
+    uint64_t blackKing = board->king & board->black;
 
-    int64_t whiteQueen = board->queen & board->white;
-    int64_t blackQueen = board->queen & board->black;
+    uint64_t whiteQueen = board->queen & board->white;
+    uint64_t blackQueen = board->queen & board->black;
 
-    int64_t whiteRook = board->rook & board->white;
-    int64_t blackRook = board->rook & board->black;
+    uint64_t whiteRook = board->rook & board->white;
+    uint64_t blackRook = board->rook & board->black;
 
-    int64_t whiteBishop = board->bishop & board->white;
-    int64_t blackBishop = board->bishop & board->black;
+    uint64_t whiteBishop = board->bishop & board->white;
+    uint64_t blackBishop = board->bishop & board->black;
 
-    int64_t whiteKnight = board->knight & board->white;
-    int64_t blackKnight = board->knight & board->black;
+    uint64_t whiteKnight = board->knight & board->white;
+    uint64_t blackKnight = board->knight & board->black;
 
-    int64_t whitePawn = board->pawn & board->white;
-    int64_t blackPawn = board->pawn & board->black;
+    uint64_t whitePawn = board->pawn & board->white;
+    uint64_t blackPawn = board->pawn & board->black;
 
     //KING
     for (int i = 0; i < 64; i++) {
@@ -250,7 +248,7 @@ void printBoard(t_board* board) {
         }
     }
     
-    int mode = _setmode(_fileno(stdout), _O_U16TEXT);
+    // int mode = _setmode(STDOUT_FILENO, _O_U16TEXT);
 
     wprintf(L"\n");
     for (int i = 0; i < 8; i++) {
@@ -262,148 +260,7 @@ void printBoard(t_board* board) {
     }
     wprintf(L"\n");
 
-    _setmode(_fileno(stdout), mode);
-
-}
-
-void doMove(t_board* board, t_move* move) {
-
-    //generate bitmask for fields
-    uint64_t bitOrigin = (uint64_t) 1 << move->origin;
-    uint64_t bitTarget = (uint64_t) 1 << move->target;
-
-    //set taken figure
-    if ((board->queen & bitTarget) != 0) move->taken_figure = 1;
-    else if ((board->rook & bitTarget) != 0) move->taken_figure = 2;
-    else if ((board->bishop & bitTarget) != 0) move->taken_figure = 3;
-    else if ((board->knight & bitTarget) != 0) move->taken_figure = 4;
-    else if ((board->pawn & bitTarget) != 0) move->taken_figure = 5;
-    else move->taken_figure = 0;
-
-    //clear targetfield
-    board->king &= ~bitTarget;
-    board->queen &= ~bitTarget;
-    board->rook &= ~bitTarget;
-    board->bishop &= ~bitTarget;
-    board->knight &= ~bitTarget;
-    board->pawn &= ~bitTarget;
-    board->white &= ~bitTarget;
-    board->black &= ~bitTarget;
-
-    //get originfigure and move it
-    if ((board->king & bitOrigin) != 0) {
-        board->king&= ~bitOrigin;
-        board->king|= bitTarget;
-    }
-    else if ((board->queen & bitOrigin) != 0) {
-        board->queen&= ~bitOrigin;
-        board->queen|= bitTarget;
-    }
-    else if ((board->rook & bitOrigin) != 0) {
-        board->rook&= ~bitOrigin;
-        board->rook|= bitTarget;
-    }
-    else if ((board->bishop & bitOrigin) != 0) {
-        board->bishop&= ~bitOrigin;
-        board->bishop|= bitTarget;
-    }
-    else if ((board->knight & bitOrigin) != 0) {
-        board->knight&= ~bitOrigin;
-        board->knight|= bitTarget;
-    }
-    else if ((board->pawn & bitOrigin) != 0) {
-        board->pawn &= ~bitOrigin;
-        board->pawn |= bitTarget;
-    }
-
-    //clear originfield and set move color
-    if ((board->black & bitOrigin) != 0) {
-        board->black &= ~bitOrigin;
-        move->color = 1;
-    }
-    else if ((board->white & bitOrigin) != 0) {
-        board->white &= ~bitOrigin;
-        move->color = 0;
-    }
-
-    //set color of targefield to move color
-    if (move->color == 0) {
-        board->black &= ~bitTarget;
-        board->white |= bitTarget;
-    }
-    else if (move->color == 1) {
-        board->white &= ~bitTarget;
-        board->black |= bitTarget;
-    }
-}
-
-void undoMove(t_board* board, t_move* move) {
-
-    //generate bitmask for fields
-    uint64_t bitOrigin = (uint64_t) 1 << move->origin;
-    uint64_t bitTarget = (uint64_t) 1 << move->target;
-
-    //get targetfigure and move it
-    if ((board->king & bitTarget) != 0) {
-        board->king&= ~bitTarget;
-        board->king|= bitOrigin;
-    }
-
-    else if ((board->queen & bitTarget) != 0) {
-        board->queen&= ~bitTarget;
-        board->queen|= bitOrigin;
-    }
-
-    else if ((board->rook & bitTarget) != 0) {
-        board->rook&= ~bitTarget;
-        board->rook|= bitOrigin;
-    }
-
-    else if ((board->bishop & bitTarget) != 0) {
-        board->bishop&= ~bitTarget;
-        board->bishop|= bitOrigin;
-    }
-
-    else if ((board->knight & bitTarget) != 0) {
-        board->knight&= ~bitTarget;
-        board->knight|= bitOrigin;
-    }
-
-    else if ((board->pawn & bitTarget) != 0) {
-        board->pawn &= ~bitTarget;
-        board->pawn |= bitOrigin;
-    }
-
-    //clear targetfield
-    board->black    &= ~bitTarget;
-    board->white    &= ~bitTarget;
-
-
-    board->black &= ~bitTarget;
-    board->white |= bitTarget;
-
-    //set color of originfield
-    if (move->color == 0) {
-        board->black &= ~bitOrigin;
-        board->white |= bitOrigin;
-
-        board->black |= bitTarget;
-
-    }
-    else if (move->color == 1) {
-        board->white &= ~bitOrigin;
-        board->black |= bitOrigin;
-
-        board->white |= bitTarget;
-    }
-
-    //place takenfigure
-    if (move->taken_figure == 0) {}
-    else if (move->taken_figure == 1) board->queen |= bitTarget;
-    else if (move->taken_figure == 2) board->rook |= bitTarget;
-    else if (move->taken_figure == 3) board->bishop |= bitTarget;
-    else if (move->taken_figure == 4) board->knight |= bitTarget;
-    else if (move->taken_figure == 5) board->pawn |= bitTarget;
+    // _setmode(STDOUT_FILENO, mode);
 
 }
 
