@@ -1,11 +1,22 @@
 #include "end.h"
 #include "move.h"
+#include "cmath"
+
 
 
 // TODO: Check for checkmate
 // TODO: Check for king of the hill
 // TODO: Check for draw
 
+int countFigure(uint64_t singleBoard){
+    int count=0;
+    for(int i=0;i<=64;i++){
+        if(singleBoard & (1<<i)){
+            count++;
+        }
+    }
+    return count;
+}
 
 
 bool isCheckmate(t_board* board, bool moving_color){
@@ -40,7 +51,21 @@ bool isStalemate(t_board* board, bool moving_color){
 };
 
 bool isInsufficientMatingMaterial(t_board* board){
+    //lone king or king with two ore less knights
+    if(board->white&(board->knight|board->king) > 0 && board->white&(board->queen|board->rook|board->bishop|board->pawn)==0){
+        return true;
+    }
+    if(board->black&(board->knight|board->king) > 0 && board->black&(board->queen|board->rook|board->bishop|board->pawn)==0){
+        return true;
+    }
+    //king and one bishop
+    if(board->king&board->white && board->white&board->bishop >0 && countFigure(board->bishop&board->white)<2 && board->white&(board->queen|board->rook|board->bishop|board->pawn)==0){
+        return true;
+    }
 
+    if(board->king&board->black && board->black&board->bishop >0 && countFigure(board->bishop&board->black)<2 && board->black&(board->queen|board->rook|board->bishop|board->pawn)==0){
+        return true;
+    }
     return false;
 };
 
