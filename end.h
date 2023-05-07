@@ -9,10 +9,10 @@
 
 
 typedef enum {
+    NOTOVER,
     WHITE,
-    DRAW,
     BLACK,
-    NOTOVER
+    DRAW
 } winner_t;
 
 winner_t checkEnd(t_board* board, bool moved_color); //return enumerated type which party won
