@@ -194,7 +194,7 @@ bool is_threatened(t_board *board, Position target, bool color) {
     List<Position> kingPositions = board_value_positions(board->king & color_filter);
     if (kingPositions.length() != 1) {
         // Dafuq?
-        return true;  // Abort move generation, because no/many king?  // TODO: Throw error?
+        // return true;  // Abort move generation, because no/many king?  // TODO: Throw error?
     } else {
         Position kingPosition = kingPositions.get(0);
 
@@ -660,7 +660,7 @@ bool is_check(t_board *board, t_move move) {
     List<Position> kingPositions = board_value_positions(board->king & color_mask);
     if (kingPositions.length() != 1) {
         // Should not be possible to have no or multiple kings on the board
-        retValue = false;
+        // retValue = false;
     } else {
         if (is_threatened(board, kingPositions.get(0), color)) {
             retValue = true;
@@ -752,7 +752,7 @@ List<t_move> generate_moves(t_board *board, bool color) {
     List<Position> kingPositions = board_value_positions(board->king & color_filter);
     if (kingPositions.length() != 1) {
         // Dafuq?
-        return moves;  // Abort move generation, because no/many king?
+        // return moves;  // Abort move generation, because no/many king?
     } else {
         Position kingPosition = kingPositions.get(0);
         List<Position> possibleTargets = List<Position>();
