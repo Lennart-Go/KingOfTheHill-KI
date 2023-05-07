@@ -21,29 +21,16 @@ int countFigure(uint64_t singleBoard){
 bool isCheckmate(t_board* board, bool moving_color){
     uint64_t color = moving_color? board->black : board->white;
     uint64_t King = board->king & color;
-    //Position kingPosition = Position( (int)((int)log2(King)%8),(int)(((int)log2(King)-((int)log2(King)%8))/8));
-    //Position kingPosition = position_from_shift(log2(King));
-    int kingX = (int)(King==0 ? 0 : (int)log2((long double) King)%8);
-    int kingY = (int)(King==0 ? 0 : ((int)log2((long double) King)-((int)log2( (long double)King)%8))/8);
-    Position kingPosition;
-    if(kingX <= 7 && kingX >=0 && kingY <= 7 && kingY >=0) {
-        kingPosition = Position(kingX, kingY);
-    }else{
-        printf("Error x:%d y:%d in Checkmate \n",kingX,kingY);
-        return false;
-    }
+    Position kingPosition = position_from_shift((King==0) ? 0 : (int)log2((long double) King));
     printf("Position x:%d y:%d\n",kingPosition.x,kingPosition.y);
     if(is_threatened(board, kingPosition, moving_color)){
         List<t_move> possibleMoves = generate_moves(board,moving_color);
         for(int i=0;i<possibleMoves.length();i++){
             t_move currentMove = possibleMoves.get(i);
-            //if(!currentMove.origin== shift_from_position(kingPosition)){ //0 for King
-            //    continue;
-            //}else{
+
             if(!is_check(board, currentMove)){
                 return false;
             }
-            //}
         }
         return true;
     }
@@ -82,16 +69,7 @@ bool isInsufficientMatingMaterial(t_board* board){
 bool KingOfTheHill(t_board* board, bool moved_color){
     uint64_t color = moved_color? board->black : board->white;
     uint64_t King = board->king & color;
-    //Position kingPosition = position_from_shift(log2(King));
-    int kingX = (int)(King==0 ? 0 : (int)log2((long double) King)%8);
-    int kingY = (int)(King==0 ? 0 : ((int)log2((long double) King)-((int)log2( (long double)King)%8))/8);
-    Position kingPosition;
-    if(kingX <= 7 && kingX >=0 && kingY <= 7 && kingY >=0) {
-        kingPosition = Position(kingX, kingY);
-    }else{
-        printf("Error x:%d y:%d in KingOfTheHill \n",kingX,kingY);
-        return false;
-    }
+    Position kingPosition = position_from_shift((King==0) ? 0 : (int)log2((long double) King));
     if(kingPosition.x >= 3 && kingPosition.x <= 4 && kingPosition.y >= 3 && kingPosition.y <= 4){
         return true;
     }else{
@@ -124,6 +102,7 @@ winner_t checkEnd(t_board* board, bool moved_color) {
     }else {
         return NOTOVER;
     }
+
 
 
 
