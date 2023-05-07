@@ -4,6 +4,7 @@
 #include "board.h"
 #include "move.h"
 #include "util.h"
+#include <map>
 
 typedef struct game {
     t_board *board;
@@ -11,6 +12,7 @@ typedef struct game {
     uint64_t latestMoveTime;
     List<t_move> moveHistory;
     bool isOver;
+    std::map<std::string,int> *positionHistory;
 
     unsigned whiteWon:1;
     unsigned whiteCanCastleShort:1;

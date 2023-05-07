@@ -1,7 +1,7 @@
 #include "end.h"
 #include "move.h"
 #include <math.h>
-#include <map>
+
 
 // TODO: Check for checkmate
 // TODO: Check for king of the hill
@@ -82,24 +82,31 @@ bool KingOfTheHill(t_board* board, bool moved_color){
     }
 };
 
-winner_t checkEnd(t_board* board, bool moved_color) {
+winner_t checkEnd(t_game* game, bool moved_color) {
     /* Function to check wether one of the game ending conditions is fullfilled and Returns the winner or DRAW. Given is the last moved color
      * tho check if the last action finsished the game.
      * Arguments:
      *  t_board *board: Pointer to the board representing the state of the game
      *  bool moved_color: the last moved color with "false" for white and "true" for black
      */
-    
+    if(game->positionHistory == NULL){
+        game->positionHistory = initMoveTracker();
+        game->positionHistory->insert(std::make_pair(getFen(game->board),1));
+    }else{
+        if(game->positionHistory->find(getFen(game->board)) != game->positionHistory->end()){
+            game->positionHistory[getFen(game->board)] = game->positionHistory->find(getFen(game->board))++;
+        }
+    }
 
-    if(KingOfTheHill(board,moved_color)){
+    if(KingOfTheHill(game->board,moved_color)){
         return moved_color ? BLACK : WHITE;
     }else
 
-    if(isCheckmate(board, !moved_color)) {
+    if(isCheckmate(game->board, !moved_color)) {
         return moved_color ? BLACK : WHITE;
     }else
 
-    if(isStalemate(board,!moved_color)){
+    if(isStalemate(game->board,!moved_color)){
         return DRAW;
     }else
 
