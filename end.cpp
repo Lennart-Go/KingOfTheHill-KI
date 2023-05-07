@@ -1,13 +1,13 @@
 #include "end.h"
 #include "move.h"
 #include <math.h>
-
+#include <map>
 
 // TODO: Check for checkmate
 // TODO: Check for king of the hill
 // TODO: Check for draw
 
-int countFigure(uint64_t singleBoard){
+/*int countFigure(uint64_t singleBoard){
     int count=0;
     for(int i=0;i<=64;i++){
         if(singleBoard & (1<<i)){
@@ -15,6 +15,11 @@ int countFigure(uint64_t singleBoard){
         }
     }
     return count;
+}*/
+
+std::map<std::string,int>* initMoveTracker(){
+    std::map<std::string,int> map;
+    return &map;
 }
 
 
@@ -47,7 +52,7 @@ bool isStalemate(t_board* board, bool moving_color){
     }
 };
 
-bool isInsufficientMatingMaterial(t_board* board){
+/*bool isInsufficientMatingMaterial(t_board* board){
     //lone king or king with two ore less knights
     if((board->white&(board->knight|board->king)) > 0 && (board->white&(board->queen|board->rook|board->bishop|board->pawn))==0){
         return true;
@@ -64,7 +69,7 @@ bool isInsufficientMatingMaterial(t_board* board){
         return true;
     }
     return false;
-};
+};*/
 
 bool KingOfTheHill(t_board* board, bool moved_color){
     uint64_t color = moved_color? board->black : board->white;
@@ -84,6 +89,7 @@ winner_t checkEnd(t_board* board, bool moved_color) {
      *  t_board *board: Pointer to the board representing the state of the game
      *  bool moved_color: the last moved color with "false" for white and "true" for black
      */
+    
 
     if(KingOfTheHill(board,moved_color)){
         return moved_color ? BLACK : WHITE;
@@ -97,9 +103,9 @@ winner_t checkEnd(t_board* board, bool moved_color) {
         return DRAW;
     }else
 
-    if(isInsufficientMatingMaterial(board)){
+    /*if(isInsufficientMatingMaterial(board)){
         return DRAW;
-    }else {
+    }else*/ {
         return NOTOVER;
     }
 
