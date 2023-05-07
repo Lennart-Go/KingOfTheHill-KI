@@ -39,6 +39,7 @@ void commitMove(t_game *game, t_move *move) {
     }
 
     doMove(game->board, move);
+
     game->moveHistory.add(*move);
 
     game->turn = !game->turn;
@@ -60,16 +61,26 @@ void play() {
 
     while (!game->isOver) {
         // Print current board state
-        printf("Current board state (Round: %d, Turn: %d):\n", (game->blackMoveCounter + 1), game->turn);
+        printf("Current board state (Round: %d, Turn: %d)", (game->blackMoveCounter + 1), game->turn);
         printBoard(game->board);
 
         // Generate next move
         t_move nextMove = getMove(game->board, game->turn);
         commitMove(game, &nextMove);
 
-        printf("\nNext move: ");
+        printf("Next move: ");
         printMove(nextMove);
-        printf("\n\n\n");
+
+        Position kingPosition;
+        if (!game->turn) {
+            kingPosition = board_value_positions(game->board->white & game->board->king).get(0);
+        } else {
+            kingPosition = board_value_positions(game->board->black & game->board->king).get(0);
+        }
+
+        if (is_threatened(game->board, kingPosition, game->turn)) {
+            printf("CHECK\n");
+        }
     }
 
     printf("Game loop broken\n");

@@ -14,7 +14,9 @@ t_move getMoveRandom(t_board *board, bool color) {
     }
 
     // Initialize rng
-    srand((unsigned ) time(nullptr));
+    timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    srand((unsigned ) ts.tv_nsec);
 
     // Generate random number within bounds of possible moves list and return the corresponding move
     int randomMoveIndex = (int )(rand() % possibleMoves.length());

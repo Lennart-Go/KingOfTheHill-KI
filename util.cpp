@@ -197,3 +197,8 @@ List<Position> board_value_positions(uint64_t board) {
     return positions;
 }
 
+
+char columnToLetter(int column) {
+    return (char ) ('A' + column);
+}
+

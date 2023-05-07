@@ -142,7 +142,7 @@ bool is_move_legal_nocheck(t_board *board, t_move move, uint64_t color_filter, u
      */
 
     // Extract information from move
-    Position targetPosition = Position(move.target >> 3, move.target & 0b111);
+    Position targetPosition = position_from_shift(move.target);
 
     int targetPositionShift = shift_from_position(targetPosition);
 
@@ -175,7 +175,7 @@ bool is_threatened(t_board *board, Position target, bool color) {
 
     uint64_t color_filter, enemy_color_filter;
     List<Offset> M_PAWN, M_PAWN_DOUBLE, M_PAWN_TAKE;
-    if (!color) {
+    if (color) {
         color_filter = board->white;
         enemy_color_filter = board->black;
 
@@ -193,7 +193,7 @@ bool is_threatened(t_board *board, Position target, bool color) {
     List<Position> kingPositions = board_value_positions(board->king & color_filter);
     if (kingPositions.length() != 1) {
         // Dafuq?
-        return false;  // Abort move generation, because no/many king?  // TODO: Throw error?
+        return true;  // Abort move generation, because no/many king?  // TODO: Throw error?
     } else {
         Position kingPosition = kingPositions.get(0);
 
@@ -619,7 +619,7 @@ bool is_threatened(t_board *board, Position target, bool color) {
                 t_move possibleMove;
                 possibleMove.origin = shift_from_position(pawnPosition);
                 possibleMove.target = shift_from_position(moveTarget);
-                possibleMove.color = color;
+                possibleMove.color = !color;
 
                 if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, false)) {
                     return true;
@@ -659,9 +659,9 @@ bool is_check(t_board *board, t_move move) {
     List<Position> kingPositions = board_value_positions(board->king & color_mask);
     if (kingPositions.length() != 1) {
         // Should not be possible to have no or multiple kings on the board
-        return false;
+        retValue = false;
     } else {
-        if (is_threatened(board, kingPositions.get(0), !color)) {
+        if (is_threatened(board, kingPositions.get(0), color)) {
             retValue = true;
         }
     }
@@ -1226,5 +1226,5 @@ void undoMove(t_board *board, t_move *move) {
 void printMove(const t_move move) {
     Position origin = position_from_shift(move.origin);
     Position target = position_from_shift(move.target);
-    printf("Move %d/%d -> %d/%d\n", origin.x, origin.y, target.x, target.y);
+    printf("Move %c%d -> %c%d\n", columnToLetter(origin.x), origin.y + 1, columnToLetter(target.x), target.y + 1);
 }
