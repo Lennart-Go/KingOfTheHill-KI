@@ -175,6 +175,7 @@ bool is_threatened(t_board *board, Position target, bool color) {
 
     uint64_t color_filter, enemy_color_filter;
     List<Offset> M_PAWN, M_PAWN_DOUBLE, M_PAWN_TAKE;
+    
     if (color) {
         color_filter = board->white;
         enemy_color_filter = board->black;

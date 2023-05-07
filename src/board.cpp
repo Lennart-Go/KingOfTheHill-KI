@@ -249,6 +249,19 @@ void printBoard(t_board* board) {
     }
     
     // int mode = _setmode(STDOUT_FILENO, _O_U16TEXT);
+    // 
+    // wprintf(L"\n");
+    // for (int i = 0; i < 8; i++) {
+    //     wprintf(L"|");
+    //     for (int j = 0; j < 8; ++j) {
+    //         wprintf(L"%lc ", boardChar[i * 8 + j]);
+    //     }
+    //     wprintf(L"|\n");
+    // }
+    // wprintf(L"\n");
+    // 
+    // _setmode(STDOUT_FILENO, mode);
+    
     setlocale(LC_ALL, "en_US.UTF-8");
 
     printf("\n");
@@ -260,8 +273,6 @@ void printBoard(t_board* board) {
         printf("|\n");
     }
     printf("\n");
-
-    // _setmode(STDOUT_FILENO, mode);
 
 }
 
