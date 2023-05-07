@@ -2,6 +2,7 @@
 #include "game.h"
 #include "move.h"
 #include "hikaru.h"
+#include "end.h"
 
 
 t_game *startGame() {
@@ -39,12 +40,22 @@ void commitMove(t_game *game, t_move *move) {
     }
 
     doMove(game->board, move);
-
     game->moveHistory.add(*move);
 
-    game->turn = !game->turn;
+    winner_t gameEnd = checkEnd(game->board, game->turn);
+    if (gameEnd) {
+        game->isOver = true;
 
-    // TODO: Implement end-check with end.cpp/end.h
+        if (gameEnd == WHITE) {
+            game->whiteWon = true;
+        } else if (gameEnd == BLACK) {
+            game->blackWon = true;
+        }
+
+        return;
+    }
+
+    game->turn = !game->turn;
 
     // TODO: Update moveTime, check if move was a castle or castles still possible
     if (!move->color) {
@@ -60,17 +71,22 @@ void play() {
     t_game *game = startGame();
 
     while (!game->isOver) {
-        // Print current board state
-        printf("Current board state (Round: %d, Turn: %d)", (game->blackMoveCounter + 1), game->turn);
-        printBoard(game->board);
+//        if (game->blackMoveCounter > 50) {
+//            break;
+//        }
 
         // Generate next move
         t_move nextMove = getMove(game->board, game->turn);
         commitMove(game, &nextMove);
 
+        // Print next move and resulting board state
         printf("Next move: ");
         printMove(nextMove);
 
+        printf("Current board state (Round: %d, Turn: %d)", (game->blackMoveCounter + 1), game->turn);
+        printBoard(game->board);
+
+        // Check and announce checks
         Position kingPosition;
         if (!game->turn) {
             kingPosition = board_value_positions(game->board->white & game->board->king).get(0);
@@ -83,5 +99,10 @@ void play() {
         }
     }
 
-    printf("Game loop broken\n");
+    printf("Game over!\n");
+    printf("Game is over: %d\n", game->isOver);
+    printf("White won: %d\n", game->whiteWon);
+    printf("Black won: %d\n", game->blackWon);
+    printf("Total rounds: %d\n", game->blackMoveCounter + 1);
+    printf("Turn: %d\n", game->turn);
 }
