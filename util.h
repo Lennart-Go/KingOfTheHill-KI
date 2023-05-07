@@ -56,7 +56,12 @@ template <typename T> List<T>::~List() {
 }
 
 template <typename T> void List<T>::add(T item) {
-    this->_items = (T *) reallocarray(this->_items, this->_length + 1, sizeof(T));
+    this->_items = (T *) realloc(this->_items, (this->_length + 1) * sizeof(T));
+
+    T localItem;
+    memcpy(&localItem, &item, sizeof(T));
+
+    this->_items[this->_length] = localItem;
     this->_items[this->_length] = item;
     this->_length++;
 }
