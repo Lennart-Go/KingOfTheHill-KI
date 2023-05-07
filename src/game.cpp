@@ -14,6 +14,7 @@ t_game *startGame() {
     game->latestMoveTime = 0;  // TODO: Set latestMoveTime to current time in ms
     game->moveHistory = List<t_move>();
     game->isOver = false;
+    game->positionHistory = NULL;
 
     game->whiteWon = false;
     game->whiteCanCastleShort = true;
@@ -42,7 +43,7 @@ void commitMove(t_game *game, t_move *move) {
     doMove(game->board, move);
     game->moveHistory.add(*move);
 
-    winner_t gameEnd = checkEnd(game->board, game->turn);
+    winner_t gameEnd = checkEnd(game, game->turn);
     if (gameEnd) {
         game->isOver = true;
 

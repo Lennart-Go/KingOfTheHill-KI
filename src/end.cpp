@@ -1,6 +1,7 @@
 #include "end.h"
 #include "move.h"
 #include <math.h>
+#include <map>
 
 
 // TODO: Check for checkmate
@@ -17,9 +18,10 @@
     return count;
 }*/
 
-std::map<std::string,int>* initMoveTracker(){
+std::map<std::string,int> initMoveTracker(){
     std::map<std::string,int> map;
-    return &map;
+    map["0"]=0;
+    return map;
 }
 
 
@@ -89,12 +91,23 @@ winner_t checkEnd(t_game* game, bool moved_color) {
      *  t_board *board: Pointer to the board representing the state of the game
      *  bool moved_color: the last moved color with "false" for white and "true" for black
      */
+    std::map<std::string,int> *map = game->positionHistory;
+    char* currentFen = getFen(game->board);
+    bool positionRepetionDraw = false;
+
     if(game->positionHistory == NULL){
-        game->positionHistory = initMoveTracker();
-        game->positionHistory->insert(std::make_pair(getFen(game->board),1));
+        std::map<std::string,int> mapStatic = initMoveTracker();
+        map = & mapStatic;
+        game->positionHistory = map;
+        mapStatic.insert(std::make_pair(currentFen,1));
     }else{
-        if(game->positionHistory->find(getFen(game->board)) != game->positionHistory->end()){
-            game->positionHistory[getFen(game->board)] = game->positionHistory->find(getFen(game->board))++;
+        if((*map).find(currentFen) != map->end()){
+            (*map)[currentFen] = (*map)[currentFen]++;
+            if((*map)[currentFen]>4){
+                positionRepetionDraw = true;
+            }
+        }else{
+            (*map).insert(std::make_pair(currentFen,1));
         }
     }
 
@@ -109,6 +122,10 @@ winner_t checkEnd(t_game* game, bool moved_color) {
     if(isStalemate(game->board,!moved_color)){
         return DRAW;
     }else
+
+    if(positionRepetionDraw){
+        return DRAW;
+    }
 
     /*if(isInsufficientMatingMaterial(board)){
         return DRAW;
