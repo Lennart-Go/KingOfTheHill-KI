@@ -65,7 +65,7 @@ void setFen(t_board* board, char fen[]) {
 }
 
 char* getFen(t_board* board) {
-    char* fen = (char*)(calloc(72, sizeof(char)));
+    char* fen = (char*)(calloc(73, sizeof(char)));
     char slash[2] = {UTF_SLASH, '\0'};
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -89,7 +89,7 @@ char* getFen(t_board* board) {
 }
 
 char* shortenFen(char* fen) {
-    char* newFen = (char*)(calloc(72, sizeof(char)));
+    char* newFen = (char*)(calloc(73, sizeof(char)));
     int i = 0;
     int j = 0;
     int slashes = 0;
