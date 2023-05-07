@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include "game.h"
 #include "move.h"
+#include "hikaru.h"
 
 
 t_game *startGame() {
@@ -11,6 +12,7 @@ t_game *startGame() {
     game->turn = 0;  // White's turn
     game->latestMoveTime = 0;  // TODO: Set latestMoveTime to current time in ms
     game->moveHistory = List<t_move>();
+    game->isOver = false;
 
     game->whiteWon = false;
     game->whiteCanCastleShort = true;
@@ -30,10 +32,18 @@ t_game *startGame() {
 }
 
 void commitMove(t_game *game, t_move *move) {
+    if (move->origin == move->target) {
+        // Failure move -> No moves generated
+        game->isOver = true;
+        return;
+    }
+
     doMove(game->board, move);
     game->moveHistory.add(*move);
 
     game->turn = !game->turn;
+
+    // TODO: Implement end-check with end.cpp/end.h
 
     // TODO: Update moveTime, check if move was a castle or castles still possible
     if (!move->color) {
@@ -43,4 +53,24 @@ void commitMove(t_game *game, t_move *move) {
         // Black moved
         game->blackMoveCounter++;
     }
+}
+
+void play() {
+    t_game *game = startGame();
+
+    while (!game->isOver) {
+        // Print current board state
+        printf("Current board state (Round: %d, Turn: %d):\n", (game->blackMoveCounter + 1), game->turn);
+        printBoard(game->board);
+
+        // Generate next move
+        t_move nextMove = getMove(game->board, game->turn);
+        commitMove(game, &nextMove);
+
+        printf("\nNext move: ");
+        printMove(nextMove);
+        printf("\n\n\n");
+    }
+
+    printf("Game loop broken\n");
 }

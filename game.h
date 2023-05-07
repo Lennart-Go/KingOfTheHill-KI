@@ -10,6 +10,7 @@ typedef struct game {
     unsigned turn:1;  // 0 for white, 1 for black
     uint64_t latestMoveTime;
     List<t_move> moveHistory;
+    bool isOver;
 
     unsigned whiteWon:1;
     unsigned whiteCanCastleShort:1;
@@ -27,5 +28,6 @@ typedef struct game {
 } t_game;
 
 t_game *startGame();
+void play();
 
 #endif //KINGOFTHEHILL_KI_GAME_H
