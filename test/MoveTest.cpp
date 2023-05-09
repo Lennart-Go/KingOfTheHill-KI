@@ -355,6 +355,7 @@ TEST_F(MoveTest, london_system_checkT) {
     EXPECT_EQ(6, moves.length());
 }
 
+
 // Stellung 2 gruppe T - Endspiel, Forciertes Unendschieden
 TEST_F(MoveTest, forced_remiT) {
     setFen(board, "8/8/4k3/3pP3/3K4/8/8/8");
