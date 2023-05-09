@@ -9,58 +9,160 @@ class MoveTest : public ::testing::Test {
 protected:
     virtual void SetUp()
     {
-        startBoard = initializeBoard();
-
-        e2_e4.origin = 52;
-        e2_e4.target = 36;
-        e2_e4.color = 0;
+        board = initializeBoard();
     }
 
     virtual void TearDown()
     {
-        delete startBoard;
+        delete board;
     }
 
-    t_board *startBoard;
-    t_move e2_e4;
-
-    char startBoardAsFen[44] = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-    char e4BoardAsFen[46] = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR";
-
+    t_board *board;
 };
 
 
-TEST_F(MoveTest, generateMovesStartBoard) {
+/*
+ * FUNCTION TESTS FOR empty_between
+ */
+TEST_F(MoveTest, emptyBetweenWhiteVerticalValid) {
+    setFen(board, (char *)"8/8/8/8/8/8/8/Q7");
+    t_move move = {(unsigned )shift_from_position(Position(0, 0)),
+                   (unsigned )shift_from_position(Position(0, 2)),
+                   0, 0};
 
-    List<t_move> moves = generate_moves(startBoard, false);
+    EXPECT_TRUE(empty_between(board, move));
+}
 
-    EXPECT_EQ(20, moves.length());
+TEST_F(MoveTest, emptyBetweenWhiteVerticalInvalid) {
+    setFen(board, (char *)"8/8/8/8/8/8/P7/Q7");
+    t_move move = {(unsigned )shift_from_position(Position(0, 0)),
+                   (unsigned )shift_from_position(Position(0, 2)),
+                   0, 0};
+
+    EXPECT_FALSE(empty_between(board, move));
+}
+
+TEST_F(MoveTest, emptyBetweenDiagonalValid) {
+    setFen(board, (char *)"8/8/8/8/8/8/8/Q7");
+    t_move move = {(unsigned )shift_from_position(Position(0, 0)),
+                   (unsigned )shift_from_position(Position(2, 2)),
+                   0, 0};
+
+    EXPECT_TRUE(empty_between(board, move));
+}
+
+TEST_F(MoveTest, emptyBetweenDiagonalInvalid) {
+    setFen(board, (char *)"8/8/8/8/8/8/1P6/Q7");
+    t_move move = {(unsigned )shift_from_position(Position(0, 0)),
+                   (unsigned )shift_from_position(Position(2, 2)),
+                   0, 0};
+
+    EXPECT_FALSE(empty_between(board, move));
+}
+
+TEST_F(MoveTest, emptyBetweenHorizontalValid) {
+    setFen(board, (char *)"8/8/8/8/8/8/8/Q7");
+    t_move move = {(unsigned )shift_from_position(Position(0, 0)),
+                   (unsigned )shift_from_position(Position(2, 0)),
+                   0, 0};
+
+    EXPECT_TRUE(empty_between(board, move));
+}
+
+TEST_F(MoveTest, emptyBetweenHorizontalInvalid) {
+    setFen(board, (char *)"8/8/8/8/8/8/8/QP6");
+    t_move move = {(unsigned )shift_from_position(Position(0, 0)),
+                   (unsigned )shift_from_position(Position(2, 0)),
+                   0, 0};
+
+    EXPECT_FALSE(empty_between(board, move));
 }
 
 
+/*
+ * FUNCTION TESTS FOR is_move_legal_nocheck
+ */
+TEST_F(MoveTest, isMoveLegalNocheckTargetOccupied) {
+    setFen(board, (char *)"8/8/8/8/8/8/8/Q1P5");
+    t_move move = {(unsigned )shift_from_position(Position(0, 0)),
+                   (unsigned )shift_from_position(Position(2, 0)),
+                   0, 0};
 
-TEST_F(MoveTest, doMove) {
+    uint64_t whiteColorFilter = board->white;
+    uint64_t blackColorFilter = board->black;
+    bool checkBetweenDefault = false;
 
-    t_board *board = initializeBoard();
-
-    // play e4
-    doMove(board, &e2_e4);
-
-    EXPECT_STREQ(getFen(board), e4BoardAsFen);
-
+    EXPECT_FALSE(is_move_legal_nocheck(board, move, whiteColorFilter, blackColorFilter, checkBetweenDefault));
 }
 
-TEST_F(MoveTest, undoMove) {
+TEST_F(MoveTest, isMoveLegalNocheckCheckBetweenEmptyBetween) {
+    setFen(board, (char *)"8/8/8/8/8/8/8/Q7");
+    t_move move = {(unsigned )shift_from_position(Position(0, 0)),
+                   (unsigned )shift_from_position(Position(2, 0)),
+                   0, 0};
 
-    // e4 back to e2
+    uint64_t whiteColorFilter = board->white;
+    uint64_t blackColorFilter = board->black;
 
-    t_board *board = initializeBoard();
-
-    setFen(board, e4BoardAsFen);
-
-    // undo e4
-    undoMove(board, &e2_e4);
-
-    EXPECT_STREQ(getFen(board), startBoardAsFen);
+    EXPECT_TRUE(is_move_legal_nocheck(board, move, whiteColorFilter, blackColorFilter, true));
 }
+
+TEST_F(MoveTest, isMoveLegalNocheckCheckBetweenNotEmptyBetween) {
+    setFen(board, (char *)"8/8/8/8/8/8/8/QP6");
+    t_move move = {(unsigned )shift_from_position(Position(0, 0)),
+                   (unsigned )shift_from_position(Position(2, 0)),
+                   0, 0};
+
+    uint64_t whiteColorFilter = board->white;
+    uint64_t blackColorFilter = board->black;
+
+    EXPECT_FALSE(is_move_legal_nocheck(board, move, whiteColorFilter, blackColorFilter, true));
+}
+
+TEST_F(MoveTest, isMoveLegalNocheckNoCheckBetweenEmptyBetween) {
+    setFen(board, (char *)"8/8/8/8/8/8/8/Q7");
+    t_move move = {(unsigned )shift_from_position(Position(0, 0)),
+                   (unsigned )shift_from_position(Position(2, 0)),
+                   0, 0};
+
+    uint64_t whiteColorFilter = board->white;
+    uint64_t blackColorFilter = board->black;
+
+    EXPECT_TRUE(is_move_legal_nocheck(board, move, whiteColorFilter, blackColorFilter, false));
+}
+
+TEST_F(MoveTest, isMoveLegalNocheckNoCheckBetweenNotEmptyBetween) {
+    setFen(board, (char *)"8/8/8/8/8/8/8/QP6");
+    t_move move = {(unsigned )shift_from_position(Position(0, 0)),
+                   (unsigned )shift_from_position(Position(2, 0)),
+                   0, 0};
+
+    uint64_t whiteColorFilter = board->white;
+    uint64_t blackColorFilter = board->black;
+
+    EXPECT_TRUE(is_move_legal_nocheck(board, move, whiteColorFilter, blackColorFilter, false));
+}
+
+TEST_F(MoveTest, isMoveLegalNocheckValid) {
+    setFen(board, (char *)"8/8/8/8/8/8/8/Q7");
+    t_move move = {(unsigned )shift_from_position(Position(0, 0)),
+                   (unsigned )shift_from_position(Position(2, 0)),
+                   0, 0};
+
+    uint64_t whiteColorFilter = board->white;
+    uint64_t blackColorFilter = board->black;
+
+    EXPECT_TRUE(is_move_legal_nocheck(board, move, whiteColorFilter, blackColorFilter, true));
+}
+
+
+/*
+ * FUNCTION TESTS FOR is_threatened WITH WHITE PIECES
+ */
+// TODO
+
+
+/*
+ * FUNCTION TESTS FOR is_threatened WITH BLACK PIECES
+ */
 

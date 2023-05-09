@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include "game.h"
-#include "move.h"
 #include "hikaru.h"
 #include "end.h"
 
@@ -12,7 +11,6 @@ t_game *startGame() {
     game->board = board;
     game->turn = 0;  // White's turn
     game->latestMoveTime = 0;  // TODO: Set latestMoveTime to current time in ms
-    game->moveHistory = List<t_move>();
     game->isOver = false;
     game->positionHistory = NULL;
 
@@ -41,7 +39,6 @@ void commitMove(t_game *game, t_move *move) {
     }
 
     doMove(game->board, move);
-    game->moveHistory.add(*move);
 
     winner_t gameEnd = checkEnd(game, game->turn);
     if (gameEnd) {
@@ -77,7 +74,7 @@ void play() {
 //        }
 
         // Generate next move
-        t_move nextMove = getMove(game->board, game->turn);
+        t_move nextMove = getMove(game, game->turn);
         commitMove(game, &nextMove);
 
         // Print next move and resulting board state

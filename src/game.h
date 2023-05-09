@@ -1,16 +1,14 @@
-#ifndef KINGOFTHEHILL_KI_GAME_H
-#define KINGOFTHEHILL_KI_GAME_H
-
 #include "board.h"
-#include "move.h"
 #include "util.h"
 #include <map>
+
+#ifndef KINGOFTHEHILL_KI_GAME_H
+#define KINGOFTHEHILL_KI_GAME_H
 
 typedef struct game {
     t_board *board;
     unsigned turn:1;  // 0 for white, 1 for black
     uint64_t latestMoveTime;
-    List<t_move> moveHistory;
     bool isOver;
     std::map<std::string,int> *positionHistory;
 

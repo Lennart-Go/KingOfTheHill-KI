@@ -1,5 +1,6 @@
 #include "move.h"
 #include "board.h"
+#include "game.h"
 
 
 // Define possible move offsets for all pieces with non-linear or conditional moves
@@ -707,23 +708,17 @@ bool is_move_legal(t_board *board, t_move move, uint64_t color_filter, uint64_t 
 }
 
 
-/*
- * TODO: Ideas
- * - Check if move is legal during move generation and cancel any further generations in that "direction" if failing
- *      -> For pieces with continuously generated moves (Queen, Rook, Bishop)
- */
-
-
-List<t_move> generate_moves(t_board *board, bool color) {
+List<t_move> generate_moves(t_game *game, bool color) {
     /*
      * Function that generates a list of all legal moves in the current state of the game
      *
      * Arguments:
-     *  t_board *board: Pointer to the board representing the state of the game
-     *  bool color: Specifies the color of the team whose turn it is. "false" for white, "true" for black
+     *  t_game *game: Pointer to the game instance representing the state of the game
      * Return:
      *  List<t_move>: A list of t_move objects containing information on origin, target and color of the legal moves
      */
+
+    t_board *board = game->board;
 
     List<t_move> moves = List<t_move>();
 
