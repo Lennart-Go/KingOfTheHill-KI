@@ -14,7 +14,7 @@ t_move getMoveRandom(t_game *game, bool color) {
         return failureMove;
     }
 
-    printf("Found %zu moves!\n", possibleMoves.length());
+    //printf("Found %zu moves!\n", possibleMoves.length());
 //    for (int i = 0; i < possibleMoves.length(); ++i) {
 //        printMove(possibleMoves.get(i));
 //    }
@@ -29,7 +29,14 @@ t_move getMoveRandom(t_game *game, bool color) {
     return possibleMoves.get(randomMoveIndex);
 }
 
+int primitive_evaluation_function(t_move *move) {
+    return 1;
+}
+
 
 t_move getMove(t_game *game, bool color) {
-    return getMoveRandom(game, color);
+    t_move best_move = getMoveRandom(game, color);
+    primitive_evaluation_function(&best_move);
+
+    return best_move;
 }
