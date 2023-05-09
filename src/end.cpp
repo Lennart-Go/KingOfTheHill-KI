@@ -57,7 +57,7 @@ bool isCheckmate(t_game* game, bool moving_color){
     Position kingPosition = position_from_shift((King==0) ? 0 : (int)log2((long double) King));
     printf("Position x:%d y:%d\n",kingPosition.x,kingPosition.y);
     if(is_threatened(game->board, kingPosition, moving_color)){
-        List<t_move> possibleMoves = generate_moves(game->board,moving_color);
+        List<t_move> possibleMoves = generate_moves(game,moving_color);
         for(int i=0;i<possibleMoves.length();i++){
             t_move currentMove = possibleMoves.get(i);
 
@@ -76,7 +76,7 @@ bool isStalemate(t_game* game, bool moving_color){
     *  t_board *board: Pointer to the board representing the state of the game
     *  bool moving_color: the next moving color with "false" for white and "true" for black
     */
-    List<t_move> possibleMoves = generate_moves(game->board,moving_color);
+    List<t_move> possibleMoves = generate_moves(game,moving_color);
     if(possibleMoves.length() < 1){
         return true;
     }else{
