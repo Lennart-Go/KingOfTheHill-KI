@@ -196,7 +196,7 @@ bool is_threatened(t_board *board, Position target, bool color) {
     List<Position> kingPositions = board_value_positions(board->king & color_filter);
     if (kingPositions.length() != 1) {
         // Dafuq?
-        return false;  // Abort move generation, because no/many king?  // TODO: Throw error?
+        // return false;  // Abort move generation, because no/many king?  // TODO: Throw error?
     } else {
         Position kingPosition = kingPositions.get(0);
 
