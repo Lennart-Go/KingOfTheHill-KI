@@ -2,6 +2,7 @@
 #include "game.h"
 #include "hikaru.h"
 #include "end.h"
+#include "move.h"
 
 
 t_game *startGame() {
@@ -28,6 +29,8 @@ t_game *startGame() {
     game->blackMoveCounter = 0;
     game->blackMoveTime = 0;
 
+    game->enpassants = 0;
+
     return game;
 }
 
@@ -39,6 +42,21 @@ void commitMove(t_game *game, t_move *move) {
     }
 
     doMove(game->board, move);
+
+    game->enpassants = 0;
+
+    // Handle double-forward pawn move
+    if (is_double_pawn_move(move)) {
+        printf("DOUBLE PAWN MOVE!\n");
+        // Set according bit if the move was a double-forward pawn move
+        game->enpassants |= 1 << position_from_shift(move->origin).x;
+    } else if (is_castle(game->board, move)) {
+        printf("CASTLE!\n");
+    } else if (is_enpassant(game->board, move)) {
+        printf("EN-PASSENT!\n");
+    } else if (move->promoted) {
+        printf("PROMOTION!\n");
+    }
 
     winner_t gameEnd = checkEnd(game, game->turn);
     if (gameEnd) {
@@ -58,20 +76,58 @@ void commitMove(t_game *game, t_move *move) {
     // TODO: Update moveTime, check if move was a castle or castles still possible
     if (!move->color) {
         // White moved
+
+        // Update castling flags
+        if (!game->whiteCastled && (game->whiteCanCastleShort || game->whiteCanCastleLong)) {
+            if (board_value_from_shift(game->board->king, move->target)) {
+                // King moved
+                game->whiteCanCastleShort = false;
+                game->whiteCanCastleLong = false;
+            } else if (board_value_from_shift(game->board->rook, move->target) && position_from_shift(move->target).x == 7) {
+                // Short rook moved
+                game->whiteCanCastleShort = false;
+            } else if (board_value_from_shift(game->board->rook, move->target) && position_from_shift(move->target).x == 0) {
+                game->whiteCanCastleLong = false;
+            }
+            if (is_castle(game->board, move)) {
+                game->whiteCastled = true;
+            }
+        }
+
         game->whiteMoveCounter++;
     } else {
         // Black moved
         game->blackMoveCounter++;
+
+        // Update castling flags
+        if (!game->blackCastled && (game->blackCanCastleShort || game->blackCanCastleLong)) {
+            if (board_value_from_shift(game->board->king, move->target)) {
+                // King moved
+                game->blackCanCastleShort = false;
+                game->blackCanCastleLong = false;
+            } else if (board_value_from_shift(game->board->rook, move->target) && position_from_shift(move->target).x == 7) {
+                // Short rook moved
+                game->blackCanCastleShort = false;
+            } else if (board_value_from_shift(game->board->rook, move->target) && position_from_shift(move->target).x == 0) {
+                game->blackCanCastleLong = false;
+            }
+            if (is_castle(game->board, move)) {
+                game->blackCastled = true;
+            }
+        }
     }
 }
 
 void play() {
     t_game *game = startGame();
+    setFen(game->board, (char *)"r3k2r/8/8/8/8/8/p1r4r/R3K2R");
+
+    printBoard(game->board);
 
     while (!game->isOver) {
-//        if (game->blackMoveCounter > 50) {
-//            break;
-//        }
+        if (game->blackMoveCounter > 0) {
+            break;
+        }
 
         // Generate next move
         t_move nextMove = getMove(game, game->turn);

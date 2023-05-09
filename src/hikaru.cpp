@@ -14,6 +14,11 @@ t_move getMoveRandom(t_game *game, bool color) {
         return failureMove;
     }
 
+    printf("Found %zu moves!\n", possibleMoves.length());
+//    for (int i = 0; i < possibleMoves.length(); ++i) {
+//        printMove(possibleMoves.get(i));
+//    }
+
     // Initialize rng
     timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);

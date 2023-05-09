@@ -1,3 +1,4 @@
+#include <cmath>
 #include "move.h"
 #include "board.h"
 #include "game.h"
@@ -169,7 +170,7 @@ bool is_threatened(t_board *board, Position target, bool color) {
      * Arguments:
      *  t_board *board: Pointer to the board representing the state of the game
      *  Position target: Position object containing the location on the board, that is to be investigated for threats
-     *  bool color: Specifies the color of the team whose turn it is. "false" for white, "true" for black
+     *  bool color: Specifies the color of the team that may be threatened. "false" for white, "true" for black
      * Return:
      *  "true" if the specified position is under threat by a piece, "false" otherwise
      */
@@ -195,7 +196,7 @@ bool is_threatened(t_board *board, Position target, bool color) {
     List<Position> kingPositions = board_value_positions(board->king & color_filter);
     if (kingPositions.length() != 1) {
         // Dafuq?
-        return true;  // Abort move generation, because no/many king?  // TODO: Throw error?
+        return false;  // Abort move generation, because no/many king?  // TODO: Throw error?
     } else {
         Position kingPosition = kingPositions.get(0);
 
@@ -633,7 +634,7 @@ bool is_threatened(t_board *board, Position target, bool color) {
     return false;
 }
 
-bool is_check(t_board *board, t_move move) {
+bool is_move_check(t_board *board, t_move move) {
     /*
      * Function to check whether taking a given move would result in a check against the moving team
      *
@@ -700,7 +701,36 @@ bool is_move_legal(t_board *board, t_move move, uint64_t color_filter, uint64_t 
     }
 
     // Check if move taken would result in a check
-    if (is_check(board, move)) {
+    if (is_move_check(board, move)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool is_castle_legal(t_board *board, Position kingPosition, bool color, bool direction) {
+    /*
+     * Function to check whether a castling move in the specified direction is legal. This assumes, that the King is in
+     * the correct position on the board, if not unexpected behaviour may arise.
+     *
+     * Arguments:
+     *  t_board *board: Pointer to the board representing the state of the game
+     *  Position kingPosition: Position object containing the King's location on the board
+     *  bool color: Specifies the color of the team that performs the castling move. "false" for white, "true" for black
+     *  bool direction: Specifies whether to examine a short or long castle. "true" for short, "false" for long.
+     * Return:
+     *  "true" if the casting move is legal
+     */
+
+    int directionModifier = -1 + (direction * 2);
+
+    if (is_threatened(board, kingPosition, color)) {
+        return false;
+    }
+    if (is_threatened(board, (Offset(directionModifier * 1, 0) + kingPosition).toPosition(), color)) {
+        return false;
+    }
+    if (is_threatened(board, (Offset(directionModifier * 2, 0) + kingPosition).toPosition(), color)) {
         return false;
     }
 
@@ -724,6 +754,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
 
     uint64_t color_filter, enemy_color_filter;
     List<Offset> M_PAWN, M_PAWN_DOUBLE, M_PAWN_TAKE;
+    bool canCastleShort, canCastleLong;
     if (!color) {
         color_filter = board->white;
         enemy_color_filter = board->black;
@@ -731,6 +762,9 @@ List<t_move> generate_moves(t_game *game, bool color) {
         M_PAWN = M_PAWN_WHITE;
         M_PAWN_DOUBLE = M_PAWN_WHITE_DOUBLE;
         M_PAWN_TAKE = M_PAWN_WHITE_TAKE;
+
+        canCastleShort = game->whiteCanCastleShort;
+        canCastleLong = game->whiteCanCastleLong;
     } else {
         color_filter = board->black;
         enemy_color_filter = board->white;
@@ -738,16 +772,18 @@ List<t_move> generate_moves(t_game *game, bool color) {
         M_PAWN = M_PAWN_BLACK;
         M_PAWN_DOUBLE = M_PAWN_BLACK_DOUBLE;
         M_PAWN_TAKE = M_PAWN_BLACK_TAKE;
+
+        canCastleShort = game->whiteCanCastleShort;
+        canCastleLong = game->whiteCanCastleLong;
     }
 
     // Generate moves for all pieces
 
-    // TODO: Castling
     // King
     List<Position> kingPositions = board_value_positions(board->king & color_filter);
     if (kingPositions.length() != 1) {
         // Dafuq?
-        return moves;  // Abort move generation, because no/many king?
+        // return moves;  // Abort move generation, because no/many king?
     } else {
         Position kingPosition = kingPositions.get(0);
         List<Position> possibleTargets = List<Position>();
@@ -772,7 +808,30 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 moves.add(possibleMove);
             }
         }
+
+        // Castling
+        if (canCastleShort && is_castle_legal(board, kingPosition, color, true)) {
+            t_move possibleMove;
+            possibleMove.origin = shift_from_position(kingPosition);
+            possibleMove.target = shift_from_position(kingPosition + Position(2, 0));
+            possibleMove.color = color;
+
+            if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
+                moves.add(possibleMove);
+            }
+        }
+        if (canCastleLong && is_castle_legal(board, kingPosition, color, false)) {
+            t_move possibleMove;
+            possibleMove.origin = shift_from_position(kingPosition);
+            possibleMove.target = shift_from_position(kingPosition - Position(2, 0));
+            possibleMove.color = color;
+
+            if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
+                moves.add(possibleMove);
+            }
+        }
     }
+
 
     // Queen
     List<Position> queenPositions = board_value_positions(board->queen & color_filter);
@@ -1043,7 +1102,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
 
         // "Normal" forward move
         Offset targetOffset = M_PAWN.get(0) + pawnPosition;
-        if (targetOffset.isWithinBounds()) {
+        if (targetOffset.isWithinBounds() && !(((pawnPosition.y == 6 && !color) || (pawnPosition.y == 1 && color)))) {
             // Should not be possible to not be within bounds
             int targetOffsetShift = shift_from_position(targetOffset.toPosition());
             bool isTargetOccupied = board_value_from_shift(color_filter | enemy_color_filter, targetOffsetShift);
@@ -1069,19 +1128,65 @@ List<t_move> generate_moves(t_game *game, bool color) {
         }
 
         // Taking move
-        for (int offsetIndex = 0; offsetIndex < M_PAWN_TAKE.length(); ++offsetIndex) {
-            targetOffset = M_PAWN_TAKE.get(offsetIndex) + pawnPosition;
+        if (!((pawnPosition.y == 6 && !color) || (pawnPosition.y == 1 && color))) {
+            for (int offsetIndex = 0; offsetIndex < M_PAWN_TAKE.length(); ++offsetIndex) {
+                targetOffset = M_PAWN_TAKE.get(offsetIndex) + pawnPosition;
 
-            if (targetOffset.isWithinBounds()) {
-                int targetOffsetShift = shift_from_position(targetOffset.toPosition());
-                bool isTargetOccupiedByEnemy = board_value_from_shift(enemy_color_filter, targetOffsetShift);
+                if (targetOffset.isWithinBounds()) {
+                    int targetOffsetShift = shift_from_position(targetOffset.toPosition());
+                    bool isTargetOccupiedByEnemy = board_value_from_shift(enemy_color_filter, targetOffsetShift);
 
-                if (isTargetOccupiedByEnemy) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    if (isTargetOccupiedByEnemy) {
+                        possibleTargets.add(targetOffset.toPosition());
+                    }
+                }
+            }
+        } else {
+            for (int offsetIndex = 0; offsetIndex < M_PAWN_TAKE.length(); ++offsetIndex) {
+                targetOffset = M_PAWN_TAKE.get(offsetIndex) + pawnPosition;
+
+                if (targetOffset.isWithinBounds()) {
+                    int targetOffsetShift = shift_from_position(targetOffset.toPosition());
+                    bool isTargetOccupiedByEnemy = board_value_from_shift(enemy_color_filter, targetOffsetShift);
+
+                    if (isTargetOccupiedByEnemy) {
+                        t_move possibleMove;
+                        possibleMove.origin = shift_from_position(pawnPosition);
+                        possibleMove.target = targetOffsetShift;
+                        possibleMove.color = color;
+                        possibleMove.promoted = true;
+
+                        if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, false)) {
+                            for (int i = 0; i < 4; ++i) {
+                                // Add one move for each promotable piece
+                                possibleMove.promoted_to = i;
+
+                                moves.add(possibleMove);
+                            }
+                        }
+                    }
                 }
             }
         }
 
+        // En-passant
+        if (game->enpassants != 0 && ((pawnPosition.y == 4 && !color) || (pawnPosition.y == 3 && color))) {
+            // Only possible on the middle row of the opposing side
+            int opposingPawnX = (int ) log2(game->enpassants);
+
+            if (pawnPosition.x == opposingPawnX - 1 || pawnPosition.x == opposingPawnX + 1) {
+                Position targetPosition = Position(opposingPawnX, (!color * 5) + (color * 2));
+
+                int targetOffsetShift = shift_from_position(targetPosition);
+                bool isTargetOccupiedByEnemy = board_value_from_shift(enemy_color_filter, targetOffsetShift);
+
+                if (!isTargetOccupiedByEnemy) {
+                    possibleTargets.add(targetPosition);
+                }
+            }
+        }
+
+        // Filter out illegal moves
         for (int targetIndex = 0; targetIndex < possibleTargets.length(); ++targetIndex) {
             Position moveTarget = possibleTargets.get(targetIndex);
 
@@ -1094,13 +1199,70 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 moves.add(possibleMove);
             }
         }
+
+        // Promotion
+        if ((pawnPosition.y == 6 && !color) || (pawnPosition.y == 1 && color)) {
+            // Only possible on second to last row in the pawn's moving direction
+            targetOffset = M_PAWN.get(0) + pawnPosition;
+            if (targetOffset.isWithinBounds()) {
+                // Should not be possible to not be within bounds
+                int targetOffsetShift = shift_from_position(targetOffset.toPosition());
+                bool isTargetOccupied = board_value_from_shift(color_filter | enemy_color_filter, targetOffsetShift);
+
+                if (!isTargetOccupied) {
+                    t_move possibleMove;
+                    possibleMove.origin = shift_from_position(pawnPosition);
+                    possibleMove.target = targetOffsetShift;
+                    possibleMove.color = color;
+                    possibleMove.promoted = true;
+
+                    if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, false)) {
+                        for (int i = 0; i < 4; ++i) {
+                            // Add one move for each promotable piece
+                            possibleMove.promoted_to = i;
+
+                            moves.add(possibleMove);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     return moves;
 }
 
+bool is_enpassant(t_board *board, t_move *move) {
+    if (!board_value_from_shift(board->pawn, move->origin)) {
+        return false;
+    }
+
+    int shift_diff = abs((int )(move->target) - (int )(move->origin));
+    if (!board_value_from_shift(board->white | board->black, move->target) && (shift_diff == 7 || shift_diff == 9)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool is_double_pawn_move(t_move *move) {
+    if (abs((int )(move->target) - (int )(move->origin)) == 16) {
+        return true;
+    }
+    return false;
+}
+
+bool is_castle(t_board *board, t_move *move) {
+    int shift_diff = abs((int )(move->target) - (int )(move->origin));
+    if (shift_diff == 2 && board_value_from_shift(board->king, move->origin)) {
+        return true;
+    }
+    return false;
+}
 
 void doMove(t_board *board, t_move *move) {
+    bool isEnpassant = is_enpassant(board, move);
+    bool isCastle = is_castle(board, move);
 
     //generate bitmask for fields
     uint64_t bitOrigin = (uint64_t) 1 << move->origin;
@@ -1162,9 +1324,61 @@ void doMove(t_board *board, t_move *move) {
         board->white &= ~bitTarget;
         board->black |= bitTarget;
     }
+
+    // Handle special moves
+    if (isEnpassant) {
+        Position originPosition = position_from_shift(move->origin);
+        Position targetPosition = position_from_shift(move->target);
+        Position takenPosition = Position(targetPosition.x, originPosition.y);
+
+//        printf("EN-PASSANT: Removed piece at ");
+//        printPosition(takenPosition);
+//        printf("\n");
+
+        int takenPositionShift = shift_from_position(takenPosition);
+        uint64_t takenPositionBitmask = (uint64_t )1 << takenPositionShift;
+
+        // Delete piece at selected position
+        board->white &= ~takenPositionBitmask;
+        board->black &= ~takenPositionBitmask;
+        board->pawn &= ~takenPositionBitmask;
+    }
+    else if (isCastle) {
+        t_move castleRookMove;
+        if (move->origin < move->target) {
+            // Short castle
+            castleRookMove.origin = move->target + 1;
+            castleRookMove.target = move->origin + 1;
+            castleRookMove.color = move->color;
+        } else {
+            // Long castle
+            castleRookMove.origin = move->target - 2;
+            castleRookMove.target = move->origin - 1;
+            castleRookMove.color = move->color;
+        }
+        doMove(board, &castleRookMove);
+    }
+    else if (move->promoted) {
+        uint64_t targetPositionBitmask = (uint64_t )1 << move->target;
+        // Remove pawn
+        board->pawn &= ~targetPositionBitmask;
+
+        // Add "new" piece
+        if (move->promoted_to == 1) {
+            board->queen |= targetPositionBitmask;
+        } else if (move->promoted_to == 2) {
+            board->rook |= targetPositionBitmask;
+        } else if (move->promoted_to == 3) {
+            board->bishop |= targetPositionBitmask;
+        } else if (move->promoted_to == 4) {
+            board->knight |= targetPositionBitmask;
+        }
+    }
 }
 
 void undoMove(t_board *board, t_move *move) {
+    bool isEnpassant = is_enpassant(board, move);
+    bool isCastle = is_castle(board, move);
 
     //generate bitmask for fields
     uint64_t bitOrigin = (uint64_t) 1 << move->origin;
@@ -1217,6 +1431,57 @@ void undoMove(t_board *board, t_move *move) {
     else if (move->taken_figure == 3) board->bishop |= bitTarget;
     else if (move->taken_figure == 4) board->knight |= bitTarget;
     else if (move->taken_figure == 5) board->pawn |= bitTarget;
+
+    if (isEnpassant) {
+        Position originPosition = position_from_shift(move->origin);
+        Position targetPosition = position_from_shift(move->target);
+        Position takenPosition = Position(targetPosition.x, originPosition.y);
+
+        int takenPositionShift = shift_from_position(takenPosition);
+        uint64_t takenPositionBitmask = (uint64_t )1 << takenPositionShift;
+
+        // Replace piece at selected position
+        if (!move->color) {
+            board->black |= takenPositionBitmask;
+        } else {
+            board->white |= takenPositionBitmask;
+        }
+        board->pawn |= takenPositionBitmask;
+    }
+    else if (isCastle) {
+        t_move castleRookMove;
+        if (move->origin < move->target) {
+            // Short castle
+            castleRookMove.origin = move->target + 1;
+            castleRookMove.target = move->origin + 1;
+            castleRookMove.color = move->color;
+        } else {
+            // Long castle
+            castleRookMove.origin = move->target - 2;
+            castleRookMove.target = move->origin - 1;
+            castleRookMove.color = move->color;
+
+            printf("Long castle move: ");
+            printMove(castleRookMove);
+        }
+        undoMove(board, &castleRookMove);
+    }
+    else if (move->promoted) {
+        uint64_t targetPositionBitmask = (uint64_t )1 << move->origin;
+        // Reinsert pawn
+        board->pawn |= targetPositionBitmask;
+
+        // Remove "new" piece
+        if (move->promoted_to == 1) {
+            board->queen &= ~targetPositionBitmask;
+        } else if (move->promoted_to == 2) {
+            board->rook &= ~targetPositionBitmask;
+        } else if (move->promoted_to == 3) {
+            board->bishop &= ~targetPositionBitmask;
+        } else if (move->promoted_to == 4) {
+            board->knight &= ~targetPositionBitmask;
+        }
+    }
 }
 
 void printMove(const t_move move) {
