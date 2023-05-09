@@ -1,10 +1,13 @@
 #include "board.h"
 #include <time.h>
 #include "move.h"
+#include "game.h"
 
 int main (int argc, char *argv[]) {
 
-    int numberOfIterations = 1000;
+    play();
+
+ /*   int numberOfIterations = 1000;
 
     t_board *begin = initializeBoard();
 
@@ -78,7 +81,7 @@ int main (int argc, char *argv[]) {
 
     end_sum = end_sum / numberOfIterations;
 
-    printf("average calculation time for endgame: %Lf\n", end_sum);
+    printf("average calculation time for endgame: %Lf\n", end_sum); */
 
 
 }
