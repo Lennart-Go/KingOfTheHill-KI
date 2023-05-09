@@ -73,7 +73,7 @@ void play() {
 //        }
 
         // Generate next move
-        t_move nextMove = getMove(game->board, game->turn);
+        t_move nextMove = getMove(game, game->turn);
         commitMove(game, &nextMove);
 
         // Print next move and resulting board state
