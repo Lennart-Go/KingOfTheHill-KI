@@ -1,15 +1,13 @@
+#include "board.h"
+#include "util.h"
+
 #ifndef KINGOFTHEHILL_KI_GAME_H
 #define KINGOFTHEHILL_KI_GAME_H
-
-#include "board.h"
-#include "move.h"
-#include "util.h"
 
 typedef struct game {
     t_board *board;
     unsigned turn:1;  // 0 for white, 1 for black
     uint64_t latestMoveTime;
-    List<t_move> moveHistory;
     bool isOver;
 
     unsigned whiteWon:1;

@@ -1,5 +1,6 @@
 #include "util.h"
 #include "board.h"
+#include "game.h"
 
 #ifndef KINGOFTHEHILL_KI_MOVE_H
 #define KINGOFTHEHILL_KI_MOVE_H
@@ -32,7 +33,7 @@ bool is_threatened(t_board *board, Position target, bool color);
 bool is_move_legal(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter, bool checkBetween);
 bool is_move_legal_nocheck(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter, bool checkBetween);
 
-List<t_move> generate_moves(t_board *board, bool color);
+List<t_move> generate_moves(t_game *game, bool color);
 
 void printMove(t_move move);
 
