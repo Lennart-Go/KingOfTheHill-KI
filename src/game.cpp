@@ -120,11 +120,14 @@ void commitMove(t_game *game, t_move *move) {
 
 void play() {
     t_game *game = startGame();
+    setFen(game->board, (char *)"r3k2r/8/8/8/8/8/p1r4r/R3K2R");
+
+    printBoard(game->board);
 
     while (!game->isOver) {
-//        if (game->blackMoveCounter > 50) {
-//            break;
-//        }
+        if (game->blackMoveCounter > 0) {
+            break;
+        }
 
         // Generate next move
         t_move nextMove = getMove(game, game->turn);

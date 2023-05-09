@@ -55,7 +55,7 @@ bool isCheckmate(t_game* game, bool moving_color){
     uint64_t color = moving_color? game->board->black : game->board->white;
     uint64_t King = game->board->king & color;
     Position kingPosition = position_from_shift((King==0) ? 0 : (int)log2((long double) King));
-    printf("Position x:%d y:%d\n",kingPosition.x,kingPosition.y);
+    // printf("Position x:%d y:%d\n",kingPosition.x,kingPosition.y);
     if(is_threatened(game->board, kingPosition, moving_color)){
         List<t_move> possibleMoves = generate_moves(game,moving_color);
         for(int i=0;i<possibleMoves.length();i++){

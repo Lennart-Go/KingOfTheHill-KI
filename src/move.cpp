@@ -196,7 +196,7 @@ bool is_threatened(t_board *board, Position target, bool color) {
     List<Position> kingPositions = board_value_positions(board->king & color_filter);
     if (kingPositions.length() != 1) {
         // Dafuq?
-        return true;  // Abort move generation, because no/many king?  // TODO: Throw error?
+        return false;  // Abort move generation, because no/many king?  // TODO: Throw error?
     } else {
         Position kingPosition = kingPositions.get(0);
 
@@ -1102,7 +1102,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
 
         // "Normal" forward move
         Offset targetOffset = M_PAWN.get(0) + pawnPosition;
-        if (targetOffset.isWithinBounds()) {
+        if (targetOffset.isWithinBounds() && !(((pawnPosition.y == 6 && !color) || (pawnPosition.y == 1 && color)))) {
             // Should not be possible to not be within bounds
             int targetOffsetShift = shift_from_position(targetOffset.toPosition());
             bool isTargetOccupied = board_value_from_shift(color_filter | enemy_color_filter, targetOffsetShift);
@@ -1128,15 +1128,43 @@ List<t_move> generate_moves(t_game *game, bool color) {
         }
 
         // Taking move
-        for (int offsetIndex = 0; offsetIndex < M_PAWN_TAKE.length(); ++offsetIndex) {
-            targetOffset = M_PAWN_TAKE.get(offsetIndex) + pawnPosition;
+        if (!((pawnPosition.y == 6 && !color) || (pawnPosition.y == 1 && color))) {
+            for (int offsetIndex = 0; offsetIndex < M_PAWN_TAKE.length(); ++offsetIndex) {
+                targetOffset = M_PAWN_TAKE.get(offsetIndex) + pawnPosition;
 
-            if (targetOffset.isWithinBounds()) {
-                int targetOffsetShift = shift_from_position(targetOffset.toPosition());
-                bool isTargetOccupiedByEnemy = board_value_from_shift(enemy_color_filter, targetOffsetShift);
+                if (targetOffset.isWithinBounds()) {
+                    int targetOffsetShift = shift_from_position(targetOffset.toPosition());
+                    bool isTargetOccupiedByEnemy = board_value_from_shift(enemy_color_filter, targetOffsetShift);
 
-                if (isTargetOccupiedByEnemy) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    if (isTargetOccupiedByEnemy) {
+                        possibleTargets.add(targetOffset.toPosition());
+                    }
+                }
+            }
+        } else {
+            for (int offsetIndex = 0; offsetIndex < M_PAWN_TAKE.length(); ++offsetIndex) {
+                targetOffset = M_PAWN_TAKE.get(offsetIndex) + pawnPosition;
+
+                if (targetOffset.isWithinBounds()) {
+                    int targetOffsetShift = shift_from_position(targetOffset.toPosition());
+                    bool isTargetOccupiedByEnemy = board_value_from_shift(enemy_color_filter, targetOffsetShift);
+
+                    if (isTargetOccupiedByEnemy) {
+                        t_move possibleMove;
+                        possibleMove.origin = shift_from_position(pawnPosition);
+                        possibleMove.target = targetOffsetShift;
+                        possibleMove.color = color;
+                        possibleMove.promoted = true;
+
+                        if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, false)) {
+                            for (int i = 0; i < 4; ++i) {
+                                // Add one move for each promotable piece
+                                possibleMove.promoted_to = i;
+
+                                moves.add(possibleMove);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1233,6 +1261,8 @@ bool is_castle(t_board *board, t_move *move) {
 }
 
 void doMove(t_board *board, t_move *move) {
+    bool isEnpassant = is_enpassant(board, move);
+    bool isCastle = is_castle(board, move);
 
     //generate bitmask for fields
     uint64_t bitOrigin = (uint64_t) 1 << move->origin;
@@ -1296,20 +1326,24 @@ void doMove(t_board *board, t_move *move) {
     }
 
     // Handle special moves
-    if (is_enpassant(board, move)) {
+    if (isEnpassant) {
         Position originPosition = position_from_shift(move->origin);
         Position targetPosition = position_from_shift(move->target);
         Position takenPosition = Position(targetPosition.x, originPosition.y);
 
+//        printf("EN-PASSANT: Removed piece at ");
+//        printPosition(takenPosition);
+//        printf("\n");
+
         int takenPositionShift = shift_from_position(takenPosition);
-        uint64_t takenPositionBitmask = 1 << takenPositionShift;
+        uint64_t takenPositionBitmask = (uint64_t )1 << takenPositionShift;
 
         // Delete piece at selected position
         board->white &= ~takenPositionBitmask;
         board->black &= ~takenPositionBitmask;
         board->pawn &= ~takenPositionBitmask;
     }
-    else if (is_castle(board, move)) {
+    else if (isCastle) {
         t_move castleRookMove;
         if (move->origin < move->target) {
             // Short castle
@@ -1325,24 +1359,26 @@ void doMove(t_board *board, t_move *move) {
         doMove(board, &castleRookMove);
     }
     else if (move->promoted) {
-        uint64_t targetPositionBitmask = 1 << move->target;
+        uint64_t targetPositionBitmask = (uint64_t )1 << move->target;
         // Remove pawn
         board->pawn &= ~targetPositionBitmask;
 
         // Add "new" piece
         if (move->promoted_to == 1) {
-            board->queen &= targetPositionBitmask;
+            board->queen |= targetPositionBitmask;
         } else if (move->promoted_to == 2) {
-            board->rook &= targetPositionBitmask;
+            board->rook |= targetPositionBitmask;
         } else if (move->promoted_to == 3) {
-            board->bishop &= targetPositionBitmask;
+            board->bishop |= targetPositionBitmask;
         } else if (move->promoted_to == 4) {
-            board->knight &= targetPositionBitmask;
+            board->knight |= targetPositionBitmask;
         }
     }
 }
 
 void undoMove(t_board *board, t_move *move) {
+    bool isEnpassant = is_enpassant(board, move);
+    bool isCastle = is_castle(board, move);
 
     //generate bitmask for fields
     uint64_t bitOrigin = (uint64_t) 1 << move->origin;
@@ -1396,23 +1432,23 @@ void undoMove(t_board *board, t_move *move) {
     else if (move->taken_figure == 4) board->knight |= bitTarget;
     else if (move->taken_figure == 5) board->pawn |= bitTarget;
 
-    if (is_enpassant(board, move)) {
+    if (isEnpassant) {
         Position originPosition = position_from_shift(move->origin);
         Position targetPosition = position_from_shift(move->target);
         Position takenPosition = Position(targetPosition.x, originPosition.y);
 
         int takenPositionShift = shift_from_position(takenPosition);
-        uint64_t takenPositionBitmask = 1 << takenPositionShift;
+        uint64_t takenPositionBitmask = (uint64_t )1 << takenPositionShift;
 
         // Replace piece at selected position
         if (!move->color) {
-            board->black &= ~takenPositionBitmask;
+            board->black |= takenPositionBitmask;
         } else {
-            board->white &= ~takenPositionBitmask;
+            board->white |= takenPositionBitmask;
         }
         board->pawn |= takenPositionBitmask;
     }
-    else if (is_castle(board, move)) {
+    else if (isCastle) {
         t_move castleRookMove;
         if (move->origin < move->target) {
             // Short castle
@@ -1424,13 +1460,16 @@ void undoMove(t_board *board, t_move *move) {
             castleRookMove.origin = move->target - 2;
             castleRookMove.target = move->origin - 1;
             castleRookMove.color = move->color;
+
+            printf("Long castle move: ");
+            printMove(castleRookMove);
         }
         undoMove(board, &castleRookMove);
     }
     else if (move->promoted) {
-        uint64_t targetPositionBitmask = 1 << move->origin;
+        uint64_t targetPositionBitmask = (uint64_t )1 << move->origin;
         // Reinsert pawn
-        board->pawn &= targetPositionBitmask;
+        board->pawn |= targetPositionBitmask;
 
         // Remove "new" piece
         if (move->promoted_to == 1) {

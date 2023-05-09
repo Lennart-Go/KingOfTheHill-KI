@@ -203,3 +203,7 @@ List<Position> board_value_positions(uint64_t board) {
 char columnToLetter(int column) {
     return (char ) ('A' + column);
 }
+
+void printPosition(Position pos) {
+    printf("%c%d", columnToLetter(pos.x), pos.y + 1);
+}
