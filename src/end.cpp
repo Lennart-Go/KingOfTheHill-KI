@@ -61,7 +61,7 @@ bool isCheckmate(t_game* game, bool moving_color){
         for(int i=0;i<possibleMoves.length();i++){
             t_move currentMove = possibleMoves.get(i);
 
-            if(!is_check(game->board, currentMove)){
+            if(!is_move_check(game->board, currentMove)){
                 return false;
             }
         }

@@ -156,6 +156,9 @@ bool Offset::isWithinBounds() const {
 
 Position Offset::toPosition() const {
     // This ignores value constraints on Position objects
+    if (!this->isWithinBounds()) {
+        printf("toPosition out of bounds for values (%d, %d)\n", this->x, this->y);
+    }
 
     return Position { (int) this->x, (int) this->y };
 }
