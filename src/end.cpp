@@ -18,9 +18,8 @@
     return count;
 }*/
 
-std::map<std::string,int> initMoveTracker(){
-    std::map<std::string,int> map;
-    map["0"]=0;
+std::map<std::string,int>* initMoveTracker(){
+    std::map<std::string,int> *map = new std::map<std::string,int>();
     return map;
 }
 
@@ -91,39 +90,43 @@ winner_t checkEnd(t_game* game, bool moved_color) {
      *  t_board *board: Pointer to the board representing the state of the game
      *  bool moved_color: the last moved color with "false" for white and "true" for black
      */
-    std::map<std::string,int> *map = game->positionHistory;
+    std::map<std::string,int> &map = *game->positionHistory;
     char* currentFen = getFen(game->board);
     bool positionRepetionDraw = false;
 
     if(game->positionHistory == NULL){
-        std::map<std::string,int> mapStatic = initMoveTracker();
-        map = & mapStatic;
-        game->positionHistory = map;
-        mapStatic.insert(std::make_pair(currentFen,1));
+        std::map<std::string,int>* mapInit = initMoveTracker();
+        game->positionHistory = mapInit;
+        (*mapInit).insert(std::make_pair(currentFen,1));
     }else{
-        if((*map).find(currentFen) != map->end()){
-            (*map)[currentFen] = (*map)[currentFen]++;
-            if((*map)[currentFen]>4){
+        if(map.find(currentFen) != map.end()){
+            map[currentFen] = map[currentFen]++;
+            if(map[currentFen]>4){
                 positionRepetionDraw = true;
+                delete game->positionHistory;
             }
         }else{
-            (*map).insert(std::make_pair(currentFen,1));
+            map.insert(std::make_pair(currentFen,1));
         }
     }
 
     if(KingOfTheHill(game->board,moved_color)){
+        delete game->positionHistory;
         return moved_color ? BLACK : WHITE;
     }else
 
     if(isCheckmate(game->board, !moved_color)) {
+        delete game->positionHistory;
         return moved_color ? BLACK : WHITE;
     }else
 
     if(isStalemate(game->board,!moved_color)){
+        delete game->positionHistory;
         return DRAW;
     }else
 
     if(positionRepetionDraw){
+        delete game->positionHistory;
         return DRAW;
     }
 
