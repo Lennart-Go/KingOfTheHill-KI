@@ -125,9 +125,9 @@ void play() {
     printBoard(game->board);
 
     while (!game->isOver) {
-        if (game->blackMoveCounter > 0) {
-            break;
-        }
+//        if (game->blackMoveCounter > 0) {
+//            break;
+//        }
 
         // Generate next move
         t_move nextMove = getMove(game, game->turn);

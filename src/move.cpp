@@ -722,6 +722,11 @@ bool is_castle_legal(t_board *board, Position kingPosition, bool color, bool dir
      *  "true" if the casting move is legal
      */
 
+    if (kingPosition.x != 4) {
+        // King is not on E-Column
+        return false;
+    }
+
     int directionModifier = -1 + (direction * 2);
 
     if (is_threatened(board, kingPosition, color)) {
