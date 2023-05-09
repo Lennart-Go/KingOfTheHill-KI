@@ -19,7 +19,7 @@
 }*/
 
 bool positionTracking(t_game* game){
-    /* Function to check if same position occurred for the fifth time
+    /* Function to check if same position occurred for the third time
     * Arguments:
     *  t_game *game: Pointer to the game representing the state of the game
     */
@@ -33,9 +33,11 @@ bool positionTracking(t_game* game){
         (*mapInit).insert(std::make_pair(currentFen,1));
     }else{
         if(map.find(currentFen) != map.end()){
-            map[currentFen] = map[currentFen]++;
-            if(map[currentFen]>4){
+            int n = map[currentFen];
+            map[currentFen] = n+1;
+            if(map[currentFen]>2){
                 positionRepetionDraw = true;
+                game->positionHistory = NULL;
                 delete game->positionHistory;
             }
         }else{
@@ -55,7 +57,6 @@ bool isCheckmate(t_game* game, bool moving_color){
     uint64_t color = moving_color? game->board->black : game->board->white;
     uint64_t King = game->board->king & color;
     Position kingPosition = position_from_shift((King==0) ? 0 : (int)log2((long double) King));
-    printf("Position x:%d y:%d\n",kingPosition.x,kingPosition.y);
     if(is_threatened(game->board, kingPosition, moving_color)){
         List<t_move> possibleMoves = generate_moves(game,moving_color);
         for(int i=0;i<possibleMoves.length();i++){
@@ -130,16 +131,19 @@ winner_t checkEnd(t_game* game, bool moved_color) {
 
     if(KingOfTheHill(game->board,moved_color)){
         delete game->positionHistory;
+        game->positionHistory = NULL;
         return moved_color ? BLACK : WHITE;
     }else
 
     if(isCheckmate(game, !moved_color)) {
         delete game->positionHistory;
+        game->positionHistory = NULL;
         return moved_color ? BLACK : WHITE;
     }else
 
     if(isStalemate(game,!moved_color)){
         delete game->positionHistory;
+        game->positionHistory = NULL;
         return DRAW;
     }else
 
