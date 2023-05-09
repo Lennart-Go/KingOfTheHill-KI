@@ -1,5 +1,6 @@
 #include "board.h"
 #include "move.h"
+#include "game.h"
 
 #ifndef KINGOFTHEHILL_KI_END_H
 #define KINGOFTHEHILL_KI_END_H
@@ -11,10 +12,13 @@ typedef enum {
     DRAW
 } winner_t;
 
-winner_t checkEnd(t_board* board, bool moved_color); //return enumerated type which party won
-bool isCheckmate(t_board* board, bool moving_color);
-bool isStalemate(t_board* board, bool moving_color);
-bool isInsufficientMatingMaterial(t_board* board);
+
+winner_t checkEnd(t_game *game, bool moved_color); //return enumerated type which party won
+bool isCheckmate(t_game* game, bool moving_color);
+bool isStalemate(t_game* game, bool moving_color);
 bool KingOfTheHill(t_board* board, bool moved_color);
+bool positionTracking(t_game* game);
+//bool isInsufficientMatingMaterial(t_board* board);
+
 
 #endif //KINGOFTHEHILL_KI_END_H
