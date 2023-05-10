@@ -46,7 +46,7 @@ void commitMove(t_game *game, t_move *move) {
     game->enpassants = 0;
 
     // Handle double-forward pawn move
-    if (is_double_pawn_move(move)) {
+    if (is_double_pawn_move(game->board, move)) {
         printf("DOUBLE PAWN MOVE!\n");
         // Set according bit if the move was a double-forward pawn move
         game->enpassants |= 1 << position_from_shift(move->origin).x;

@@ -41,7 +41,7 @@ List<t_move> generate_moves(t_game *game, bool color);
 void printMove(t_move move);
 
 bool is_enpassant(t_board *board, t_move *move);
-bool is_double_pawn_move(t_move *move);
+bool is_double_pawn_move(t_board *board, t_move *move);
 bool is_castle(t_board *board, t_move *move);
 
 void doMove(t_board* board, t_move* move);
