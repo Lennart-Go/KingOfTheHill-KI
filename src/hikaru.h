@@ -7,5 +7,8 @@
 
 t_move getMove(t_game *game, bool color);
 t_move getMoveRandom(t_game *game, bool color);
+int min(int depth, int alpha, int beta, t_game* game);
+int max(int depth, int alpha, int beta, t_game* game);
+t_move alphaBetaHead(t_game* game);
 
 #endif //KINGOFTHEHILL_KI_HIKARU_H
