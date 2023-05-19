@@ -18,6 +18,7 @@ bool isCheckmate(t_game* game, bool moving_color);
 bool isStalemate(t_game* game, bool moving_color);
 bool KingOfTheHill(t_board* board, bool moved_color);
 bool positionTracking(t_game* game);
+int countFigure(uint64_t singleFigure);
 //bool isInsufficientMatingMaterial(t_board* board);
 
 

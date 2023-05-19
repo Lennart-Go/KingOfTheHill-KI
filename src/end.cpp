@@ -8,7 +8,7 @@
 // TODO: Check for king of the hill
 // TODO: Check for draw
 
-/*int countFigure(uint64_t singleBoard){
+int countFigure(uint64_t singleBoard){
     int count=0;
     for(int i=0;i<=64;i++){
         if(singleBoard & (1<<i)){
@@ -16,7 +16,7 @@
         }
     }
     return count;
-}*/
+}
 
 bool positionTracking(t_game* game){
     /* Function to check if same position occurred for the third time

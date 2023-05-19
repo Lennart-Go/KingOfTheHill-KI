@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <ctime>
 #include "hikaru.h"
+#include "end.h"
+
 
 
 t_move getMoveRandom(t_game *game, bool color) {
@@ -51,7 +53,16 @@ t_move alphaBetaHead(t_game* game) {
 }
 
 int value(t_game* game) {
-    return 1;
+    //simple attempt to evaluate positions by taking a look at the available material
+    float score = 0;
+    uint64_t colorBoard = game->turn ? game->board->black : game->board->white;
+    score += countFigure(game->board->pawn&colorBoard)*PAWN_VALUE;
+    score += countFigure(game->board->rook&colorBoard)*ROOK_VALUE;
+    score += countFigure(game->board->bishop&colorBoard)*BISHOP_VALUE;
+    score += countFigure(game->board->knight&colorBoard)*KNIGHT_VALUE;
+    score += countFigure(game->board->queen&colorBoard)*QUEEN_VALUE;
+
+    return score;
 }
 
 int max(int depth, int alpha, int beta, t_game* game) {
