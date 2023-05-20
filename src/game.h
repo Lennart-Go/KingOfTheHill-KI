@@ -26,7 +26,7 @@ typedef struct game {
     uint32_t blackMoveCounter;
     uint32_t blackMoveTime;  // Cumulative move time of black team in ms
 
-    uint8_t enpassants;
+    unsigned enpassants:4;
 } t_game;
 
 t_game *startGame();
