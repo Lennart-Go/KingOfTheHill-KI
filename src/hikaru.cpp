@@ -17,7 +17,7 @@ t_move getMoveRandom(t_game *game, bool color) {
         return failureMove;
     }
 
-    //printf("Found %zu moves!\n", possibleMoves.length());
+//    printf("Found %zu moves!\n", possibleMoves.length());
 //    for (int i = 0; i < possibleMoves.length(); ++i) {
 //        printMove(possibleMoves.get(i));
 //    }
@@ -32,78 +32,181 @@ t_move getMoveRandom(t_game *game, bool color) {
     return possibleMoves.get(randomMoveIndex);
 }
 
-int primitive_evaluation_function(t_move *move) {
-    return 1;
-}
 
+uint32_t evaluate(const t_game* game) {
+    // Simple approach to evaluating positions by taking a look at the available material
+    int score = 0;
+    uint64_t whiteColorFilter = game->board->white;
+    uint64_t blackColorFilter = game->board->black;
 
-t_move getMove(t_game *game, bool color) {
-    t_move best_move = getMoveRandom(game, color);
-    primitive_evaluation_function(&best_move);
+    score += countFigure(game->board->queen & whiteColorFilter) * QUEEN_VALUE;
+    score += countFigure(game->board->rook & whiteColorFilter) * ROOK_VALUE;
+    score += countFigure(game->board->bishop & whiteColorFilter) * BISHOP_VALUE;
+    score += countFigure(game->board->knight & whiteColorFilter) * KNIGHT_VALUE;
+    score += countFigure(game->board->pawn & whiteColorFilter) * PAWN_VALUE;
 
-    return best_move;
-}
-
-t_move alphaBetaHead(t_game* game) {
-    int depth = 3;
-    if (game->turn) {
-        max(depth, INT32_MIN, INT32_MAX, game);
-    }
-
-}
-
-int value(t_game* game) {
-    //simple attempt to evaluate positions by taking a look at the available material
-    float score = 0;
-    uint64_t colorBoard = game->turn ? game->board->black : game->board->white;
-    score += countFigure(game->board->pawn&colorBoard)*PAWN_VALUE;
-    score += countFigure(game->board->rook&colorBoard)*ROOK_VALUE;
-    score += countFigure(game->board->bishop&colorBoard)*BISHOP_VALUE;
-    score += countFigure(game->board->knight&colorBoard)*KNIGHT_VALUE;
-    score += countFigure(game->board->queen&colorBoard)*QUEEN_VALUE;
+    score -= countFigure(game->board->queen & blackColorFilter) * QUEEN_VALUE;
+    score -= countFigure(game->board->rook & blackColorFilter) * ROOK_VALUE;
+    score -= countFigure(game->board->bishop & blackColorFilter) * BISHOP_VALUE;
+    score -= countFigure(game->board->knight & blackColorFilter) * KNIGHT_VALUE;
+    score -= countFigure(game->board->pawn & blackColorFilter) * PAWN_VALUE;
 
     return score;
 }
 
-int max(int depth, int alpha, int beta, t_game* game) {
-
-    int maxScore = INT32_MIN;
-    List<t_move> moves = generate_moves(game, false);
-    if ((depth == 0) | game->isOver | moves.size() == 0) {
-        return value(game);
+int alphaBeta(int depth, int alpha, int beta, t_game *game) {
+    if (depth == 0 || game->isOver) {
+        return evaluate(game);
     }
-    t_move bestMove = moves.get(0);
-    while (moves.length() != 0) {
-        t_move currMove = moves.pop();
-        doMove(game->board, &currMove);
-        int score = min(depth - 1, alpha, beta, game);
-        undoMove(game->board, &currMove);
-        if (score > maxScore) {
-            maxScore = score;
-            bestMove = currMove;
+
+    int score, bestScore;
+    t_move currentMove;
+    List<t_move> moves = generate_moves(game, game->turn);
+
+    for (int _ = 0; _ < depth; ++_) {
+        printf("\t");
+    }
+    printf("Found %zu moves\n", moves.length());
+
+    if (!game->turn) {
+        bestScore = INT32_MIN;
+
+        // White's turn -> Maximize score
+        for (int moveIndex = 0; moveIndex < moves.length(); ++moveIndex) {
+            currentMove = moves.pop();
+
+            commitMove(game, &currentMove);
+            score = alphaBeta(depth-1, alpha, beta, game);
+            revertMove(game, &currentMove);
+
+            for (int _ = 0; _ < depth; ++_) {
+                printf("\t");
+            }
+            printMove(currentMove);
+            printf(" returned value %d (current/new max is %d/", score, bestScore);
+
+            bestScore = max(bestScore, score);
+            alpha = max(alpha, score);
+
+            printf("%d)\n", bestScore);
+
+            if (beta <= alpha) {
+                // "Opposing" team would always choose one of the already better moves
+                break;
+            }
+        }
+    } else {
+        bestScore = INT32_MAX;
+
+        // Black's turn -> Minimize score
+        for (int moveIndex = 0; moveIndex < moves.length(); ++moveIndex) {
+            currentMove = moves.pop();
+
+            commitMove(game, &currentMove);
+            score = alphaBeta(depth-1, alpha, beta, game);
+            revertMove(game, &currentMove);
+
+            for (int _ = 0; _ < depth; ++_) {
+                printf("\t");
+            }
+            printMove(currentMove);
+            printf(" returned value %d (current/new max is %d/", score, bestScore);
+
+            bestScore = min(bestScore, score);
+            beta = min(beta, score);
+
+            printf("%d)\n", bestScore);
+
+            if (beta <= alpha) {
+                // "Opposing" team would always choose one of the already better moves
+                break;
+            }
         }
     }
-    return maxScore;
+
+    return bestScore;
 }
 
-int min(int depth, int alpha, int beta, t_game* game) {
+t_move alphaBetaHead(t_game* game, int max_depth) {
+    int depth = max_depth;  // NOTE: Always use one less than actually wanted
 
-    int minScore = INT32_MAX;
-    List<t_move> moves = generate_moves(game, false);
-    if ((depth == 0) | game->isOver | moves.size() == 0) {
-        return value(game);
+    int alpha = INT32_MIN;
+    int beta = INT32_MAX;
+
+    int score, bestScore;
+    t_move currentMove, bestMove;
+    List<t_move> moves = generate_moves(game, game->turn);
+
+    for (int _ = 0; _ < depth; ++_) {
+        printf("\t");
     }
-    t_move bestMove = moves.get(0);
-    while (moves.length() != 0) {
-        t_move currMove = moves.pop();
-        doMove(game->board, &currMove);
-        int score = max(depth - 1, alpha, beta, game);
-        undoMove(game->board, &currMove);
-        if (score > minScore) {
-            minScore = score;
-            bestMove = currMove;
+    printf("Found %zu moves\n", moves.length());
+
+    // Set default best move as abort move recognized in play() function
+    bestMove.origin = 0;
+    bestMove.target = 0;
+
+    if (!game->turn) {
+        bestScore = INT32_MIN;
+
+        // White's turn -> Maximize score
+        for (int moveIndex = 0; moveIndex < moves.length(); ++moveIndex) {
+            currentMove = moves.pop();
+
+            commitMove(game, &currentMove);
+            score = alphaBeta(depth-1, alpha, beta, game);
+            revertMove(game, &currentMove);
+
+            for (int _ = 0; _ < depth; ++_) {
+                printf("\t");
+            }
+            printMove(currentMove);
+            printf(" returned value %d (current/new max is %d/", score, bestScore);
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = currentMove;
+            }
+
+            printf("%d)\n", bestScore);
+        }
+    } else {
+        bestScore = INT32_MAX;
+
+        // Black's turn -> Minimize score
+        for (int moveIndex = 0; moveIndex < moves.size(); ++moveIndex) {
+            currentMove = moves.pop();
+
+            commitMove(game, &currentMove);
+            score = alphaBeta(depth-1, alpha, beta, game);
+            revertMove(game, &currentMove);
+
+            for (int _ = 0; _ < depth; ++_) {
+                printf("\t");
+            }
+            printMove(currentMove);
+            printf(" returned value %d (current/new min is %d/", score, bestScore);
+
+            if (score < bestScore) {
+                bestScore = score;
+                bestMove = currentMove;
+            }
+
+            printf("%d)\n", bestScore);
         }
     }
-    return minScore;
+
+    return bestMove;
+}
+
+
+t_move getMove(t_game *game, bool color) {
+    // t_move bestMove = getMoveRandom(game, color);
+    t_move bestMove = alphaBetaHead(game, 2);
+    printf("SELECTED ");
+    printMove(bestMove);
+    printf("\n");
+
+    return bestMove;
 }
 

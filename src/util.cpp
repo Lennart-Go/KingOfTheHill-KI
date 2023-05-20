@@ -207,3 +207,17 @@ char columnToLetter(int column) {
 void printPosition(Position pos) {
     printf("%c%d", columnToLetter(pos.x), pos.y + 1);
 }
+
+int max(int num1, int num2) {
+    if (num1 > num2) {
+        return num1;
+    }
+    return num2;
+}
+
+int min(int num1, int num2) {
+    if (num1 < num2) {
+        return num1;
+    }
+    return num2;
+}

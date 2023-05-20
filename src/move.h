@@ -24,8 +24,8 @@ typedef struct move {
     unsigned castled_short:1 = 0;
     unsigned castled_long:1 = 0;
     unsigned enpassants:4;
-    unsigned disable_short_castle:1;
-    unsigned disable_long_castle:1;
+    unsigned disable_short_castle:1 = 0;
+    unsigned disable_long_castle:1 = 0;
 } t_move;
 
 #define O_MOVE_ORIGIN 0
@@ -50,5 +50,8 @@ bool is_castle(t_board *board, t_move *move);
 
 void doMove(t_board* board, t_move* move);
 void undoMove(t_board* board, t_move* move);
+
+void commitMove(t_game *game, t_move *move);
+void revertMove(t_game *game, t_move *move);
 
 #endif //KINGOFTHEHILL_KI_MOVE_H

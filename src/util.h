@@ -171,4 +171,7 @@ List<Position> board_value_positions(uint64_t board);
 char columnToLetter(int column);
 void printPosition(Position pos);
 
+int max(int num1, int num2);
+int min(int num1, int num2);
+
 #endif
