@@ -21,6 +21,11 @@ typedef struct move {
     unsigned color:1;
     unsigned promoted:1 = 0;
     unsigned promoted_to:2;
+    unsigned castled_short:1 = 0;
+    unsigned castled_long:1 = 0;
+    unsigned enpassants:4;
+    unsigned disable_short_castle:1;
+    unsigned disable_long_castle:1;
 } t_move;
 
 #define O_MOVE_ORIGIN 0
