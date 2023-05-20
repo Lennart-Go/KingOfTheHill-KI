@@ -803,6 +803,8 @@ List<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.origin = shift_from_position(kingPosition);
             possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
+            possibleMove.disable_short_castle = true;
+            possibleMove.disable_long_castle = true;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, false)) {
                 moves.add(possibleMove);
@@ -815,6 +817,8 @@ List<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.origin = shift_from_position(kingPosition);
             possibleMove.target = shift_from_position(kingPosition + Position(2, 0));
             possibleMove.color = color;
+            possibleMove.castled_short = true;
+            possibleMove.disable_long_castle = true;
 
             if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
                 moves.add(possibleMove);
@@ -825,6 +829,8 @@ List<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.origin = shift_from_position(kingPosition);
             possibleMove.target = shift_from_position(kingPosition - Position(2, 0));
             possibleMove.color = color;
+            possibleMove.castled_long = true;
+            possibleMove.disable_short_castle = true;
 
             if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
                 moves.add(possibleMove);
@@ -994,6 +1000,8 @@ List<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.origin = shift_from_position(rookPosition);
             possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
+            possibleMove.disable_short_castle = rookPosition.x == 7;
+            possibleMove.disable_long_castle = rookPosition.x == 0;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
                 moves.add(possibleMove);
@@ -1172,7 +1180,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
         // En-passant
         if (game->enpassants != 0 && ((pawnPosition.y == 4 && !color) || (pawnPosition.y == 3 && color))) {
             // Only possible on the middle row of the opposing side
-            int opposingPawnX = (int ) log2(game->enpassants);
+            int opposingPawnX = (int ) game->enpassants - 1;
 
             if (pawnPosition.x == opposingPawnX - 1 || pawnPosition.x == opposingPawnX + 1) {
                 Position targetPosition = Position(opposingPawnX, (!color * 5) + (color * 2));
