@@ -6,9 +6,9 @@
 #define KINGOFTHEHILL_KI_HIKARU_H
 
 #define QUEEN_VALUE 9
-#define ROOK_VALUE 3
+#define ROOK_VALUE 5
 #define BISHOP_VALUE 3
-#define KNIGHT_VALUE 5
+#define KNIGHT_VALUE 3
 #define PAWN_VALUE 1
 
 

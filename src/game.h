@@ -30,6 +30,6 @@ typedef struct game {
 } t_game;
 
 t_game *startGame();
-void play();
+void play(int maxRounds);
 
 #endif //KINGOFTHEHILL_KI_GAME_H

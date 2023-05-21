@@ -4,14 +4,10 @@
 #include <map>
 
 
-// TODO: Check for checkmate
-// TODO: Check for king of the hill
-// TODO: Check for draw
-
 int countFigure(uint64_t singleBoard) {
     int count = 0;
-    for (int i = 0; i <= 64; i++) {
-        if (singleBoard & ((uint64_t )1 << i)) {
+    for (int i = 0; i < 64; i++) {
+        if (singleBoard & ((uint64_t) 1 << i)) {
             count++;
         }
     }
@@ -37,8 +33,6 @@ bool positionTracking(t_game *game) {
             map[currentFen] = n + 1;
             if (map[currentFen] > 2) {
                 positionRepetitionDraw = true;
-                game->positionHistory = nullptr;
-                delete game->positionHistory;
             }
         } else {
             map.insert(std::make_pair(currentFen, 1));
@@ -87,7 +81,7 @@ bool isCheckmate(t_game *game, bool moving_color) {
 }
 
 bool isStalemate(t_game *game, bool moving_color) {
-    /* Function to check whether the party whichs turn is now can move. If not the game is stalemate-> draw
+    /* Function to check whether the party whose turn is now can move. If not the game is stalemate-> draw
     * Arguments:
     *  t_board *board: Pointer to the board representing the state of the game
     *  bool moving_color: the next moving color with "false" for white and "true" for black
@@ -98,17 +92,17 @@ bool isStalemate(t_game *game, bool moving_color) {
     } else {
         return false;
     }
-};
+}
 
 /*bool isInsufficientMatingMaterial(t_board* board){
-    //lone king or king with two ore less knights
+    // lone king or king with two or fewer knights
     if((board->white&(board->knight|board->king)) > 0 && (board->white&(board->queen|board->rook|board->bishop|board->pawn))==0){
         return true;
     }
     if((board->black&(board->knight|board->king)) > 0 && (board->black&(board->queen|board->rook|board->bishop|board->pawn))==0){
         return true;
     }
-    //king and one bishop
+    // king and one bishop
     if((board->king&board->white && board->white&board->bishop) >0 && (countFigure(board->bishop&board->white))<2 && (board->white&(board->queen|board->rook|board->bishop|board->pawn))==0){
         return true;
     }
@@ -120,7 +114,7 @@ bool isStalemate(t_game *game, bool moving_color) {
 };*/
 
 bool KingOfTheHill(t_board *board, bool moved_color) {
-    /* Function to check whether King of the Hill condition is fullfilled
+    /* Function to check whether King of the Hill condition is fulfilled
      * Arguments:
      *  t_board *board: Pointer to the board representing the state of the game
      *  bool moved_color: the last moved color with "false" for white and "true" for black
@@ -133,11 +127,11 @@ bool KingOfTheHill(t_board *board, bool moved_color) {
     } else {
         return false;
     }
-};
+}
 
 winner_t checkEnd(t_game *game, bool moved_color) {
-    /* Function to check wether one of the game ending conditions is fullfilled and Returns the winner or DRAW. Given is the last moved color
-     * tho check if the last action finsished the game.
+    /* Function to check whether one of the game ending conditions is fulfilled and Returns the winner or DRAW. Given is the last moved color
+     * tho check if the last action finished the game.
      * Arguments:
      *  t_game *game: Pointer to the game representing the state of the game
      *  bool moved_color: the last moved color with "false" for white and "true" for black
@@ -145,16 +139,10 @@ winner_t checkEnd(t_game *game, bool moved_color) {
 
 
     if (KingOfTheHill(game->board, moved_color)) {
-        delete game->positionHistory;
-        game->positionHistory = NULL;
         return moved_color ? BLACK : WHITE;
     } else if (isCheckmate(game, !moved_color)) {
-        delete game->positionHistory;
-        game->positionHistory = NULL;
         return moved_color ? BLACK : WHITE;
     } else if (isStalemate(game, !moved_color)) {
-        delete game->positionHistory;
-        game->positionHistory = NULL;
         return DRAW;
     } else if (positionTracking(game)) {
         return DRAW;

@@ -40,14 +40,18 @@ int time_limit() {
     return 2 * 60 * 60 / 40;
 }
 
-void play() {
+void play(int maxRounds) {
+    if (maxRounds < 0) {
+        maxRounds = INT32_MAX;
+    }
+
     t_game *game = startGame();
     // setFen(game->board, (char *)"r3k2r/8/8/8/8/8/p1r4r/R3K2R");
 
     printBoard(game->board);
     // sleep(4);
 
-    while (!game->isOver) {
+    while (!game->isOver && (game->blackMoveCounter + 1) <= maxRounds) {
         /*  if (game->blackMoveCounter > 0) {
               break;
           } */
