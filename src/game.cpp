@@ -35,6 +35,7 @@ t_game *startGame() {
     return game;
 }
 
+
 // 2 h = 2 * 60 * 60s / 40 moves
 int time_limit() {
     return 2 * 60 * 60 / 40;

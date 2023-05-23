@@ -721,6 +721,11 @@ bool is_castle_legal(t_board *board, Position kingPosition, bool color, bool dir
      *  "true" if the casting move is legal
      */
 
+    if (kingPosition.x != 4) {
+        // King is not on E-Column
+        return false;
+    }
+
     int directionModifier = -1 + (direction * 2);
 
     if (is_threatened(board, kingPosition, color)) {
@@ -1255,7 +1260,11 @@ bool is_enpassant(t_board *board, t_move *move) {
     return false;
 }
 
-bool is_double_pawn_move(t_move *move) {
+bool is_double_pawn_move(t_board *board, t_move *move) {
+    if (!board_value_from_shift(board->pawn, move->origin)) {
+        return false;
+    }
+
     if (abs((int )(move->target) - (int )(move->origin)) == 16) {
         return true;
     }
@@ -1296,6 +1305,9 @@ void doMove(t_board *board, t_move *move) {
     board->white &= ~bitTarget;
     board->black &= ~bitTarget;
 
+    // TODO: Idea: Instead of using if condition for each piece, calculate dynamically?
+    // TODO:        board->piece |= board_value_from_shift(board->piece, move->origin) * bitTarget;
+    // TODO:        board->piece &= board_value_from_shift(board->piece, move->origin) * ~bitOrigin;
     //get originfigure and move it
     if ((board->king & bitOrigin) != 0) {
         board->king &= ~bitOrigin;
@@ -1374,13 +1386,13 @@ void doMove(t_board *board, t_move *move) {
         board->pawn &= ~targetPositionBitmask;
 
         // Add "new" piece
-        if (move->promoted_to == 1) {
+        if (move->promoted_to == 0) {
             board->queen |= targetPositionBitmask;
-        } else if (move->promoted_to == 2) {
+        } else if (move->promoted_to == 1) {
             board->rook |= targetPositionBitmask;
-        } else if (move->promoted_to == 3) {
+        } else if (move->promoted_to == 2) {
             board->bishop |= targetPositionBitmask;
-        } else if (move->promoted_to == 4) {
+        } else if (move->promoted_to == 3) {
             board->knight |= targetPositionBitmask;
         }
     }
@@ -1482,13 +1494,13 @@ void undoMove(t_board *board, t_move *move) {
         board->pawn |= targetPositionBitmask;
 
         // Remove "new" piece
-        if (move->promoted_to == 1) {
+        if (move->promoted_to == 0) {
             board->queen &= ~targetPositionBitmask;
-        } else if (move->promoted_to == 2) {
+        } else if (move->promoted_to == 1) {
             board->rook &= ~targetPositionBitmask;
-        } else if (move->promoted_to == 3) {
+        } else if (move->promoted_to == 2) {
             board->bishop &= ~targetPositionBitmask;
-        } else if (move->promoted_to == 4) {
+        } else if (move->promoted_to == 3) {
             board->knight &= ~targetPositionBitmask;
         }
     }
