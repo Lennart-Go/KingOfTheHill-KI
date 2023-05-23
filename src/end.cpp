@@ -38,6 +38,8 @@ bool positionTracking(t_game *game) {
             map.insert(std::make_pair(currentFen, 1));
         }
     }
+
+    free(currentFen);
     return positionRepetitionDraw;
 }
 
@@ -54,6 +56,8 @@ void positionTrackingUndo(t_game *game) {
             }
         }
     }
+
+    free(currentFen);
 }
 
 
@@ -67,10 +71,8 @@ bool isCheckmate(t_game *game, bool moving_color) {
     uint64_t King = game->board->king & color;
     Position kingPosition = position_from_shift((King == 0) ? 0 : (int) log2((long double) King));
     if (is_threatened(game->board, kingPosition, moving_color)) {
-        List<t_move> possibleMoves = generate_moves(game, moving_color);
-        for (int i = 0; i < possibleMoves.length(); i++) {
-            t_move currentMove = possibleMoves.get(i);
-
+        std::vector<t_move> possibleMoves = generate_moves(game, moving_color);
+        for (auto currentMove : possibleMoves) {
             if (!is_move_check(game->board, currentMove)) {
                 return false;
             }
@@ -86,8 +88,8 @@ bool isStalemate(t_game *game, bool moving_color) {
     *  t_board *board: Pointer to the board representing the state of the game
     *  bool moving_color: the next moving color with "false" for white and "true" for black
     */
-    List<t_move> possibleMoves = generate_moves(game, moving_color);
-    if (possibleMoves.length() < 1) {
+    std::vector<t_move> possibleMoves = generate_moves(game, moving_color);
+    if (possibleMoves.size() < 1) {
         return true;
     } else {
         return false;

@@ -13,6 +13,7 @@
 
 
 t_move getMove(t_game *game, bool color);
-t_move alphaBetaHead(t_game* game, int max_depth);
+std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth);
+float evaluate(const t_game *game);
 
 #endif //KINGOFTHEHILL_KI_HIKARU_H

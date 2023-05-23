@@ -17,13 +17,13 @@
 typedef struct move {
     unsigned origin:6;
     unsigned target:6;
-    unsigned taken_figure:3;  // 0 -> Non taken, 1 -> Queen, 2 -> Rook, 3 -> Bishop, 4 -> Knight, 5 -> Pawn (?)
+    unsigned taken_figure:3 = 0;  // 0 -> Non taken, 1 -> Queen, 2 -> Rook, 3 -> Bishop, 4 -> Knight, 5 -> Pawn (?)
     unsigned color:1;
     unsigned promoted:1 = 0;
-    unsigned promoted_to:2;
+    unsigned promoted_to:2 = 0;
     unsigned castled_short:1 = 0;
     unsigned castled_long:1 = 0;
-    unsigned enpassants:4;
+    unsigned enpassants:4 = 0;
     unsigned disable_short_castle:1 = 0;
     unsigned disable_long_castle:1 = 0;
 } t_move;
@@ -41,7 +41,7 @@ bool is_move_legal(t_board *board, t_move move, uint64_t color_filter, uint64_t 
 bool is_move_legal_nocheck(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter, bool checkBetween);
 bool is_castle_legal(t_board *board, Position kingPosition, bool color, bool direction);
 
-List<t_move> generate_moves(t_game *game, bool color);
+std::vector<t_move> generate_moves(t_game *game, bool color);
 
 void printMove(t_move move);
 

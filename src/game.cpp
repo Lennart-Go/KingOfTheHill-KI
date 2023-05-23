@@ -67,7 +67,7 @@ void play(int maxRounds) {
         printf("Next move: ");
         printMove(nextMove);
 
-        printf("\nCurrent board state (Round: %d, ", (game->blackMoveCounter + 1));
+        printf("\nCurrent board state (Score: %.4f, Round: %d, ", evaluate(game), game->blackMoveCounter + 1);
 
         if (game->turn == 0) {
             printf("Turn: White)\n");
@@ -81,9 +81,9 @@ void play(int maxRounds) {
         // Check and announce checks
         Position kingPosition;
         if (!game->turn) {
-            kingPosition = board_value_positions(game->board->white & game->board->king).get(0);
+            kingPosition = board_value_positions(game->board->white & game->board->king).at(0);
         } else {
-            kingPosition = board_value_positions(game->board->black & game->board->king).get(0);
+            kingPosition = board_value_positions(game->board->black & game->board->king).at(0);
         }
 
         if (is_threatened(game->board, kingPosition, game->turn)) {
@@ -97,4 +97,8 @@ void play(int maxRounds) {
     printf("Black won: %d\n", game->blackWon);
     printf("Total rounds: %d\n", game->blackMoveCounter + 1);
     printf("Turn: %d\n", game->turn);
+
+    // Free memory
+    delete game->positionHistory;
+    free(game);
 }

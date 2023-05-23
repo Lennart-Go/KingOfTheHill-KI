@@ -8,7 +8,7 @@
 // Define possible move offsets for all pieces with non-linear or conditional moves
 
 // King
-const Offset MO_KING[]{
+const std::vector<Offset> M_KING = {
         Offset{0, 1},  // Up
         Offset{1, 1},  // Up & Right
         Offset{1, 0},  // Right
@@ -18,20 +18,17 @@ const Offset MO_KING[]{
         Offset{-1, 0},  // Left
         Offset{-1, 1},  // Up & Left
 };
-const List<Offset> M_KING{(Offset *) &MO_KING, 8};
 
-const Offset MO_KING_CASTLE_SHORT[]{
+const std::vector<Offset> M_KING_CASTLE_SHORT = {
         Offset{2, 0}  // Short castle to the right
 };
-const List<Offset> M_KING_CASTLE_SHORT = {(Offset *) &MO_KING_CASTLE_SHORT, 1};
 
-const Offset MO_KING_CASTLE_LONG[]{
+const std::vector<Offset> M_KING_CASTLE_LONG = {
         Offset{-2, 0}
 };
-const List<Offset> M_KING_CASTLE_LONG = {(Offset *) &MO_KING_CASTLE_LONG, 1};
 
 // Knight
-const Offset MO_KNIGHT[]{
+const std::vector<Offset> M_KNIGHT = {
         Offset{1, 2},  // Up & Right
         Offset{2, 1},  // Right & Up
         Offset{2, -1},  // Right & Down
@@ -41,41 +38,34 @@ const Offset MO_KNIGHT[]{
         Offset{-2, 1},  // Left & Up
         Offset{-1, 2},  // Up & Left
 };
-const List<Offset> M_KNIGHT = {(Offset *) &MO_KNIGHT, 8};
 
 // Pawns
-const Offset MO_PAWN_WHITE[]{
+const std::vector<Offset> M_PAWN_WHITE = {
         Offset{0, 1}
 };
-const List<Offset> M_PAWN_WHITE = {(Offset *) &MO_PAWN_WHITE, 1};
 
-const Offset MO_PAWN_BLACK[]{
+const std::vector<Offset> M_PAWN_BLACK = {
         Offset{0, -1}
 };
-const List<Offset> M_PAWN_BLACK = {(Offset *) &MO_PAWN_BLACK, 1};
 
-const Offset MO_PAWN_WHITE_TAKE[]{
+const std::vector<Offset> M_PAWN_WHITE_TAKE = {
         Offset{1, 1},  // Take diagonal right
         Offset{-1, 1},  // Take diagonal left
 };
-const List<Offset> M_PAWN_WHITE_TAKE = {(Offset *) &MO_PAWN_WHITE_TAKE, 2};
 
-const Offset MO_PAWN_WHITE_DOUBLE[]{
+const std::vector<Offset> M_PAWN_WHITE_DOUBLE = {
         Offset{0, 2}
 };
-const List<Offset> M_PAWN_WHITE_DOUBLE = {(Offset *) &MO_PAWN_WHITE_DOUBLE, 1};
 
-const Offset MO_PAWN_BLACK_TAKE[]{
+const std::vector<Offset> M_PAWN_BLACK_TAKE = {
         Offset{1, -1},  // Take diagonal right
         Offset{-1, -1},  // Take diagonal left
 };
-const List<Offset> M_PAWN_BLACK_TAKE = {(Offset *) &MO_PAWN_BLACK_TAKE, 2};
 
-const Offset MO_PAWN_BLACK_DOUBLE[]{
+const std::vector<Offset> M_PAWN_BLACK_DOUBLE = {
         Offset{0, -2}
 };
 
-const List<Offset> M_PAWN_BLACK_DOUBLE = {(Offset *) &MO_PAWN_BLACK_DOUBLE, 1};
 
 bool empty_between(t_board *board, t_move move) {
     /*
@@ -177,8 +167,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
      */
 
     uint64_t color_filter, enemy_color_filter;
-    List<Offset> M_PAWN, M_PAWN_DOUBLE, M_PAWN_TAKE;
-    
+    std::vector<Offset> M_PAWN, M_PAWN_DOUBLE, M_PAWN_TAKE;
+
     if (color) {
         color_filter = board->white;
         enemy_color_filter = board->black;
@@ -194,14 +184,14 @@ bool is_threatened(t_board *board, Position target, bool color) {
     // Check for threatening move for all pieces
 
     // King
-    List<Position> kingPositions = board_value_positions(board->king & color_filter);
-    if (kingPositions.length() != 1) {
+    std::vector<Position> kingPositions = board_value_positions(board->king & color_filter);
+    if (kingPositions.size() != 1) {
         // Dafuq?
     } else {
-        Position kingPosition = kingPositions.get(0);
+        Position kingPosition = kingPositions.at(0);
 
-        for (int offsetIndex = 0; offsetIndex < M_KING.length(); ++offsetIndex) {
-            Offset targetOffset = M_KING.get(offsetIndex) + kingPosition;
+        for (auto offsetIndex: M_KING) {
+            Offset targetOffset = offsetIndex + kingPosition;
 
             if (targetOffset.isWithinBounds() && (targetOffset == target)) {
                 Position moveTarget = targetOffset.toPosition();
@@ -219,10 +209,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
     }
 
     // Queen
-    List<Position> queenPositions = board_value_positions(board->queen & color_filter);
-    for (int queenPositionIndex = 0; queenPositionIndex < queenPositions.length(); ++queenPositionIndex) {
-        Position queenPosition = queenPositions.get(queenPositionIndex);
-
+    std::vector<Position> queenPositions = board_value_positions(board->queen & color_filter);
+    for (auto queenPosition : queenPositions) {
         bool a_0 = true;
         bool a_45 = true;
         bool a_90 = true;
@@ -397,10 +385,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
     }
 
     // Rook
-    List<Position> rookPositions = board_value_positions(board->rook & color_filter);
-    for (int rookPositionIndex = 0; rookPositionIndex < rookPositions.length(); ++rookPositionIndex) {
-        Position rookPosition = rookPositions.get(rookPositionIndex);
-
+    std::vector<Position> rookPositions = board_value_positions(board->rook & color_filter);
+    for (auto rookPosition : rookPositions) {
         bool a_0 = true;
         bool a_90 = true;
         bool a_180 = true;
@@ -491,10 +477,8 @@ bool is_threatened(t_board *board, Position target, bool color) {
     }
 
     // Bishop
-    List<Position> bishopPositions = board_value_positions(board->bishop & color_filter);
-    for (int bishopPositionIndex = 0; bishopPositionIndex < bishopPositions.length(); ++bishopPositionIndex) {
-        Position bishopPosition = bishopPositions.get(bishopPositionIndex);
-
+    std::vector<Position> bishopPositions = board_value_positions(board->bishop & color_filter);
+    for (auto bishopPosition : bishopPositions) {
         bool a_45 = true;
         bool a_135 = true;
         bool a_225 = true;
@@ -585,12 +569,10 @@ bool is_threatened(t_board *board, Position target, bool color) {
     }
 
     // Knight
-    List<Position> knightPositions = board_value_positions(board->knight & color_filter);
-    for (int knightPositionIndex = 0; knightPositionIndex < knightPositions.length(); ++knightPositionIndex) {
-        Position knightPosition = knightPositions.get(knightPositionIndex);
-
-        for (int offsetIndex = 0; offsetIndex < M_KNIGHT.length(); ++offsetIndex) {
-            Offset targetOffset = M_KNIGHT.get(offsetIndex) + knightPosition;
+    std::vector<Position> knightPositions = board_value_positions(board->knight & color_filter);
+    for (auto knightPosition : knightPositions) {
+        for (auto offsetIndex: M_KNIGHT) {
+            Offset targetOffset = offsetIndex + knightPosition;
 
             if (targetOffset.isWithinBounds() && (targetOffset == target)) {
                 Position moveTarget = targetOffset.toPosition();
@@ -608,13 +590,11 @@ bool is_threatened(t_board *board, Position target, bool color) {
     }
 
     // Pawns
-    List<Position> pawnPositions = board_value_positions(board->pawn & color_filter);
-    for (int pawnPositionIndex = 0; pawnPositionIndex < pawnPositions.length(); ++pawnPositionIndex) {
-        Position pawnPosition = pawnPositions.get(pawnPositionIndex);
-
+    std::vector<Position> pawnPositions = board_value_positions(board->pawn & color_filter);
+    for (auto pawnPosition : pawnPositions) {
         // Taking move
-        for (int offsetIndex = 0; offsetIndex < M_PAWN_TAKE.length(); ++offsetIndex) {
-            Offset targetOffset = M_PAWN_TAKE.get(offsetIndex) + pawnPosition;
+        for (auto offsetIndex: M_PAWN_TAKE) {
+            Offset targetOffset = offsetIndex + pawnPosition;
 
             if (targetOffset.isWithinBounds() && (targetOffset == target)) {
                 Position moveTarget = targetOffset.toPosition();
@@ -658,12 +638,12 @@ bool is_move_check(t_board *board, t_move move) {
         color_mask = board->black;
     }
 
-    List<Position> kingPositions = board_value_positions(board->king & color_mask);
-    if (kingPositions.length() != 1) {
+    std::vector<Position> kingPositions = board_value_positions(board->king & color_mask);
+    if (kingPositions.size() != 1) {
         // Should not be possible to have no or multiple kings on the board
         retValue = false;
     } else {
-        if (is_threatened(board, kingPositions.get(0), color)) {
+        if (is_threatened(board, kingPositions.at(0), color)) {
             retValue = true;
         }
     }
@@ -742,22 +722,22 @@ bool is_castle_legal(t_board *board, Position kingPosition, bool color, bool dir
 }
 
 
-List<t_move> generate_moves(t_game *game, bool color) {
+std::vector<t_move> generate_moves(t_game *game, bool color) {
     /*
      * Function that generates a list of all legal moves in the current state of the game
      *
      * Arguments:
      *  t_game *game: Pointer to the game instance representing the state of the game
      * Return:
-     *  List<t_move>: A list of t_move objects containing information on origin, target and color of the legal moves
+     *  std::vector<t_move>: A list of t_move objects containing information on origin, target and color of the legal moves
      */
 
     t_board *board = game->board;
 
-    List<t_move> moves = List<t_move>();
+    std::vector<t_move> moves = std::vector<t_move>();
 
     uint64_t color_filter, enemy_color_filter;
-    List<Offset> M_PAWN, M_PAWN_DOUBLE, M_PAWN_TAKE;
+    std::vector<Offset> M_PAWN, M_PAWN_DOUBLE, M_PAWN_TAKE;
     bool hasCastled, canCastleShort, canCastleLong;
     if (!color) {
         color_filter = board->white;
@@ -786,25 +766,23 @@ List<t_move> generate_moves(t_game *game, bool color) {
     // Generate moves for all pieces
 
     // King
-    List<Position> kingPositions = board_value_positions(board->king & color_filter);
-    if (kingPositions.length() != 1) {
+    std::vector<Position> kingPositions = board_value_positions(board->king & color_filter);
+    if (kingPositions.size() != 1) {
         // Dafuq?
         // return moves;  // Abort move generation, because no/many king?
     } else {
-        Position kingPosition = kingPositions.get(0);
-        List<Position> possibleTargets = List<Position>();
+        Position kingPosition = kingPositions.at(0);
+        std::vector<Position> possibleTargets;
 
-        for (int offsetIndex = 0; offsetIndex < M_KING.length(); ++offsetIndex) {
-            Offset targetOffset = M_KING.get(offsetIndex) + kingPosition;
+        for (auto offsetIndex: M_KING) {
+            Offset targetOffset = offsetIndex + kingPosition;
 
             if (targetOffset.isWithinBounds()) {
-                possibleTargets.add(targetOffset.toPosition());
+                possibleTargets.push_back(targetOffset.toPosition());
             }
         }
 
-        for (int targetIndex = 0; targetIndex < possibleTargets.length(); ++targetIndex) {
-            Position moveTarget = possibleTargets.get(targetIndex);
-
+        for (auto moveTarget : possibleTargets) {
             t_move possibleMove;
             possibleMove.origin = shift_from_position(kingPosition);
             possibleMove.target = shift_from_position(moveTarget);
@@ -813,7 +791,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.disable_long_castle = true;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, false)) {
-                moves.add(possibleMove);
+                moves.push_back(possibleMove);
             }
         }
 
@@ -828,7 +806,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 possibleMove.disable_long_castle = true;
 
                 if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
-                    moves.add(possibleMove);
+                    moves.push_back(possibleMove);
                 }
             }
             if (canCastleLong && is_castle_legal(board, kingPosition, color, false)) {
@@ -840,7 +818,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 possibleMove.disable_short_castle = true;
 
                 if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
-                    moves.add(possibleMove);
+                    moves.push_back(possibleMove);
                 }
             }
         }
@@ -848,10 +826,9 @@ List<t_move> generate_moves(t_game *game, bool color) {
 
 
     // Queen
-    List<Position> queenPositions = board_value_positions(board->queen & color_filter);
-    for (int queenPositionIndex = 0; queenPositionIndex < queenPositions.length(); ++queenPositionIndex) {
-        Position queenPosition = queenPositions.get(queenPositionIndex);
-        List<Position> possibleTargets = List<Position>();
+    std::vector<Position> queenPositions = board_value_positions(board->queen & color_filter);
+    for (auto queenPosition : queenPositions) {
+        std::vector<Position> possibleTargets;
 
         bool a_0 = true;
         bool a_45 = true;
@@ -867,7 +844,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(0, distanceOffset) + queenPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_0 = false;
                 }
@@ -876,7 +853,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(distanceOffset, distanceOffset) + queenPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_45 = false;
                 }
@@ -885,7 +862,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(distanceOffset, 0) + queenPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_90 = false;
                 }
@@ -894,7 +871,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(distanceOffset, -distanceOffset) + queenPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_135 = false;
                 }
@@ -903,7 +880,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(0, -distanceOffset) + queenPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_180 = false;
                 }
@@ -912,7 +889,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(-distanceOffset, -distanceOffset) + queenPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_225 = false;
                 }
@@ -921,7 +898,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(-distanceOffset, 0) + queenPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_270 = false;
                 }
@@ -930,32 +907,29 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(-distanceOffset, distanceOffset) + queenPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_315 = false;
                 }
             }
         }
 
-        for (int targetIndex = 0; targetIndex < possibleTargets.length(); ++targetIndex) {
-            Position moveTarget = possibleTargets.get(targetIndex);
-
+        for (auto moveTarget : possibleTargets) {
             t_move possibleMove;
             possibleMove.origin = shift_from_position(queenPosition);
             possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
-                moves.add(possibleMove);
+                moves.push_back(possibleMove);
             }
         }
     }
 
     // Rook
-    List<Position> rookPositions = board_value_positions(board->rook & color_filter);
-    for (int rookPositionIndex = 0; rookPositionIndex < rookPositions.length(); ++rookPositionIndex) {
-        Position rookPosition = rookPositions.get(rookPositionIndex);
-        List<Position> possibleTargets = List<Position>();
+    std::vector<Position> rookPositions = board_value_positions(board->rook & color_filter);
+    for (auto rookPosition : rookPositions) {
+        std::vector<Position> possibleTargets;
 
         bool a_0 = true;
         bool a_90 = true;
@@ -967,7 +941,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(0, distanceOffset) + rookPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_0 = false;
                 }
@@ -976,7 +950,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(distanceOffset, 0) + rookPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_90 = false;
                 }
@@ -985,7 +959,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(0, -distanceOffset) + rookPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_180 = false;
                 }
@@ -994,16 +968,14 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(-distanceOffset, 0) + rookPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_270 = false;
                 }
             }
         }
 
-        for (int targetIndex = 0; targetIndex < possibleTargets.length(); ++targetIndex) {
-            Position moveTarget = possibleTargets.get(targetIndex);
-
+        for (auto moveTarget : possibleTargets) {
             t_move possibleMove;
             possibleMove.origin = shift_from_position(rookPosition);
             possibleMove.target = shift_from_position(moveTarget);
@@ -1012,16 +984,15 @@ List<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.disable_long_castle = rookPosition.x == 0;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
-                moves.add(possibleMove);
+                moves.push_back(possibleMove);
             }
         }
     }
 
     // Bishop
-    List<Position> bishopPositions = board_value_positions(board->bishop & color_filter);
-    for (int bishopPositionIndex = 0; bishopPositionIndex < bishopPositions.length(); ++bishopPositionIndex) {
-        Position bishopPosition = bishopPositions.get(bishopPositionIndex);
-        List<Position> possibleTargets = List<Position>();
+    std::vector<Position> bishopPositions = board_value_positions(board->bishop & color_filter);
+    for (auto bishopPosition : bishopPositions) {
+        std::vector<Position> possibleTargets;
 
         bool a_45 = true;
         bool a_135 = true;
@@ -1033,7 +1004,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(distanceOffset, distanceOffset) + bishopPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_45 = false;
                 }
@@ -1042,7 +1013,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(distanceOffset, -distanceOffset) + bishopPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_135 = false;
                 }
@@ -1051,7 +1022,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(-distanceOffset, -distanceOffset) + bishopPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_225 = false;
                 }
@@ -1060,105 +1031,99 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 Offset targetOffset = Offset(-distanceOffset, distanceOffset) + bishopPosition;
 
                 if (targetOffset.isWithinBounds()) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 } else {
                     a_315 = false;
                 }
             }
         }
 
-        for (int targetIndex = 0; targetIndex < possibleTargets.length(); ++targetIndex) {
-            Position moveTarget = possibleTargets.get(targetIndex);
-
+        for (auto moveTarget : possibleTargets) {
             t_move possibleMove;
             possibleMove.origin = shift_from_position(bishopPosition);
             possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
-                moves.add(possibleMove);
+                moves.push_back(possibleMove);
             }
         }
     }
 
     // Knight
-    List<Position> knightPositions = board_value_positions(board->knight & color_filter);
-    for (int knightPositionIndex = 0; knightPositionIndex < knightPositions.length(); ++knightPositionIndex) {
-        Position knightPosition = knightPositions.get(knightPositionIndex);
-        List<Position> possibleTargets = List<Position>();
+    std::vector<Position> knightPositions = board_value_positions(board->knight & color_filter);
+    for (auto knightPosition : knightPositions) {
+        std::vector<Position> possibleTargets;
 
-        for (int offsetIndex = 0; offsetIndex < M_KNIGHT.length(); ++offsetIndex) {
-            Offset targetOffset = M_KNIGHT.get(offsetIndex) + knightPosition;
+        for (auto offsetIndex: M_KNIGHT) {
+            Offset targetOffset = offsetIndex + knightPosition;
 
             if (targetOffset.isWithinBounds()) {
-                possibleTargets.add(targetOffset.toPosition());
+                possibleTargets.push_back(targetOffset.toPosition());
             }
         }
 
-        for (int targetIndex = 0; targetIndex < possibleTargets.length(); ++targetIndex) {
-            Position moveTarget = possibleTargets.get(targetIndex);
-
+        for (auto moveTarget : possibleTargets) {
             t_move possibleMove;
             possibleMove.origin = shift_from_position(knightPosition);
             possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, false)) {
-                moves.add(possibleMove);
+                moves.push_back(possibleMove);
             }
         }
     }
 
     // Pawns
-    List<Position> pawnPositions = board_value_positions(board->pawn & color_filter);
-    for (int pawnPositionIndex = 0; pawnPositionIndex < pawnPositions.length(); ++pawnPositionIndex) {
-        Position pawnPosition = pawnPositions.get(pawnPositionIndex);
-        List<Position> possibleTargets = List<Position>();
+    std::vector<Position> pawnPositions = board_value_positions(board->pawn & color_filter);
+    for (auto pawnPosition : pawnPositions) {
+        std::vector<Position> possibleTargets;
 
         // "Normal" forward move
-        Offset targetOffset = M_PAWN.get(0) + pawnPosition;
+        Offset targetOffset = M_PAWN.at(0) + pawnPosition;
         if (targetOffset.isWithinBounds() && !(((pawnPosition.y == 6 && !color) || (pawnPosition.y == 1 && color)))) {
             // Should not be possible to not be within bounds
             int targetOffsetShift = shift_from_position(targetOffset.toPosition());
             bool isTargetOccupied = board_value_from_shift(color_filter | enemy_color_filter, targetOffsetShift);
 
             if (!isTargetOccupied) {
-                possibleTargets.add(targetOffset.toPosition());
+                possibleTargets.push_back(targetOffset.toPosition());
             }
         }
 
         // Double forward move
         if ((pawnPosition.y == 1 && !color) || (pawnPosition.y == 6 && color)) {
             // Only possible when pawn has not moved yet
-            targetOffset = M_PAWN_DOUBLE.get(0) + pawnPosition;
+            targetOffset = M_PAWN_DOUBLE.at(0) + pawnPosition;
             if (targetOffset.isWithinBounds()) {
                 // Should not be possible to not be within bounds
                 int targetOffsetShift = shift_from_position(targetOffset.toPosition());
                 bool isTargetOccupied = board_value_from_shift(color_filter | enemy_color_filter, targetOffsetShift);
 
                 if (!isTargetOccupied) {
-                    possibleTargets.add(targetOffset.toPosition());
+                    possibleTargets.push_back(targetOffset.toPosition());
                 }
             }
         }
 
         // Taking move
         if (!((pawnPosition.y == 6 && !color) || (pawnPosition.y == 1 && color))) {
-            for (int offsetIndex = 0; offsetIndex < M_PAWN_TAKE.length(); ++offsetIndex) {
-                targetOffset = M_PAWN_TAKE.get(offsetIndex) + pawnPosition;
+            for (auto offsetIndex: M_PAWN_TAKE) {
+                targetOffset = offsetIndex + pawnPosition;
 
                 if (targetOffset.isWithinBounds()) {
                     int targetOffsetShift = shift_from_position(targetOffset.toPosition());
                     bool isTargetOccupiedByEnemy = board_value_from_shift(enemy_color_filter, targetOffsetShift);
 
                     if (isTargetOccupiedByEnemy) {
-                        possibleTargets.add(targetOffset.toPosition());
+                        possibleTargets.push_back(targetOffset.toPosition());
                     }
                 }
             }
         } else {
-            for (int offsetIndex = 0; offsetIndex < M_PAWN_TAKE.length(); ++offsetIndex) {
-                targetOffset = M_PAWN_TAKE.get(offsetIndex) + pawnPosition;
+            for (auto offsetIndex: M_PAWN_TAKE) {
+                targetOffset = offsetIndex + pawnPosition;
 
                 if (targetOffset.isWithinBounds()) {
                     int targetOffsetShift = shift_from_position(targetOffset.toPosition());
@@ -1176,7 +1141,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                                 // Add one move for each promotable piece
                                 possibleMove.promoted_to = i;
 
-                                moves.add(possibleMove);
+                                moves.push_back(possibleMove);
                             }
                         }
                     }
@@ -1187,7 +1152,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
         // En-passant
         if (game->enpassants != 0 && ((pawnPosition.y == 4 && !color) || (pawnPosition.y == 3 && color))) {
             // Only possible on the middle row of the opposing side
-            int opposingPawnX = (int ) game->enpassants - 1;
+            int opposingPawnX = (int) game->enpassants - 1;
 
             if (pawnPosition.x == opposingPawnX - 1 || pawnPosition.x == opposingPawnX + 1) {
                 Position targetPosition = Position(opposingPawnX, (!color * 5) + (color * 2));
@@ -1196,29 +1161,27 @@ List<t_move> generate_moves(t_game *game, bool color) {
                 bool isTargetOccupiedByEnemy = board_value_from_shift(enemy_color_filter, targetOffsetShift);
 
                 if (!isTargetOccupiedByEnemy) {
-                    possibleTargets.add(targetPosition);
+                    possibleTargets.push_back(targetPosition);
                 }
             }
         }
 
         // Filter out illegal moves
-        for (int targetIndex = 0; targetIndex < possibleTargets.length(); ++targetIndex) {
-            Position moveTarget = possibleTargets.get(targetIndex);
-
+        for (auto moveTarget : possibleTargets) {
             t_move possibleMove;
             possibleMove.origin = shift_from_position(pawnPosition);
             possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
-                moves.add(possibleMove);
+                moves.push_back(possibleMove);
             }
         }
 
         // Promotion
         if ((pawnPosition.y == 6 && !color) || (pawnPosition.y == 1 && color)) {
             // Only possible on second to last row in the pawn's moving direction
-            targetOffset = M_PAWN.get(0) + pawnPosition;
+            targetOffset = M_PAWN.at(0) + pawnPosition;
             if (targetOffset.isWithinBounds()) {
                 // Should not be possible to not be within bounds
                 int targetOffsetShift = shift_from_position(targetOffset.toPosition());
@@ -1236,7 +1199,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
                             // Add one move for each promotable piece
                             possibleMove.promoted_to = i;
 
-                            moves.add(possibleMove);
+                            moves.push_back(possibleMove);
                         }
                     }
                 }
@@ -1252,7 +1215,7 @@ bool is_enpassant(t_board *board, t_move *move) {
         return false;
     }
 
-    int shift_diff = abs((int )(move->target) - (int )(move->origin));
+    int shift_diff = abs((int) (move->target) - (int) (move->origin));
     if (!board_value_from_shift(board->white | board->black, move->target) && (shift_diff == 7 || shift_diff == 9)) {
         return true;
     }
@@ -1265,14 +1228,14 @@ bool is_double_pawn_move(t_board *board, t_move *move) {
         return false;
     }
 
-    if (abs((int )(move->target) - (int )(move->origin)) == 16) {
+    if (abs((int) (move->target) - (int) (move->origin)) == 16) {
         return true;
     }
     return false;
 }
 
 bool is_castle(t_board *board, t_move *move) {
-    int shift_diff = abs((int )(move->target) - (int )(move->origin));
+    int shift_diff = abs((int) (move->target) - (int) (move->origin));
     if (shift_diff == 2 && board_value_from_shift(board->king, move->origin)) {
         return true;
     }
@@ -1358,14 +1321,13 @@ void doMove(t_board *board, t_move *move) {
 //        printf("\n");
 
         int takenPositionShift = shift_from_position(takenPosition);
-        uint64_t takenPositionBitmask = (uint64_t )1 << takenPositionShift;
+        uint64_t takenPositionBitmask = (uint64_t) 1 << takenPositionShift;
 
         // Delete piece at selected position
         board->white &= ~takenPositionBitmask;
         board->black &= ~takenPositionBitmask;
         board->pawn &= ~takenPositionBitmask;
-    }
-    else if (isCastle) {
+    } else if (isCastle) {
         t_move castleRookMove;
         if (move->origin < move->target) {
             // Short castle
@@ -1379,9 +1341,8 @@ void doMove(t_board *board, t_move *move) {
             castleRookMove.color = move->color;
         }
         doMove(board, &castleRookMove);
-    }
-    else if (move->promoted) {
-        uint64_t targetPositionBitmask = (uint64_t )1 << move->target;
+    } else if (move->promoted) {
+        uint64_t targetPositionBitmask = (uint64_t) 1 << move->target;
         // Remove pawn
         board->pawn &= ~targetPositionBitmask;
 
@@ -1399,9 +1360,6 @@ void doMove(t_board *board, t_move *move) {
 }
 
 void undoMove(t_board *board, t_move *move) {
-    bool isEnpassant = is_enpassant(board, move);
-    bool isCastle = is_castle(board, move);
-
     //generate bitmask for fields
     uint64_t bitOrigin = (uint64_t) 1 << move->origin;
     uint64_t bitTarget = (uint64_t) 1 << move->target;
@@ -1454,42 +1412,49 @@ void undoMove(t_board *board, t_move *move) {
     else if (move->taken_figure == 4) board->knight |= bitTarget;
     else if (move->taken_figure == 5) board->pawn |= bitTarget;
 
+    bool isEnpassant = is_enpassant(board, move);
+    bool isCastle = is_castle(board, move);
+
     if (isEnpassant) {
         Position originPosition = position_from_shift(move->origin);
         Position targetPosition = position_from_shift(move->target);
         Position takenPosition = Position(targetPosition.x, originPosition.y);
 
         int takenPositionShift = shift_from_position(takenPosition);
-        uint64_t takenPositionBitmask = (uint64_t )1 << takenPositionShift;
+        uint64_t takenPositionBitmask = (uint64_t) 1 << takenPositionShift;
 
+        // printf("Replacing ");
         // Replace piece at selected position
         if (!move->color) {
             board->black |= takenPositionBitmask;
+            // printf("black ");
         } else {
             board->white |= takenPositionBitmask;
+            // printf("white ");
         }
         board->pawn |= takenPositionBitmask;
-    }
-    else if (isCastle) {
+        // printf("pawn to ");
+        // printPosition(takenPosition);
+        // printf("\n");
+    } else if (isCastle) {
         t_move castleRookMove;
         if (move->origin < move->target) {
             // Short castle
             castleRookMove.origin = move->target + 1;
-            castleRookMove.target = move->origin + 1;
+            castleRookMove.target = move->target - 1;
             castleRookMove.color = move->color;
         } else {
             // Long castle
             castleRookMove.origin = move->target - 2;
-            castleRookMove.target = move->origin - 1;
+            castleRookMove.target = move->target + 1;
             castleRookMove.color = move->color;
 
-            printf("Long castle move: ");
-            printMove(castleRookMove);
+//            printf("Long castle move: ");
+//            printMove(castleRookMove);
         }
         undoMove(board, &castleRookMove);
-    }
-    else if (move->promoted) {
-        uint64_t targetPositionBitmask = (uint64_t )1 << move->origin;
+    } else if (move->promoted) {
+        uint64_t targetPositionBitmask = (uint64_t) 1 << move->origin;
         // Reinsert pawn
         board->pawn |= targetPositionBitmask;
 
@@ -1519,7 +1484,7 @@ void commitMove(t_game *game, t_move *move) {
     game->enpassants = 0;
 
     // Handle double-forward pawn move
-    if (is_double_pawn_move(move)) {
+    if (is_double_pawn_move(game->board, move)) {
         //printf("DOUBLE PAWN MOVE!\n");
         // Set according bit if the move was a double-forward pawn move
         game->enpassants = position_from_shift(move->origin).x + 1;
@@ -1551,12 +1516,13 @@ void commitMove(t_game *game, t_move *move) {
         // White moved
 
         // Update castling flags
+        move->disable_short_castle &= game->whiteCanCastleShort;
+        move->disable_long_castle &= game->whiteCanCastleLong;
+
         if (!game->whiteCastled && (game->whiteCanCastleShort || game->whiteCanCastleLong)) {
             if (move->castled_short || move->castled_long) {
                 game->whiteCastled = true;
             }
-            move->disable_short_castle &= game->whiteCanCastleShort;
-            move->disable_long_castle &= game->whiteCanCastleLong;
 
             game->whiteCanCastleShort ^= move->disable_short_castle;
             game->whiteCanCastleLong ^= move->disable_long_castle;
@@ -1570,12 +1536,13 @@ void commitMove(t_game *game, t_move *move) {
         // Black moved
 
         // Update castling flags
+        move->disable_short_castle &= game->blackCanCastleShort;
+        move->disable_long_castle &= game->blackCanCastleLong;
+
         if (!game->blackCastled && (game->blackCanCastleShort || game->blackCanCastleLong)) {
             if (move->castled_short || move->castled_long) {
                 game->blackCastled = true;
             }
-            move->disable_short_castle &= game->blackCanCastleShort;
-            move->disable_long_castle &= game->blackCanCastleLong;
 
             game->blackCanCastleShort ^= move->disable_short_castle;
             game->blackCanCastleLong ^= move->disable_long_castle;

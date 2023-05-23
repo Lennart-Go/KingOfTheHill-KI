@@ -11,7 +11,7 @@
 
 
 t_move getMoveRandom(t_game *game, bool color) {
-    List<t_move> possibleMoves = generate_moves(game, color);
+    std::vector<t_move> possibleMoves = generate_moves(game, color);
 
     if (possibleMoves.empty()) {
         t_move failureMove = { 0, 0, 0, 0 };
@@ -29,8 +29,8 @@ t_move getMoveRandom(t_game *game, bool color) {
     srand((unsigned ) ts.tv_nsec);
 
     // Generate random number within bounds of possible moves list and return the corresponding move
-    int randomMoveIndex = (int )(rand() % possibleMoves.length());
-    return possibleMoves.get(randomMoveIndex);
+    int randomMoveIndex = (int )(rand() % possibleMoves.size());
+    return possibleMoves.at(randomMoveIndex);
 }
 
 int randn(int start, int stop) {
@@ -86,19 +86,19 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game) {
 
     float score, bestScore;
     t_move currentMove;
-    List<t_move> moves = generate_moves(game, game->turn);
+    std::vector<t_move> moves = generate_moves(game, game->turn);
 
     for (int _ = 0; _ < depth; ++_) {
         // printf("\t");
     }
-    // printf("Found %zu moves\n", moves.length());
+    // printf("Found %zu moves\n", moves.size());
 
     if (!game->turn) {
         bestScore = -std::numeric_limits<float>::max();
 
         // White's turn -> Maximize score
-        for (int moveIndex = 0; moveIndex < moves.length(); ++moveIndex) {
-            currentMove = moves.get(moveIndex);
+        for (auto move : moves) {
+            currentMove = move;
 
             commitMove(game, &currentMove);
             score = alphaBeta(depth-1, alpha, beta, game);
@@ -128,8 +128,8 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game) {
         bestScore = std::numeric_limits<float>::max();
 
         // Black's turn -> Minimize score
-        for (int moveIndex = 0; moveIndex < moves.length(); ++moveIndex) {
-            currentMove = moves.get(moveIndex);
+        for (auto move : moves) {
+            currentMove = move;
 
             commitMove(game, &currentMove);
             score = alphaBeta(depth-1, alpha, beta, game);
@@ -160,7 +160,7 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game) {
     return bestScore;
 }
 
-t_move alphaBetaHead(t_game* game, int max_depth) {
+std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth) {
     int depth = max_depth;  // NOTE: Always use one less than actually wanted
 
     float alpha = -std::numeric_limits<float>::max();
@@ -168,7 +168,7 @@ t_move alphaBetaHead(t_game* game, int max_depth) {
 
     float score, bestScore;
     t_move currentMove, bestMove;
-    List<t_move> moves = generate_moves(game, game->turn);
+    std::vector<t_move> moves = generate_moves(game, game->turn);
 
 //    if (!moves.empty()) {
 //        // Default to first move
@@ -178,7 +178,7 @@ t_move alphaBetaHead(t_game* game, int max_depth) {
     for (int _ = 0; _ < depth; ++_) {
         // printf("\t");
     }
-    // printf("Found %zu moves\n", moves.length());
+    // printf("Found %zu moves\n", moves.size());
 
     // Set default best move as abort move recognized in play() function
     bestMove.origin = 0;
@@ -188,8 +188,8 @@ t_move alphaBetaHead(t_game* game, int max_depth) {
         bestScore = -std::numeric_limits<float>::max();
 
         // White's turn -> Maximize score
-        for (int moveIndex = 0; moveIndex < moves.length(); ++moveIndex) {
-            currentMove = moves.get(moveIndex);
+        for (auto move : moves) {
+            currentMove = move;
 
             commitMove(game, &currentMove);
             score = alphaBeta(depth-1, alpha, beta, game);
@@ -214,8 +214,8 @@ t_move alphaBetaHead(t_game* game, int max_depth) {
         bestScore = std::numeric_limits<float>::max();
 
         // Black's turn -> Minimize score
-        for (int moveIndex = 0; moveIndex < moves.length(); ++moveIndex) {
-            currentMove = moves.get(moveIndex);
+        for (auto move : moves) {
+            currentMove = move;
 
             commitMove(game, &currentMove);
             score = alphaBeta(depth-1, alpha, beta, game);
@@ -242,16 +242,19 @@ t_move alphaBetaHead(t_game* game, int max_depth) {
     // printMove(bestMove);
     // printf("\n");
 
-    return bestMove;
+    return {bestMove, bestScore};
 }
 
 
 t_move getMove(t_game *game, bool color) {
     // t_move bestMove = getMoveRandom(game, color);
-    t_move bestMove = alphaBetaHead(game, 5);
-    // printf("SELECTED ");
-    // printMove(bestMove);
-    // printf("\n");
+    std::pair<t_move, float> abReturn = alphaBetaHead(game, 5);
+
+    t_move bestMove = abReturn.first;
+    float bestScore = abReturn.second;
+    printf("SELECTED ");
+    printMove(bestMove);
+    printf(" with score %.4f\n", bestScore);
 
     return bestMove;
 }

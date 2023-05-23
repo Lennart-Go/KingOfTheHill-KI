@@ -188,12 +188,12 @@ bool board_value_from_shift(uint64_t board, int shift) {
 }
 
 
-List<Position> board_value_positions(uint64_t board) {
-    List<Position> positions = List<Position>();
+std::vector<Position> board_value_positions(uint64_t board) {
+    std::vector<Position> positions;
 
     for (int shift = 0; shift < 64; ++shift) {
         if (board_value_from_shift(board, shift)) {
-            positions.add(position_from_shift(shift));
+            positions.push_back(position_from_shift(shift));
         }
     }
 
@@ -216,7 +216,7 @@ int max(int num1, int num2) {
 }
 
 float max(float num1, float num2) {
-    if (num1 > num2) {
+    if (num1 >= num2) {
         return num1;
     }
     return num2;
@@ -230,7 +230,7 @@ int min(int num1, int num2) {
 }
 
 float min(float num1, float num2) {
-    if (num1 < num2) {
+    if (num1 <= num2) {
         return num1;
     }
     return num2;
