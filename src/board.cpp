@@ -2,12 +2,6 @@
 #include "move.h"
 #include <malloc.h>
 
-// TODO: Set/Get?
-// TODO: Print board
-// TODO: Do move
-// TODO: Undo move
-// TODO: State information -> King moved, castled?
-
 t_board* initializeBoard() {
 
     t_board* board = (t_board*) calloc(1, sizeof(t_board));

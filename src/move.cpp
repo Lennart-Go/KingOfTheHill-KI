@@ -2,6 +2,7 @@
 #include "move.h"
 #include "board.h"
 #include "game.h"
+#include "end.h"
 
 
 // Define possible move offsets for all pieces with non-linear or conditional moves
@@ -196,7 +197,6 @@ bool is_threatened(t_board *board, Position target, bool color) {
     List<Position> kingPositions = board_value_positions(board->king & color_filter);
     if (kingPositions.length() != 1) {
         // Dafuq?
-        // return false;  // Abort move generation, because no/many king?  // TODO: Throw error?
     } else {
         Position kingPosition = kingPositions.get(0);
 
@@ -648,7 +648,6 @@ bool is_move_check(t_board *board, t_move move) {
     bool color = (bool) move.color;
     bool retValue = false;
 
-    // TODO: Apply move to board before checking if the king is threatened
     doMove(board, &move);
 
     // Get position of king
@@ -759,7 +758,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
 
     uint64_t color_filter, enemy_color_filter;
     List<Offset> M_PAWN, M_PAWN_DOUBLE, M_PAWN_TAKE;
-    bool canCastleShort, canCastleLong;
+    bool hasCastled, canCastleShort, canCastleLong;
     if (!color) {
         color_filter = board->white;
         enemy_color_filter = board->black;
@@ -768,6 +767,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
         M_PAWN_DOUBLE = M_PAWN_WHITE_DOUBLE;
         M_PAWN_TAKE = M_PAWN_WHITE_TAKE;
 
+        hasCastled = game->whiteCastled;
         canCastleShort = game->whiteCanCastleShort;
         canCastleLong = game->whiteCanCastleLong;
     } else {
@@ -778,8 +778,9 @@ List<t_move> generate_moves(t_game *game, bool color) {
         M_PAWN_DOUBLE = M_PAWN_BLACK_DOUBLE;
         M_PAWN_TAKE = M_PAWN_BLACK_TAKE;
 
-        canCastleShort = game->whiteCanCastleShort;
-        canCastleLong = game->whiteCanCastleLong;
+        hasCastled = game->blackCastled;
+        canCastleShort = game->blackCanCastleShort;
+        canCastleLong = game->blackCanCastleLong;
     }
 
     // Generate moves for all pieces
@@ -808,6 +809,8 @@ List<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.origin = shift_from_position(kingPosition);
             possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
+            possibleMove.disable_short_castle = true;
+            possibleMove.disable_long_castle = true;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, false)) {
                 moves.add(possibleMove);
@@ -815,24 +818,30 @@ List<t_move> generate_moves(t_game *game, bool color) {
         }
 
         // Castling
-        if (canCastleShort && is_castle_legal(board, kingPosition, color, true)) {
-            t_move possibleMove;
-            possibleMove.origin = shift_from_position(kingPosition);
-            possibleMove.target = shift_from_position(kingPosition + Position(2, 0));
-            possibleMove.color = color;
+        if (!hasCastled) {
+            if (canCastleShort && is_castle_legal(board, kingPosition, color, true)) {
+                t_move possibleMove;
+                possibleMove.origin = shift_from_position(kingPosition);
+                possibleMove.target = shift_from_position(kingPosition + Position(2, 0));
+                possibleMove.color = color;
+                possibleMove.castled_short = true;
+                possibleMove.disable_long_castle = true;
 
-            if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
-                moves.add(possibleMove);
+                if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
+                    moves.add(possibleMove);
+                }
             }
-        }
-        if (canCastleLong && is_castle_legal(board, kingPosition, color, false)) {
-            t_move possibleMove;
-            possibleMove.origin = shift_from_position(kingPosition);
-            possibleMove.target = shift_from_position(kingPosition - Position(2, 0));
-            possibleMove.color = color;
+            if (canCastleLong && is_castle_legal(board, kingPosition, color, false)) {
+                t_move possibleMove;
+                possibleMove.origin = shift_from_position(kingPosition);
+                possibleMove.target = shift_from_position(kingPosition - Position(2, 0));
+                possibleMove.color = color;
+                possibleMove.castled_long = true;
+                possibleMove.disable_short_castle = true;
 
-            if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
-                moves.add(possibleMove);
+                if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
+                    moves.add(possibleMove);
+                }
             }
         }
     }
@@ -999,6 +1008,8 @@ List<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.origin = shift_from_position(rookPosition);
             possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
+            possibleMove.disable_short_castle = rookPosition.x == 7;
+            possibleMove.disable_long_castle = rookPosition.x == 0;
 
             if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
                 moves.add(possibleMove);
@@ -1098,7 +1109,6 @@ List<t_move> generate_moves(t_game *game, bool color) {
         }
     }
 
-    // TODO: Promotions and En-Passant?
     // Pawns
     List<Position> pawnPositions = board_value_positions(board->pawn & color_filter);
     for (int pawnPositionIndex = 0; pawnPositionIndex < pawnPositions.length(); ++pawnPositionIndex) {
@@ -1177,7 +1187,7 @@ List<t_move> generate_moves(t_game *game, bool color) {
         // En-passant
         if (game->enpassants != 0 && ((pawnPosition.y == 4 && !color) || (pawnPosition.y == 3 && color))) {
             // Only possible on the middle row of the opposing side
-            int opposingPawnX = (int ) log2(game->enpassants);
+            int opposingPawnX = (int ) game->enpassants - 1;
 
             if (pawnPosition.x == opposingPawnX - 1 || pawnPosition.x == opposingPawnX + 1) {
                 Position targetPosition = Position(opposingPawnX, (!color * 5) + (color * 2));
@@ -1496,8 +1506,140 @@ void undoMove(t_board *board, t_move *move) {
     }
 }
 
+void commitMove(t_game *game, t_move *move) {
+    if (move->origin == move->target) {
+        // Failure move -> No moves generated
+        game->isOver = true;
+        return;
+    }
+
+    doMove(game->board, move);
+
+    move->enpassants = game->enpassants;  // Save previous enpassant possibilities to enable reverting
+    game->enpassants = 0;
+
+    // Handle double-forward pawn move
+    if (is_double_pawn_move(move)) {
+        //printf("DOUBLE PAWN MOVE!\n");
+        // Set according bit if the move was a double-forward pawn move
+        game->enpassants = position_from_shift(move->origin).x + 1;
+    } else if (is_castle(game->board, move)) {
+        //printf("CASTLE!\n");
+    } else if (is_enpassant(game->board, move)) {
+        //printf("EN-PASSANT!\n");
+    } else if (move->promoted) {
+        //printf("PROMOTION!\n");
+    }
+
+    winner_t gameEnd = checkEnd(game, game->turn);
+    if (gameEnd) {
+        game->isOver = true;
+
+        if (gameEnd == WHITE) {
+            game->whiteWon = true;
+        } else if (gameEnd == BLACK) {
+            game->blackWon = true;
+        }
+
+        return;
+    }
+
+    game->turn = !game->turn;
+
+    // TODO: Update moveTime
+    if (!move->color) {
+        // White moved
+
+        // Update castling flags
+        if (!game->whiteCastled && (game->whiteCanCastleShort || game->whiteCanCastleLong)) {
+            if (move->castled_short || move->castled_long) {
+                game->whiteCastled = true;
+            }
+            move->disable_short_castle &= game->whiteCanCastleShort;
+            move->disable_long_castle &= game->whiteCanCastleLong;
+
+            game->whiteCanCastleShort ^= move->disable_short_castle;
+            game->whiteCanCastleLong ^= move->disable_long_castle;
+        } else {
+            move->disable_short_castle = false;
+            move->disable_long_castle = false;
+        }
+
+        game->whiteMoveCounter++;
+    } else {
+        // Black moved
+
+        // Update castling flags
+        if (!game->blackCastled && (game->blackCanCastleShort || game->blackCanCastleLong)) {
+            if (move->castled_short || move->castled_long) {
+                game->blackCastled = true;
+            }
+            move->disable_short_castle &= game->blackCanCastleShort;
+            move->disable_long_castle &= game->blackCanCastleLong;
+
+            game->blackCanCastleShort ^= move->disable_short_castle;
+            game->blackCanCastleLong ^= move->disable_long_castle;
+        }
+
+
+        game->blackMoveCounter++;
+    }
+}
+
+void revertMove(t_game *game, t_move *move) {
+    if (move->origin == move->target) {
+        // Failure move -> No moves were possible
+        game->isOver = false;
+        return;
+    }
+
+    game->enpassants = move->enpassants;
+
+    if (game->isOver) {
+        game->isOver = false;
+        game->whiteWon = false;
+        game->blackWon = false;
+
+        undoMove(game->board, move);
+        return;
+    }
+
+    game->turn = !game->turn;
+
+    if (!move->color) {
+        // White moved
+
+        // Update castling flags
+        if (game->whiteCastled || !(game->whiteCanCastleShort && game->whiteCanCastleLong)) {
+            if (move->castled_short || move->castled_long) {
+                game->whiteCastled = false;
+            }
+            game->whiteCanCastleShort ^= move->disable_short_castle;
+            game->whiteCanCastleLong ^= move->disable_long_castle;
+        }
+
+        game->whiteMoveCounter--;
+    } else {
+        // Black moved
+
+        // Update castling flags
+        if (game->blackCastled || !(game->blackCanCastleShort && game->blackCanCastleLong)) {
+            if (move->castled_short || move->castled_long) {
+                game->blackCastled = false;
+            }
+            game->blackCanCastleShort ^= move->disable_short_castle;
+            game->blackCanCastleLong ^= move->disable_long_castle;
+        }
+
+        game->blackMoveCounter--;
+    }
+
+    positionTrackingUndo(game);
+    undoMove(game->board, move);
+}
+
 void printMove(const t_move move) {
     Position origin = position_from_shift(move.origin);
     Position target = position_from_shift(move.target);
-    printf("Move %c%d -> %c%d\n", columnToLetter(origin.x), origin.y + 1, columnToLetter(target.x), target.y + 1);
+    printf("Move %c%d -> %c%d", columnToLetter(origin.x), origin.y + 1, columnToLetter(target.x), target.y + 1);
 }

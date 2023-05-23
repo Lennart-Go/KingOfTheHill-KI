@@ -67,7 +67,6 @@ template <typename T> void List<T>::add(T item) {
 
 template <typename T> T List<T>::get(int index) const {
     if (abs(index) > (this->_length - 1)) {
-        // TODO: Raise out of bounds exception?
         throw std::out_of_range("Index out of range for List");
     }
 
@@ -80,7 +79,6 @@ template <typename T> T List<T>::get(int index) const {
 
 template <typename T> void List<T>::remove(int index) {
     if (abs(index) > (this->_length - 1)) {
-        // TODO: Raise out of bounds exception?
         return;
     }
 
@@ -170,5 +168,10 @@ List<Position> board_value_positions(uint64_t board);
 
 char columnToLetter(int column);
 void printPosition(Position pos);
+
+int max(int num1, int num2);
+float max(float num1, float num2);
+int min(int num1, int num2);
+float min(float num1, float num2);
 
 #endif

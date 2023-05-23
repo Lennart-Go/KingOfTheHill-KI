@@ -3,6 +3,7 @@
 #include "move.h"
 #include "board.h"
 #include "util.h"
+#include "hikaru.h"
 
 
 void setAllowCastle(t_game *game, bool value) {
@@ -23,7 +24,11 @@ protected:
     virtual void SetUp()
     {
         game = startGame();
-        game->board = initializeBoard();
+        game->whiteCanCastleLong = false;
+        game->whiteCanCastleShort = false;
+        game->blackCanCastleLong = false;
+        game->blackCanCastleShort = false;
+
         board = initializeBoard();
 
         setAllowCastle(game, false);
@@ -721,6 +726,7 @@ TEST_F(MoveTest, isCastleLegalBlackLongCheck1) {
 
     EXPECT_FALSE(is_castle_legal(board, kingPosition, color, direction));
 }
+
 
 TEST_F(MoveTest, isCastleLegalBlackLongCheck2) {
     setFen(board, (char *)"4k3/1Q6/8/8/8/8/8/8");

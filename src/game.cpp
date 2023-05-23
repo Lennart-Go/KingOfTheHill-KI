@@ -3,6 +3,7 @@
 #include "hikaru.h"
 #include "end.h"
 #include "move.h"
+#include "unistd.h"
 
 
 t_game *startGame() {
@@ -13,7 +14,7 @@ t_game *startGame() {
     game->turn = 0;  // White's turn
     game->latestMoveTime = 0;  // TODO: Set latestMoveTime to current time in ms
     game->isOver = false;
-    game->positionHistory = NULL;
+    game->positionHistory = nullptr;
 
     game->whiteWon = false;
     game->whiteCanCastleShort = true;
@@ -34,100 +35,29 @@ t_game *startGame() {
     return game;
 }
 
-void commitMove(t_game *game, t_move *move) {
-    if (move->origin == move->target) {
-        // Failure move -> No moves generated
-        game->isOver = true;
-        return;
-    }
 
-    doMove(game->board, move);
-
-    game->enpassants = 0;
-
-    // Handle double-forward pawn move
-    if (is_double_pawn_move(game->board, move)) {
-        printf("DOUBLE PAWN MOVE!\n");
-        // Set according bit if the move was a double-forward pawn move
-        game->enpassants |= 1 << position_from_shift(move->origin).x;
-    } else if (is_castle(game->board, move)) {
-        printf("CASTLE!\n");
-    } else if (is_enpassant(game->board, move)) {
-        printf("EN-PASSENT!\n");
-    } else if (move->promoted) {
-        printf("PROMOTION!\n");
-    }
-
-    winner_t gameEnd = checkEnd(game, game->turn);
-    if (gameEnd) {
-        game->isOver = true;
-
-        if (gameEnd == WHITE) {
-            game->whiteWon = true;
-        } else if (gameEnd == BLACK) {
-            game->blackWon = true;
-        }
-
-        return;
-    }
-
-    game->turn = !game->turn;
-
-    // TODO: Update moveTime, check if move was a castle or castles still possible
-    if (!move->color) {
-        // White moved
-
-        // Update castling flags
-        if (!game->whiteCastled && (game->whiteCanCastleShort || game->whiteCanCastleLong)) {
-            if (board_value_from_shift(game->board->king, move->target)) {
-                // King moved
-                game->whiteCanCastleShort = false;
-                game->whiteCanCastleLong = false;
-            } else if (board_value_from_shift(game->board->rook, move->target) && position_from_shift(move->target).x == 7) {
-                // Short rook moved
-                game->whiteCanCastleShort = false;
-            } else if (board_value_from_shift(game->board->rook, move->target) && position_from_shift(move->target).x == 0) {
-                game->whiteCanCastleLong = false;
-            }
-            if (is_castle(game->board, move)) {
-                game->whiteCastled = true;
-            }
-        }
-
-        game->whiteMoveCounter++;
-    } else {
-        // Black moved
-        game->blackMoveCounter++;
-
-        // Update castling flags
-        if (!game->blackCastled && (game->blackCanCastleShort || game->blackCanCastleLong)) {
-            if (board_value_from_shift(game->board->king, move->target)) {
-                // King moved
-                game->blackCanCastleShort = false;
-                game->blackCanCastleLong = false;
-            } else if (board_value_from_shift(game->board->rook, move->target) && position_from_shift(move->target).x == 7) {
-                // Short rook moved
-                game->blackCanCastleShort = false;
-            } else if (board_value_from_shift(game->board->rook, move->target) && position_from_shift(move->target).x == 0) {
-                game->blackCanCastleLong = false;
-            }
-            if (is_castle(game->board, move)) {
-                game->blackCastled = true;
-            }
-        }
-    }
+// 2 h = 2 * 60 * 60s / 40 moves
+int time_limit() {
+    return 2 * 60 * 60 / 40;
 }
 
-void play() {
+void play(int maxRounds) {
+    if (maxRounds < 0) {
+        maxRounds = INT32_MAX;
+    }
+
     t_game *game = startGame();
-    setFen(game->board, (char *)"r3k2r/8/8/8/8/8/p1r4r/R3K2R");
+    // setFen(game->board, (char *)"r3k2r/8/8/8/8/8/p1r4r/R3K2R");
 
     printBoard(game->board);
+    // sleep(4);
 
-    while (!game->isOver) {
-//        if (game->blackMoveCounter > 0) {
-//            break;
-//        }
+    while (!game->isOver && (game->blackMoveCounter + 1) <= maxRounds) {
+        /*  if (game->blackMoveCounter > 0) {
+              break;
+          } */
+
+        // sleep(1);
 
         // Generate next move
         t_move nextMove = getMove(game, game->turn);
@@ -137,7 +67,15 @@ void play() {
         printf("Next move: ");
         printMove(nextMove);
 
-        printf("Current board state (Round: %d, Turn: %d)", (game->blackMoveCounter + 1), game->turn);
+        printf("\nCurrent board state (Round: %d, ", (game->blackMoveCounter + 1));
+
+        if (game->turn == 0) {
+            printf("Turn: White)\n");
+        } else {
+            printf("Turn: Black)\n");
+        }
+
+
         printBoard(game->board);
 
         // Check and announce checks
