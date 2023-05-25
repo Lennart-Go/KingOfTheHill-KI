@@ -44,6 +44,7 @@ add_executable(Tests
         src/util.cpp
         src/util.h
         test/BoardTest.cpp
+        test/EndTest.cpp
         test/main.cpp
         test/MoveTest.cpp)
 target_link_libraries(Tests ${GTEST_LIBRARIES} pthread)
