@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <cstring>
+#include "board.h"
 
 //template <typename T> class List {
 //private:
@@ -160,6 +161,18 @@ public:
     bool isWithinBounds() const;
 
     Position toPosition() const;
+};
+
+class Boardc {
+public:
+    Boardc(t_board* board);
+    bool operator < (const Boardc& a) const;
+    bool operator > (const Boardc& a) const;
+    bool operator == (const Boardc& a) const;
+    t_board* getBoard();
+private:
+   t_board* _board;
+
 };
 
 int shift_from_position(Position position);

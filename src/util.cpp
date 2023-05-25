@@ -169,6 +169,38 @@ int shift_from_position(Position position) {
     // return 63 - (position.y * 8 + position.x);
 }
 
+Boardc::Boardc(t_board* board){
+    _board = board;
+}
+
+t_board* Boardc::getBoard(){
+    return _board;
+}
+
+bool Boardc::operator<(const Boardc& a) const {
+    if(_board->pawn < a._board->pawn){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+bool Boardc::operator>(const Boardc& a) const {
+    if(_board->pawn > a._board->pawn){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+bool Boardc::operator==(const Boardc& a) const {
+    if(_board->pawn == a._board->pawn){
+        return true;
+    }else{
+        return false;
+    }
+}
+
 
 Position position_from_shift(int shift) {
     int val = 63 - shift;
