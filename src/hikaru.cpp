@@ -87,7 +87,7 @@ float evaluate(const t_game* game) {
     return score;
 }
 
-float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t timePerMove, time_t startMoveTime) {
+float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t timePerMove, time_t startMoveTime, long int* searchedMoves) {
 
     if (depth == 0 || game->isOver || timeLeft(timePerMove, startMoveTime) <= 0) {
         return evaluate(game);
@@ -101,6 +101,7 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t time
         // printf("\t");
     }
     // printf("Found %zu moves\n", moves.size());
+    *searchedMoves += moves.size();
 
     if (!game->turn) {
         bestScore = -std::numeric_limits<float>::max();
@@ -110,7 +111,7 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t time
             currentMove = move;
 
             commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
+            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime, searchedMoves);
             revertMove(game, &currentMove);
 
             for (int _ = 0; _ < depth; ++_) {
@@ -141,7 +142,7 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t time
             currentMove = move;
 
             commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
+            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime, searchedMoves);
             revertMove(game, &currentMove);
 
             for (int _ = 0; _ < depth; ++_) {
@@ -169,7 +170,7 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t time
     return bestScore;
 }
 
-std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t timePerMove) {
+std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t timePerMove, long int* searchedMoves) {
     int depth = max_depth;  // NOTE: Always use one less than actually wanted
 
     float alpha = -std::numeric_limits<float>::max();
@@ -190,6 +191,8 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t tim
     }
     // printf("Found %zu moves\n", moves.size());
 
+    *searchedMoves += moves.size();
+
     // Set default best move as abort move recognized in play() function
     bestMove.origin = 0;
     bestMove.target = 0;
@@ -202,7 +205,7 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t tim
             currentMove = move;
 
             commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
+            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime, searchedMoves);
             revertMove(game, &currentMove);
 
             for (int _ = 0; _ < depth; ++_) {
@@ -228,7 +231,7 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t tim
             currentMove = move;
 
             commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
+            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime, searchedMoves);
             revertMove(game, &currentMove);
 
             for (int _ = 0; _ < depth; ++_) {
@@ -258,7 +261,7 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t tim
 
 t_move getMove(t_game *game, bool color, uint64_t timePerMove) {
     // t_move bestMove = getMoveRandom(game, color);
-    std::pair<t_move, float> abReturn = alphaBetaHead(game, 4, timePerMove);
+    std::pair<t_move, float> abReturn = alphaBetaHead(game, 4, timePerMove, NULL);
 
     t_move bestMove = abReturn.first;
     float bestScore = abReturn.second;
