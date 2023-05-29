@@ -169,9 +169,9 @@ public:
     bool operator < (const Boardc& a) const;
     bool operator > (const Boardc& a) const;
     bool operator == (const Boardc& a) const;
-    t_board* getBoard();
+    t_board* _board;
 private:
-   t_board* _board;
+   uint64_t _boardValue;
 
 };
 

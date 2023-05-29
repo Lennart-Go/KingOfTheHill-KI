@@ -171,14 +171,12 @@ int shift_from_position(Position position) {
 
 Boardc::Boardc(t_board* board){
     _board = board;
-}
-
-t_board* Boardc::getBoard(){
-    return _board;
+    uint64_t _boardValue = _board->pawn+_board->knight+_board->bishop+_board->rook+_board->king+_board->queen;
 }
 
 bool Boardc::operator<(const Boardc& a) const {
-    if(_board->pawn < a._board->pawn){
+    uint64_t aBoardValue = a._board->pawn+a._board->knight+a._board->bishop+a._board->rook+a._board->king+a._board->queen;
+    if(_boardValue < aBoardValue){
         return true;
     }else{
         return false;
@@ -186,7 +184,8 @@ bool Boardc::operator<(const Boardc& a) const {
 }
 
 bool Boardc::operator>(const Boardc& a) const {
-    if(_board->pawn > a._board->pawn){
+    uint64_t aBoardValue = a._board->pawn+a._board->knight+a._board->bishop+a._board->rook+a._board->king+a._board->queen;
+    if(_boardValue > aBoardValue){
         return true;
     }else{
         return false;
@@ -194,7 +193,8 @@ bool Boardc::operator>(const Boardc& a) const {
 }
 
 bool Boardc::operator==(const Boardc& a) const {
-    if(_board->pawn == a._board->pawn){
+    uint64_t aBoardValue = a._board->pawn+a._board->knight+a._board->bishop+a._board->rook+a._board->king+a._board->queen;
+    if(_boardValue == aBoardValue){
         return true;
     }else{
         return false;

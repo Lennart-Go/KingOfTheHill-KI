@@ -23,7 +23,6 @@ bool positionTracking(t_game *game) {
 
     Boardc comparableBoard = Boardc(game->board);
     std::map<Boardc, int> &map = *game->positionHistory;
-    char *currentFen = getFen(game->board);
     bool positionRepetitionDraw = false;
 
     if (game->positionHistory == nullptr) {
@@ -42,14 +41,12 @@ bool positionTracking(t_game *game) {
         }
     }
 
-    free(currentFen);
     return positionRepetitionDraw;
 }
 
 void positionTrackingUndo(t_game *game) {
     Boardc comparableBoard = Boardc(game->board);
     std::map<Boardc, int> &map = *game->positionHistory;
-    char *currentFen = getFen(game->board);
 
     if (game->positionHistory != nullptr) {
         if (map.find(comparableBoard) != map.end()) {
@@ -61,7 +58,6 @@ void positionTrackingUndo(t_game *game) {
         }
     }
 
-    free(currentFen);
 }
 
 
