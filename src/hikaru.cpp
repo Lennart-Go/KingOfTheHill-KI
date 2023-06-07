@@ -64,7 +64,7 @@ float evaluate(const t_game* game) {
         } else {
             // Draw -> Return neutral score, as neither side should get any scores out of it
             int sign = (game->turn * 2) - 1;
-            return (float )sign / (float )(game->blackMoveCounter * game->blackMoveCounter);
+            return (float )sign / (float )(game->blackMoveCounter * game->blackMoveCounter + 1);
         }
     }
 
@@ -94,7 +94,6 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t time
     }
 
     float score, bestScore;
-    t_move currentMove;
     std::vector<t_move> moves = generate_moves(game, game->turn);
 
     for (int _ = 0; _ < depth; ++_) {
@@ -106,9 +105,7 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t time
         bestScore = -std::numeric_limits<float>::max();
 
         // White's turn -> Maximize score
-        for (auto move : moves) {
-            currentMove = move;
-
+        for (auto currentMove : moves) {
             commitMove(game, &currentMove);
             score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
             revertMove(game, &currentMove);
@@ -120,7 +117,7 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t time
             // printf(" returned value %.4f (current/new max is %.4f/", score, bestScore);
 
             bestScore = max(bestScore, score);
-            alpha = max(alpha, score);
+            alpha = max(alpha, bestScore);
 
             // printf("%.4f)\n", bestScore);
 
@@ -133,13 +130,13 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t time
                 break;
             }
         }
+
+        return bestScore;
     } else {
         bestScore = std::numeric_limits<float>::max();
 
         // Black's turn -> Minimize score
-        for (auto move : moves) {
-            currentMove = move;
-
+        for (auto currentMove : moves) {
             commitMove(game, &currentMove);
             score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
             revertMove(game, &currentMove);
@@ -151,11 +148,11 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t time
             // printf(" returned value %.4f (current/new min is %.4f/", score, bestScore);
 
             bestScore = min(bestScore, score);
-            beta = min(beta, score);
+            beta = min(beta, bestScore);
 
             // printf("%.4f)\n", bestScore);
 
-            if (alpha <= beta) {
+            if (beta <= alpha) {
                 // "Opposing" team would always choose one of the already better moves
                 for (int _ = 0; _ < depth; ++_) {
                     // printf("\t");
@@ -216,10 +213,11 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t tim
                 bestMove = currentMove;
             }
 
-            alpha = max(alpha, score);
+            alpha = max(alpha, bestScore);
 
             // printf("%.4f)\n", bestScore);
         }
+        return {bestMove, bestScore};
     } else {
         bestScore = std::numeric_limits<float>::max();
 
@@ -242,7 +240,7 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t tim
                 bestMove = currentMove;
             }
 
-            beta = min(beta, score);
+            beta = min(beta, bestScore);
 
             // printf("%.4f)\n", bestScore);
         }
