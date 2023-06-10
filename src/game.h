@@ -27,6 +27,8 @@ typedef struct game {
     uint32_t blackMoveTime;  // Cumulative move time of black team in ms
 
     unsigned enpassants:4;
+
+    uint64_t* random;
 } t_game;
 
 t_game *startGame();
