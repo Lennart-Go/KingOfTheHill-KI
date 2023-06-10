@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 
+
 /* #############################################################################
  * ########################## List class definitions ###########################
  * #############################################################################
@@ -169,13 +170,12 @@ int shift_from_position(Position position) {
     // return 63 - (position.y * 8 + position.x);
 }
 
-Boardc::Boardc(t_board* board){
-    _board = board;
-    uint64_t _boardValue = _board->pawn+_board->knight+_board->bishop+_board->rook+_board->king+_board->queen;
+Boardc::Boardc(uint64_t hashValue){
+    _boardValue = hashValue;
 }
 
 bool Boardc::operator<(const Boardc& a) const {
-    uint64_t aBoardValue = a._board->pawn+a._board->knight+a._board->bishop+a._board->rook+a._board->king+a._board->queen;
+    uint64_t aBoardValue = a._boardValue;
     if(_boardValue < aBoardValue){
         return true;
     }else{
@@ -184,7 +184,7 @@ bool Boardc::operator<(const Boardc& a) const {
 }
 
 bool Boardc::operator>(const Boardc& a) const {
-    uint64_t aBoardValue = a._board->pawn+a._board->knight+a._board->bishop+a._board->rook+a._board->king+a._board->queen;
+    uint64_t aBoardValue = a._boardValue;
     if(_boardValue > aBoardValue){
         return true;
     }else{
@@ -193,7 +193,7 @@ bool Boardc::operator>(const Boardc& a) const {
 }
 
 bool Boardc::operator==(const Boardc& a) const {
-    uint64_t aBoardValue = a._board->pawn+a._board->knight+a._board->bishop+a._board->rook+a._board->king+a._board->queen;
+    uint64_t aBoardValue = a._boardValue;
     if(_boardValue == aBoardValue){
         return true;
     }else{
