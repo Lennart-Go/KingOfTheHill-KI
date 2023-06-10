@@ -57,5 +57,16 @@ uint64_t hash(uint64_t* random, t_game* game) {
         if (figure != -1) hash ^= random[i*12+figure];
     }
 
+    uint64_t stats = 0;
+    stats |= (uint64_t) game->whiteCanCastleLong << 0;
+    stats |= (uint64_t) game->whiteCanCastleShort << 1;
+    stats |= (uint64_t) game->whiteCastled << 2;
+    stats |= (uint64_t) game->blackCanCastleLong << 3;
+    stats |= (uint64_t) game->blackCanCastleShort << 4;
+    stats |= (uint64_t) game->blackCastled << 5;
+    stats |= (uint64_t) game->enpassants << 6;
+
+    hash ^= stats;
+
     return hash;
 }
