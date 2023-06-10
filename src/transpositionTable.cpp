@@ -8,11 +8,13 @@ t_table* init_table() {
     return table;
 }
 
-t_entry* init_entry(uint64_t hash, t_move bestMove, uint8_t vision) {
+t_entry* init_entry(uint64_t hash, t_move bestMove, float score, uint8_t vision) {
     t_entry* newEntry = (t_entry*)calloc(1, sizeof(t_entry));
     newEntry->hash = hash;
     newEntry->bestMove = bestMove;
+    newEntry->age = 0;
     newEntry->vision = vision;
+    newEntry->score = score;
     newEntry->next = NULL;
     return newEntry;
 }
@@ -63,6 +65,14 @@ void remove_entry(t_table* table, t_entry* oldEntry) {
     throw std::runtime_error("Entry to remove not in table\n");
 }
 
+void age_table(t_table* table) {
+    t_entry* current = table->first;
+    while (current != NULL) {
+        current->age += 1;
+        current = current->next;
+    }
+}
+
 void print_entry(t_entry* entry) {
     printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
     printf("entry at: %p\n", entry);
@@ -71,7 +81,9 @@ void print_entry(t_entry* entry) {
     printf("best Move: ");
     printMove(entry->bestMove);
     printf("\n");
+    printf("score: %f\n", entry->score);
     printf("vision: %i\n", entry->vision);
+    printf("age: %hhu\n", entry->age);
     printf("next entry at: %p\n", entry->next);
     printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 }
