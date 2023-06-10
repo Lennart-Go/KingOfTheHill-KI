@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(KingOfTheHill_KI)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 include_directories(.)
 include_directories(src)
@@ -25,7 +25,7 @@ add_executable(KingOfTheHill_KI
         src/move.cpp
         src/move.h
         src/util.cpp
-        src/util.h)
+        src/util.h src/moveMaps.h)
 target_link_libraries(KingOfTheHill_KI ${GTEST_LIBRARIES} pthread)
 
 add_executable(Tests
@@ -46,5 +46,5 @@ add_executable(Tests
         test/BoardTest.cpp
         test/EndTest.cpp
         test/main.cpp
-        test/MoveTest.cpp)
+        test/MoveTest.cpp src/moveMaps.h)
 target_link_libraries(Tests ${GTEST_LIBRARIES} pthread)

@@ -4,10 +4,10 @@
 #include <map>
 
 
-int countFigure(uint64_t singleBoard) {
+int countFigure(field singleBoard) {
     int count = 0;
     for (int i = 0; i < 64; i++) {
-        if (singleBoard & ((uint64_t) 1 << i)) {
+        if (singleBoard & ((field) 1 << i)) {
             count++;
         }
     }
@@ -67,8 +67,8 @@ bool isCheckmate(t_game *game, bool moving_color) {
     *  t_board *board: Pointer to the board representing the state of the game
     *  bool moving_color: the next moving color with "false" for white and "true" for black
     */
-    uint64_t color = moving_color ? game->board->black : game->board->white;
-    uint64_t King = game->board->king & color;
+    field color = moving_color ? game->board->black : game->board->white;
+    field King = moving_color ? game->board->blackKing : game->board->whiteKing;
     Position kingPosition = position_from_shift((King == 0) ? 0 : (int) log2((long double) King));
     if (is_threatened(game->board, kingPosition, moving_color)) {
         std::vector<t_move> possibleMoves = generate_moves(game, moving_color);
@@ -96,7 +96,7 @@ bool isStalemate(t_game *game, bool moving_color) {
     }
 }
 
-/*bool isInsufficientMatingMaterial(t_board* board){
+/*bool isInsufficientMatingMaterial(t_board *board){
     // lone king or king with two or fewer knights
     if((board->white&(board->knight|board->king)) > 0 && (board->white&(board->queen|board->rook|board->bishop|board->pawn))==0){
         return true;
@@ -121,8 +121,8 @@ bool KingOfTheHill(t_board *board, bool moved_color) {
      *  t_board *board: Pointer to the board representing the state of the game
      *  bool moved_color: the last moved color with "false" for white and "true" for black
      */
-    uint64_t color = moved_color ? board->black : board->white;
-    uint64_t King = board->king & color;
+    field color = moved_color ? board->black : board->white;
+    field King = moved_color ? board->blackKing : board->whiteKing;
     Position kingPosition = position_from_shift((King == 0) ? 0 : (int) log2((long double) King));
     if (kingPosition.x >= 3 && kingPosition.x <= 4 && kingPosition.y >= 3 && kingPosition.y <= 4) {
         return true;

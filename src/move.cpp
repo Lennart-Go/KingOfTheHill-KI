@@ -78,7 +78,7 @@ bool empty_between(t_board *board, t_move move) {
      *  bool: "true" if the line of sight from origin to target is clear, "false" otherwise
      */
 
-    uint64_t occupied = board->white | board->black;
+    field occupied = board->white | board->black;
 
     Position originPosition = position_from_shift(move.origin);
     Position targetPosition = position_from_shift(move.target);
@@ -119,7 +119,7 @@ bool empty_between(t_board *board, t_move move) {
     return true;
 }
 
-bool is_move_legal_nocheck(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter,
+bool is_move_legal_nocheck(t_board *board, t_move move, field color_filter, field enemy_color_filter,
                            bool checkBetween) {
     /*
      * Function to check whether a given move is legal, whilst ignoring restrictions from possible checks
@@ -127,8 +127,8 @@ bool is_move_legal_nocheck(t_board *board, t_move move, uint64_t color_filter, u
      * Arguments:
      *  t_board *board: Pointer to the board representing the state of the game
      *  t_move move: Move struct object containing origin, target and color of the moving piece
-     *  uint64_t color_filter: Bitmap containing information where pieces of the moving team are located
-     *  uint64_t enemy_color_filter: Bitmap containing information where pieces of the moving team's enemy are located
+     *  field color_filter: Bitmap containing information where pieces of the moving team are located
+     *  field enemy_color_filter: Bitmap containing information where pieces of the moving team's enemy are located
      *  bool checkBetween: boolean flag, whether to check for obstructions between origin and target of the given move
      * Return:
      *  "true" if the move is legal considering the information passed to the function, "false" otherwise
@@ -166,7 +166,7 @@ bool is_threatened(t_board *board, Position target, bool color) {
      *  "true" if the specified position is under threat by a piece, "false" otherwise
      */
 
-    uint64_t color_filter, enemy_color_filter;
+    field color_filter, enemy_color_filter;
     std::vector<Offset> M_PAWN, M_PAWN_DOUBLE, M_PAWN_TAKE;
 
     if (color) {
@@ -631,7 +631,7 @@ bool is_move_check(t_board *board, t_move move) {
     doMove(board, &move);
 
     // Get position of king
-    uint64_t color_mask;
+    field color_mask;
     if (!color) {
         color_mask = board->white;
     } else {
@@ -653,15 +653,15 @@ bool is_move_check(t_board *board, t_move move) {
     return retValue;
 }
 
-bool is_move_legal(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter, bool checkBetween) {
+bool is_move_legal(t_board *board, t_move move, field color_filter, field enemy_color_filter, bool checkBetween) {
     /*
      * Function to check whether a given move is legal
      *
      * Arguments:
      *  t_board *board: Pointer to the board representing the state of the game
      *  t_move move: Move struct object containing origin, target and color of the moving piece
-     *  uint64_t color_filter: Bitmap containing information where pieces of the moving team are located
-     *  uint64_t enemy_color_filter: Bitmap containing information where pieces of the moving team's enemy are located
+     *  field color_filter: Bitmap containing information where pieces of the moving team are located
+     *  field enemy_color_filter: Bitmap containing information where pieces of the moving team's enemy are located
      *  bool checkBetween: boolean flag, whether to check for obstructions between origin and target of the given move
      * Return:
      *  "true" if the move is legal considering the information passed to the function, "false" otherwise
@@ -732,16 +732,21 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
      *  std::vector<t_move>: A list of t_move objects containing information on origin, target and color of the legal moves
      */
 
-    t_board *board = game->board;
+    t_board *gameBoard = game->board;
+    t_board otherBoard = board(gameBoard->white & gameBoard->king, gameBoard->white & gameBoard->queen, gameBoard->white & gameBoard->rook,
+                        gameBoard->white & gameBoard->bishop, gameBoard->white & gameBoard->knight, gameBoard->white & gameBoard->pawn,
+                        gameBoard->black & gameBoard->king, gameBoard->black & gameBoard->queen, gameBoard->black & gameBoard->rook,
+                        gameBoard->black & gameBoard->bishop, gameBoard->black & gameBoard->knight, gameBoard->black & gameBoard->pawn);
+    t_board *board = &otherBoard;
 
     std::vector<t_move> moves = std::vector<t_move>();
 
-    uint64_t color_filter, enemy_color_filter;
+    field color_filter, enemy_color_filter;
     std::vector<Offset> M_PAWN, M_PAWN_DOUBLE, M_PAWN_TAKE;
     bool hasCastled, canCastleShort, canCastleLong;
     if (!color) {
-        color_filter = board->white;
-        enemy_color_filter = board->black;
+        color_filter = gameBoard->white;
+        enemy_color_filter = gameBoard->black;
 
         M_PAWN = M_PAWN_WHITE;
         M_PAWN_DOUBLE = M_PAWN_WHITE_DOUBLE;
@@ -751,8 +756,8 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
         canCastleShort = game->whiteCanCastleShort;
         canCastleLong = game->whiteCanCastleLong;
     } else {
-        color_filter = board->black;
-        enemy_color_filter = board->white;
+        color_filter = gameBoard->black;
+        enemy_color_filter = gameBoard->white;
 
         M_PAWN = M_PAWN_BLACK;
         M_PAWN_DOUBLE = M_PAWN_BLACK_DOUBLE;
@@ -766,7 +771,7 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
     // Generate moves for all pieces
 
     // King
-    std::vector<Position> kingPositions = board_value_positions(board->king & color_filter);
+    std::vector<Position> kingPositions = board_value_positions(gameBoard->king & color_filter);
     if (kingPositions.size() != 1) {
         // Dafuq?
         // return moves;  // Abort move generation, because no/many king?
@@ -790,14 +795,14 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.disable_short_castle = true;
             possibleMove.disable_long_castle = true;
 
-            if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, false)) {
+            if (is_move_legal(gameBoard, possibleMove, color_filter, enemy_color_filter, false)) {
                 moves.push_back(possibleMove);
             }
         }
 
         // Castling
         if (!hasCastled) {
-            if (canCastleShort && is_castle_legal(board, kingPosition, color, true)) {
+            if (canCastleShort && is_castle_legal(gameBoard, kingPosition, color, true)) {
                 t_move possibleMove;
                 possibleMove.origin = shift_from_position(kingPosition);
                 possibleMove.target = shift_from_position(kingPosition + Position(2, 0));
@@ -805,11 +810,11 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
                 possibleMove.castled_short = true;
                 possibleMove.disable_long_castle = true;
 
-                if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
+                if (is_move_legal_nocheck(gameBoard, possibleMove, color_filter, enemy_color_filter, true)) {
                     moves.push_back(possibleMove);
                 }
             }
-            if (canCastleLong && is_castle_legal(board, kingPosition, color, false)) {
+            if (canCastleLong && is_castle_legal(gameBoard, kingPosition, color, false)) {
                 t_move possibleMove;
                 possibleMove.origin = shift_from_position(kingPosition);
                 possibleMove.target = shift_from_position(kingPosition - Position(2, 0));
@@ -817,7 +822,7 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
                 possibleMove.castled_long = true;
                 possibleMove.disable_short_castle = true;
 
-                if (is_move_legal_nocheck(board, possibleMove, color_filter, enemy_color_filter, true)) {
+                if (is_move_legal_nocheck(gameBoard, possibleMove, color_filter, enemy_color_filter, true)) {
                     moves.push_back(possibleMove);
                 }
             }
@@ -826,8 +831,8 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
 
 
     // Queen
-    std::vector<Position> queenPositions = board_value_positions(board->queen & color_filter);
-    for (auto queenPosition : queenPositions) {
+    std::vector<Position> queenPositions = board_value_positions(gameBoard->queen & color_filter);
+    for (Position queenPosition : queenPositions) {
         std::vector<Position> possibleTargets;
 
         bool a_0 = true;
@@ -920,14 +925,14 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
-            if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
+            if (is_move_legal(gameBoard, possibleMove, color_filter, enemy_color_filter, true)) {
                 moves.push_back(possibleMove);
             }
         }
     }
 
     // Rook
-    std::vector<Position> rookPositions = board_value_positions(board->rook & color_filter);
+    std::vector<Position> rookPositions = board_value_positions(gameBoard->rook & color_filter);
     for (auto rookPosition : rookPositions) {
         std::vector<Position> possibleTargets;
 
@@ -983,14 +988,14 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.disable_short_castle = rookPosition.x == 7;
             possibleMove.disable_long_castle = rookPosition.x == 0;
 
-            if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
+            if (is_move_legal(gameBoard, possibleMove, color_filter, enemy_color_filter, true)) {
                 moves.push_back(possibleMove);
             }
         }
     }
 
     // Bishop
-    std::vector<Position> bishopPositions = board_value_positions(board->bishop & color_filter);
+    std::vector<Position> bishopPositions = board_value_positions(gameBoard->bishop & color_filter);
     for (auto bishopPosition : bishopPositions) {
         std::vector<Position> possibleTargets;
 
@@ -1044,14 +1049,14 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
-            if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
+            if (is_move_legal(gameBoard, possibleMove, color_filter, enemy_color_filter, true)) {
                 moves.push_back(possibleMove);
             }
         }
     }
 
     // Knight
-    std::vector<Position> knightPositions = board_value_positions(board->knight & color_filter);
+    std::vector<Position> knightPositions = board_value_positions(gameBoard->knight & color_filter);
     for (auto knightPosition : knightPositions) {
         std::vector<Position> possibleTargets;
 
@@ -1069,14 +1074,14 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
-            if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, false)) {
+            if (is_move_legal(gameBoard, possibleMove, color_filter, enemy_color_filter, false)) {
                 moves.push_back(possibleMove);
             }
         }
     }
 
     // Pawns
-    std::vector<Position> pawnPositions = board_value_positions(board->pawn & color_filter);
+    std::vector<Position> pawnPositions = board_value_positions(gameBoard->pawn & color_filter);
     for (auto pawnPosition : pawnPositions) {
         std::vector<Position> possibleTargets;
 
@@ -1136,7 +1141,7 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
                         possibleMove.color = color;
                         possibleMove.promoted = true;
 
-                        if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, false)) {
+                        if (is_move_legal(gameBoard, possibleMove, color_filter, enemy_color_filter, false)) {
                             for (int i = 0; i < 4; ++i) {
                                 // Add one move for each promotable piece
                                 possibleMove.promoted_to = i;
@@ -1173,7 +1178,7 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
             possibleMove.target = shift_from_position(moveTarget);
             possibleMove.color = color;
 
-            if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, true)) {
+            if (is_move_legal(gameBoard, possibleMove, color_filter, enemy_color_filter, true)) {
                 moves.push_back(possibleMove);
             }
         }
@@ -1194,7 +1199,7 @@ std::vector<t_move> generate_moves(t_game *game, bool color) {
                     possibleMove.color = color;
                     possibleMove.promoted = true;
 
-                    if (is_move_legal(board, possibleMove, color_filter, enemy_color_filter, false)) {
+                    if (is_move_legal(gameBoard, possibleMove, color_filter, enemy_color_filter, false)) {
                         for (int i = 0; i < 4; ++i) {
                             // Add one move for each promotable piece
                             possibleMove.promoted_to = i;
@@ -1247,8 +1252,8 @@ void doMove(t_board *board, t_move *move) {
     bool isCastle = is_castle(board, move);
 
     //generate bitmask for fields
-    uint64_t bitOrigin = (uint64_t) 1 << move->origin;
-    uint64_t bitTarget = (uint64_t) 1 << move->target;
+    field bitOrigin = (field) 1 << move->origin;
+    field bitTarget = (field) 1 << move->target;
 
     //set taken figure
     if ((board->queen & bitTarget) != 0) move->taken_figure = 1;
@@ -1321,7 +1326,7 @@ void doMove(t_board *board, t_move *move) {
 //        printf("\n");
 
         int takenPositionShift = shift_from_position(takenPosition);
-        uint64_t takenPositionBitmask = (uint64_t) 1 << takenPositionShift;
+        field takenPositionBitmask = (field) 1 << takenPositionShift;
 
         // Delete piece at selected position
         board->white &= ~takenPositionBitmask;
@@ -1342,7 +1347,7 @@ void doMove(t_board *board, t_move *move) {
         }
         doMove(board, &castleRookMove);
     } else if (move->promoted) {
-        uint64_t targetPositionBitmask = (uint64_t) 1 << move->target;
+        field targetPositionBitmask = (field) 1 << move->target;
         // Remove pawn
         board->pawn &= ~targetPositionBitmask;
 
@@ -1361,8 +1366,8 @@ void doMove(t_board *board, t_move *move) {
 
 void undoMove(t_board *board, t_move *move) {
     //generate bitmask for fields
-    uint64_t bitOrigin = (uint64_t) 1 << move->origin;
-    uint64_t bitTarget = (uint64_t) 1 << move->target;
+    field bitOrigin = (field) 1 << move->origin;
+    field bitTarget = (field) 1 << move->target;
 
     //get targetfigure and move it
     if ((board->king & bitTarget) != 0) {
@@ -1421,7 +1426,7 @@ void undoMove(t_board *board, t_move *move) {
         Position takenPosition = Position(targetPosition.x, originPosition.y);
 
         int takenPositionShift = shift_from_position(takenPosition);
-        uint64_t takenPositionBitmask = (uint64_t) 1 << takenPositionShift;
+        field takenPositionBitmask = (field) 1 << takenPositionShift;
 
         // printf("Replacing ");
         // Replace piece at selected position
@@ -1454,7 +1459,7 @@ void undoMove(t_board *board, t_move *move) {
         }
         undoMove(board, &castleRookMove);
     } else if (move->promoted) {
-        uint64_t targetPositionBitmask = (uint64_t) 1 << move->origin;
+        field targetPositionBitmask = (field) 1 << move->origin;
         // Reinsert pawn
         board->pawn |= targetPositionBitmask;
 

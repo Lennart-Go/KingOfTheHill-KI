@@ -12,8 +12,8 @@
 #define PAWN_VALUE 1
 
 
-t_move getMove(t_game *game, bool color, uint64_t timePerMove);
-std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t timePerMove);
+t_move getMove(t_game *game, bool color, field timePerMove);
+std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, field timePerMove);
 float evaluate(const t_game *game);
 
 #endif //KINGOFTHEHILL_KI_HIKARU_H

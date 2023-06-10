@@ -46,7 +46,7 @@ int randn(int start, int stop) {
 
 
 // calculates the time left finding a move
-uint64_t timeLeft(uint64_t timePerMove, time_t startMoveTime) {
+field timeLeft(field timePerMove, time_t startMoveTime) {
     time_t currentTime = time(NULL);
     return currentTime - timePerMove - startMoveTime;
 }
@@ -69,25 +69,23 @@ float evaluate(const t_game* game) {
     }
 
     float score = 0;
-    uint64_t whiteColorFilter = game->board->white;
-    uint64_t blackColorFilter = game->board->black;
 
-    score += (float )countFigure(game->board->queen & whiteColorFilter) * QUEEN_VALUE;
-    score += (float )countFigure(game->board->rook & whiteColorFilter) * ROOK_VALUE;
-    score += (float )countFigure(game->board->bishop & whiteColorFilter) * BISHOP_VALUE;
-    score += (float )countFigure(game->board->knight & whiteColorFilter) * KNIGHT_VALUE;
-    score += (float )countFigure(game->board->pawn & whiteColorFilter) * PAWN_VALUE;
+    score += (float )countFigure(game->board->whiteQueen) * QUEEN_VALUE;
+    score += (float )countFigure(game->board->whiteRook) * ROOK_VALUE;
+    score += (float )countFigure(game->board->whiteBishop) * BISHOP_VALUE;
+    score += (float )countFigure(game->board->whiteKnight) * KNIGHT_VALUE;
+    score += (float )countFigure(game->board->whitePawn) * PAWN_VALUE;
 
-    score -= (float )countFigure(game->board->queen & blackColorFilter) * QUEEN_VALUE;
-    score -= (float )countFigure(game->board->rook & blackColorFilter) * ROOK_VALUE;
-    score -= (float )countFigure(game->board->bishop & blackColorFilter) * BISHOP_VALUE;
-    score -= (float )countFigure(game->board->knight & blackColorFilter) * KNIGHT_VALUE;
-    score -= (float )countFigure(game->board->pawn & blackColorFilter) * PAWN_VALUE;
+    score -= (float )countFigure(game->board->blackQueen) * QUEEN_VALUE;
+    score -= (float )countFigure(game->board->blackRook) * ROOK_VALUE;
+    score -= (float )countFigure(game->board->blackBishop) * BISHOP_VALUE;
+    score -= (float )countFigure(game->board->blackKnight) * KNIGHT_VALUE;
+    score -= (float )countFigure(game->board->blackPawn ) * PAWN_VALUE;
 
     return score;
 }
 
-float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t timePerMove, time_t startMoveTime) {
+float alphaBeta(int depth, float alpha, float beta, t_game *game,  field timePerMove, time_t startMoveTime) {
 
     if (depth == 0 || game->isOver || timeLeft(timePerMove, startMoveTime) <= 0) {
         return evaluate(game);
@@ -166,7 +164,7 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t time
     return bestScore;
 }
 
-std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t timePerMove) {
+std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, field timePerMove) {
     int depth = max_depth;  // NOTE: Always use one less than actually wanted
 
     float alpha = -std::numeric_limits<float>::max();
@@ -254,7 +252,7 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t tim
 }
 
 
-t_move getMove(t_game *game, bool color, uint64_t timePerMove) {
+t_move getMove(t_game *game, bool color, field timePerMove) {
     // t_move bestMove = getMoveRandom(game, color);
     std::pair<t_move, float> abReturn = alphaBetaHead(game, 4, timePerMove);
 

@@ -177,18 +177,18 @@ Position position_from_shift(int shift) {
     int x = 7 - (val - (y * 8));
     // int x = val - (y * 8);
 
-    return Position {x, y};
+    return Position(x, y);
 }
 
 
-bool board_value_from_shift(uint64_t board, int shift) {
-    if ((board & ((uint64_t) 1 << shift)) != 0)
+bool board_value_from_shift(field board, int shift) {
+    if ((board & ((field )1 << shift)) != 0)
         return true;
     return false;
 }
 
 
-std::vector<Position> board_value_positions(uint64_t board) {
+std::vector<Position> board_value_positions(field board) {
     std::vector<Position> positions;
 
     for (int shift = 0; shift < 64; ++shift) {

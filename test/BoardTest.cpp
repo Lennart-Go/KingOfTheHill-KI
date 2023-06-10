@@ -23,10 +23,10 @@ protected:
 
 TEST_F(BoardTest, setFenStartBoard) {
 
-    t_board *board = initializeBoard();
+    t_board board = initializeBoard();
     setFen(board, startBoardAsFen);
 
-    EXPECT_EQ(startBoard->black, board->black);
+    EXPECT_EQ(startBoard->black, board.black);
     //EXPECT_ANY_THROW(setFen(board, wrongBoardAsFen)); // no check of wrong input, but not so important
 
 }

@@ -46,7 +46,7 @@ protected:
     }
 
     t_game *game;
-    t_board *board;
+    t_board board;
     t_move e2_e4;
 
     char boardAsFen[44] = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
@@ -122,8 +122,8 @@ TEST_F(MoveTest, isMoveLegalNocheckTargetOccupied) {
                    (unsigned )shift_from_position(Position(2, 0)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
     bool checkBetweenDefault = false;
 
     EXPECT_FALSE(is_move_legal_nocheck(board, move, whiteColorFilter, blackColorFilter, checkBetweenDefault));
@@ -135,8 +135,8 @@ TEST_F(MoveTest, isMoveLegalNocheckCheckBetweenEmptyBetween) {
                    (unsigned )shift_from_position(Position(2, 0)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
 
     EXPECT_TRUE(is_move_legal_nocheck(board, move, whiteColorFilter, blackColorFilter, true));
 }
@@ -147,8 +147,8 @@ TEST_F(MoveTest, isMoveLegalNocheckCheckBetweenNotEmptyBetween) {
                    (unsigned )shift_from_position(Position(2, 0)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
 
     EXPECT_FALSE(is_move_legal_nocheck(board, move, whiteColorFilter, blackColorFilter, true));
 }
@@ -159,8 +159,8 @@ TEST_F(MoveTest, isMoveLegalNocheckNoCheckBetweenEmptyBetween) {
                    (unsigned )shift_from_position(Position(2, 0)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
 
     EXPECT_TRUE(is_move_legal_nocheck(board, move, whiteColorFilter, blackColorFilter, false));
 }
@@ -171,8 +171,8 @@ TEST_F(MoveTest, isMoveLegalNocheckNoCheckBetweenNotEmptyBetween) {
                    (unsigned )shift_from_position(Position(2, 0)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
 
     EXPECT_TRUE(is_move_legal_nocheck(board, move, whiteColorFilter, blackColorFilter, false));
 }
@@ -183,8 +183,8 @@ TEST_F(MoveTest, isMoveLegalNocheckValid) {
                    (unsigned )shift_from_position(Position(2, 0)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
 
     EXPECT_TRUE(is_move_legal_nocheck(board, move, whiteColorFilter, blackColorFilter, true));
 }
@@ -475,8 +475,8 @@ TEST_F(MoveTest, isMoveLegalTargetOccupied) {
                    (unsigned )shift_from_position(Position(2, 0)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
     bool checkBetweenDefault = false;
 
     EXPECT_FALSE(is_move_legal(board, move, whiteColorFilter, blackColorFilter, checkBetweenDefault));
@@ -488,8 +488,8 @@ TEST_F(MoveTest, isMoveLegalCheckBetweenEmptyBetween) {
                    (unsigned )shift_from_position(Position(2, 0)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
 
     EXPECT_TRUE(is_move_legal(board, move, whiteColorFilter, blackColorFilter, true));
 }
@@ -500,8 +500,8 @@ TEST_F(MoveTest, isMoveLegalCheckBetweenNotEmptyBetween) {
                    (unsigned )shift_from_position(Position(2, 0)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
 
     EXPECT_FALSE(is_move_legal(board, move, whiteColorFilter, blackColorFilter, true));
 }
@@ -512,8 +512,8 @@ TEST_F(MoveTest, isMoveLegalNoCheckBetweenEmptyBetween) {
                    (unsigned )shift_from_position(Position(2, 0)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
 
     EXPECT_TRUE(is_move_legal(board, move, whiteColorFilter, blackColorFilter, false));
 }
@@ -524,8 +524,8 @@ TEST_F(MoveTest, isMoveLegalNoCheckBetweenNotEmptyBetween) {
                    (unsigned )shift_from_position(Position(2, 0)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
 
     EXPECT_TRUE(is_move_legal(board, move, whiteColorFilter, blackColorFilter, false));
 }
@@ -536,8 +536,8 @@ TEST_F(MoveTest, isMoveLegalIsCheck) {
                    (unsigned )shift_from_position(Position(2, 0)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
 
     EXPECT_FALSE(is_move_legal(board, move, whiteColorFilter, blackColorFilter, false));
 }
@@ -548,8 +548,8 @@ TEST_F(MoveTest, isMoveLegalNoCheck) {
                    (unsigned )shift_from_position(Position(0, 1)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
 
     EXPECT_TRUE(is_move_legal(board, move, whiteColorFilter, blackColorFilter, false));
 }
@@ -560,8 +560,8 @@ TEST_F(MoveTest, isMoveLegalValid) {
                    (unsigned )shift_from_position(Position(2, 0)),
                    0, 0};
 
-    uint64_t whiteColorFilter = board->white;
-    uint64_t blackColorFilter = board->black;
+    uint64_t whiteColorFilter = board.white;
+    uint64_t blackColorFilter = board.black;
 
     EXPECT_TRUE(is_move_legal_nocheck(board, move, whiteColorFilter, blackColorFilter, true));
 }
@@ -937,21 +937,21 @@ TEST_F(MoveTest, doMoveTargetCleared) {
     int targetShift = shift_from_position(Position(0, 1));
     uint64_t targetBitmask = (uint64_t )1 << targetShift;
 
-    board->king |= targetBitmask;
-    board->queen |= targetBitmask;
-    board->rook |= targetBitmask;
-    board->bishop |= targetBitmask;
-    board->knight |= targetBitmask;
-    board->pawn |= targetBitmask;
+    board.king |= targetBitmask;
+    board.queen |= targetBitmask;
+    board.rook |= targetBitmask;
+    board.bishop |= targetBitmask;
+    board.knight |= targetBitmask;
+    board.pawn |= targetBitmask;
 
     doMove(board, &move);
 
-    EXPECT_FALSE(board_value_from_shift(board->king, targetShift));
-    EXPECT_TRUE(board_value_from_shift(board->queen, targetShift));
-    EXPECT_FALSE(board_value_from_shift(board->rook, targetShift));
-    EXPECT_FALSE(board_value_from_shift(board->bishop, targetShift));
-    EXPECT_FALSE(board_value_from_shift(board->knight, targetShift));
-    EXPECT_FALSE(board_value_from_shift(board->pawn, targetShift));
+    EXPECT_FALSE(board_value_from_shift(board.king, targetShift));
+    EXPECT_TRUE(board_value_from_shift(board.queen, targetShift));
+    EXPECT_FALSE(board_value_from_shift(board.rook, targetShift));
+    EXPECT_FALSE(board_value_from_shift(board.bishop, targetShift));
+    EXPECT_FALSE(board_value_from_shift(board.knight, targetShift));
+    EXPECT_FALSE(board_value_from_shift(board.pawn, targetShift));
 }
 
 TEST_F(MoveTest, doMoveOriginCleared) {
@@ -964,14 +964,14 @@ TEST_F(MoveTest, doMoveOriginCleared) {
     doMove(board, &move);
 
     int originShift = move.origin;
-    EXPECT_FALSE(board_value_from_shift(board->king, originShift));
-    EXPECT_FALSE(board_value_from_shift(board->queen, originShift));
-    EXPECT_FALSE(board_value_from_shift(board->rook, originShift));
-    EXPECT_FALSE(board_value_from_shift(board->bishop, originShift));
-    EXPECT_FALSE(board_value_from_shift(board->knight, originShift));
-    EXPECT_FALSE(board_value_from_shift(board->pawn, originShift));
-    EXPECT_FALSE(board_value_from_shift(board->white, originShift));
-    EXPECT_FALSE(board_value_from_shift(board->black, originShift));
+    EXPECT_FALSE(board_value_from_shift(board.king, originShift));
+    EXPECT_FALSE(board_value_from_shift(board.queen, originShift));
+    EXPECT_FALSE(board_value_from_shift(board.rook, originShift));
+    EXPECT_FALSE(board_value_from_shift(board.bishop, originShift));
+    EXPECT_FALSE(board_value_from_shift(board.knight, originShift));
+    EXPECT_FALSE(board_value_from_shift(board.pawn, originShift));
+    EXPECT_FALSE(board_value_from_shift(board.white, originShift));
+    EXPECT_FALSE(board_value_from_shift(board.black, originShift));
 }
 
 TEST_F(MoveTest, doMovePieceMoved) {

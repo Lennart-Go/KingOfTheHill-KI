@@ -37,8 +37,8 @@ typedef struct move {
 bool empty_between(t_board *board, t_move move);
 bool is_move_check(t_board *board, t_move move);
 bool is_threatened(t_board *board, Position target, bool color);
-bool is_move_legal(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter, bool checkBetween);
-bool is_move_legal_nocheck(t_board *board, t_move move, uint64_t color_filter, uint64_t enemy_color_filter, bool checkBetween);
+bool is_move_legal(t_board *board, t_move move, field color_filter, field enemy_color_filter, bool checkBetween);
+bool is_move_legal_nocheck(t_board *board, t_move move, field color_filter, field enemy_color_filter, bool checkBetween);
 bool is_castle_legal(t_board *board, Position kingPosition, bool color, bool direction);
 
 std::vector<t_move> generate_moves(t_game *game, bool color);
@@ -49,8 +49,8 @@ bool is_enpassant(t_board *board, t_move *move);
 bool is_double_pawn_move(t_board *board, t_move *move);
 bool is_castle(t_board *board, t_move *move);
 
-void doMove(t_board* board, t_move* move);
-void undoMove(t_board* board, t_move* move);
+void doMove(t_board *board, t_move* move);
+void undoMove(t_board *board, t_move* move);
 
 void commitMove(t_game *game, t_move *move);
 void revertMove(t_game *game, t_move *move);

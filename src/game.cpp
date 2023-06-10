@@ -1,16 +1,17 @@
 #include <cstdlib>
 #include "game.h"
-#include "hikaru.h"
 #include "end.h"
+#include "board.h"
+#include "hikaru.h"
 #include "move.h"
 #include "unistd.h"
 
 
-t_game *startGame(uint64_t gameTime) {
+t_game *startGame(field gameTime) {
     t_game *game = (t_game *) calloc(1, sizeof(t_game));
-    t_board *board = initializeBoard();
+    t_board startBoard = initializeBoard();
 
-    game->board = board;
+    game->board = &startBoard;
     game->gameTime = gameTime;
     game->turn = 0;  // White's turn
     game->latestMoveTime = 0;  // TODO: Set latestMoveTime to current time in ms
@@ -42,19 +43,19 @@ int time_limit() {
     return 2 * 60 * 60 / 40;
 }
 
-void play(int maxRounds, uint64_t gameTime) {
+void play(int maxRounds, field gameTime) {
     if (maxRounds < 0) {
         maxRounds = INT32_MAX;
     }
 
     t_game *game = startGame(gameTime);
-    setFen(game->board, (char *)"r2qkbnr/pp1bpppp/2np4/1Bp5/4P3/5N2/PPPP1PPP/RNBQ1RK1");
+    // setFen(game->board, (char *)"r2qkbnr/pp1bpppp/2np4/1Bp5/4P3/5N2/PPPP1PPP/RNBQ1RK1");
     // game->turn = true;
 
     printBoard(game->board);
     // sleep(4);
 
-    uint64_t timePerMove = gameTime / 40;
+    field timePerMove = gameTime / 40;
 
     while (!game->isOver && (game->blackMoveCounter + 1) <= maxRounds) {
         /*  if (game->blackMoveCounter > 0) {
@@ -85,9 +86,9 @@ void play(int maxRounds, uint64_t gameTime) {
         // Check and announce checks
         Position kingPosition;
         if (!game->turn) {
-            kingPosition = board_value_positions(game->board->white & game->board->king).at(0);
+            kingPosition = board_value_positions(game->board->whiteKing).at(0);
         } else {
-            kingPosition = board_value_positions(game->board->black & game->board->king).at(0);
+            kingPosition = board_value_positions(game->board->blackKing).at(0);
         }
 
         if (is_threatened(game->board, kingPosition, game->turn)) {

@@ -9,7 +9,7 @@ protected:
     virtual void SetUp()
     {
         game = (t_game *) calloc(1, sizeof(t_game));
-        t_board *board = initializeBoard();
+        t_board board = initializeBoard();
 
         game->board = board;
         game->turn = 0;  // White's turn
