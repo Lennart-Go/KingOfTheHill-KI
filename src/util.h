@@ -164,15 +164,6 @@ public:
     Position toPosition() const;
 };
 
-class Boardc {
-public:
-    Boardc(uint64_t hashValue);
-    bool operator < (const Boardc& a) const;
-    bool operator > (const Boardc& a) const;
-    bool operator == (const Boardc& a) const;
-    uint64_t _boardValue;
-};
-
 int shift_from_position(Position position);
 Position position_from_shift(int shift);
 

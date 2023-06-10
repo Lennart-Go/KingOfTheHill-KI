@@ -20,23 +20,23 @@ bool positionTracking(t_game *game) {
     * Arguments:
     *  t_game *game: Pointer to the game representing the state of the game
     */
-    Boardc* comparableBoard = new Boardc(hash(game->random,game));
-    std::map<Boardc, int> &map = *game->positionHistory;
+    uint64_t boardHash = hash(game->random,game);
+    std::map<uint64_t , int> &map = *game->positionHistory;
     bool positionRepetitionDraw = false;
 
     if (game->positionHistory == nullptr) {
-        std::map<Boardc, int> *mapInit = new std::map<Boardc, int>();
+        std::map<uint64_t , int> *mapInit = new std::map<uint64_t , int>();
         game->positionHistory = mapInit;
-        (*mapInit).insert(std::pair<Boardc,int>(*comparableBoard, 1));
+        (*mapInit).insert(std::pair<uint64_t ,int>(hash(game->random,game), 1));
     } else {
-        if (map.find(*comparableBoard) != map.end()) {
-            int n = map[*comparableBoard];
-            map[*comparableBoard] = n + 1;
-            if (map[*comparableBoard] > 2) {
+        if (map.find(boardHash) != map.end()) {
+            int n = map[boardHash];
+            map[boardHash] = n + 1;
+            if (map[boardHash] > 2) {
                 positionRepetitionDraw = true;
             }
         } else {
-            map.insert(std::make_pair(*comparableBoard, 1));
+            map.insert(std::make_pair(boardHash, 1));
         }
     }
 
@@ -44,8 +44,8 @@ bool positionTracking(t_game *game) {
 }
 
 void positionTrackingUndo(t_game *game) {
-    Boardc comparableBoard = Boardc(hash(game->random,game));
-    std::map<Boardc, int> &map = *game->positionHistory;
+    uint64_t comparableBoard = hash(game->random,game);
+    std::map<uint64_t , int> &map = *game->positionHistory;
 
     if (game->positionHistory != nullptr) {
         if (map.find(comparableBoard) != map.end()) {

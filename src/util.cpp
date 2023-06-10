@@ -170,38 +170,6 @@ int shift_from_position(Position position) {
     // return 63 - (position.y * 8 + position.x);
 }
 
-Boardc::Boardc(uint64_t hashValue){
-    _boardValue = hashValue;
-}
-
-bool Boardc::operator<(const Boardc& a) const {
-    uint64_t aBoardValue = a._boardValue;
-    if(_boardValue < aBoardValue){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-bool Boardc::operator>(const Boardc& a) const {
-    uint64_t aBoardValue = a._boardValue;
-    if(_boardValue > aBoardValue){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-bool Boardc::operator==(const Boardc& a) const {
-    uint64_t aBoardValue = a._boardValue;
-    if(_boardValue == aBoardValue){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-
 Position position_from_shift(int shift) {
     int val = 63 - shift;
 
