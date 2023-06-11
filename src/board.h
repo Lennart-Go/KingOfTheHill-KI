@@ -111,7 +111,7 @@ enum class piece {
 
 t_board initializeBoard();
 
-void setFen(t_board *board, char fen[]);
+t_board setFen(char fen[]);
 
 char *getFen(t_board *board);
 
