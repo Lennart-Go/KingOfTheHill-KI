@@ -27,8 +27,8 @@ public:
 
 class Offset {
 public:
-    unsigned x:6;
-    unsigned y:6;
+    signed x:7;
+    signed y:7;
 
     Offset();
     Offset(int val1, int val2);

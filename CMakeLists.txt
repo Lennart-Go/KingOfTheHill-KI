@@ -25,7 +25,7 @@ add_executable(KingOfTheHill_KI
         src/move.cpp
         src/move.h
         src/util.cpp
-        src/util.h src/moveMaps.h)
+        src/util.h src/moveMaps.h src/generators.h)
 target_link_libraries(KingOfTheHill_KI ${GTEST_LIBRARIES} pthread)
 
 add_executable(Tests
