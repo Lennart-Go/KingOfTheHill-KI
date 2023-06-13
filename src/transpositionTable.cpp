@@ -1,7 +1,7 @@
 #include <inttypes.h>
 #include "transpositionTable.h"
 
-t_table* init_table() {
+/*t_table* init_table() {
     t_table* table = (t_table*)calloc(1, sizeof(t_table));
     table->first = NULL;
     table->last = NULL;
@@ -100,4 +100,99 @@ void print_table(t_table* table) {
     printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
     printf("END OF TABLE\n");
     printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+}*/
+
+TableEntry::TableEntry(uint64_t hash, t_move bestMove, float score, uint8_t vision) {
+    _hash = hash;
+    _bestMove = bestMove;
+    _score  = score;
+    _vision = vision;
 }
+
+uint64_t TableEntry::getHash() const {
+    return _hash;
+}
+
+void TableEntry::setHash(uint64_t hash) {
+    _hash = hash;
+}
+
+const t_move &TableEntry::getBestMove() const {
+    return _bestMove;
+}
+
+void TableEntry::setBestMove(const t_move &bestMove) {
+    _bestMove = bestMove;
+}
+
+float TableEntry::getScore() const {
+    return _score;
+}
+
+void TableEntry::setScore(float score) {
+    _score = score;
+}
+
+uint8_t TableEntry::getVision() const {
+    return _vision;
+}
+
+void TableEntry::setVision(uint8_t vision) {
+    _vision = vision;
+}
+
+TranspositionTable::TranspositionTable() {
+    _entryCounter = 0;
+    _currentAge = 0;
+    _hashTable = new std::map<uint64_t,TableEntry*>();
+}
+
+TranspositionTable::~TranspositionTable(){
+    delete _hashTable;
+};
+
+
+
+void TranspositionTable::removeEntry(TableEntry* entry) {
+    (*_hashTable).erase(entry->getHash());
+    _entryCounter -= 1;
+}
+
+//return pointer to TableEntry if exists. If not returns NULL
+TableEntry* TranspositionTable::getEntry(uint64_t hash) {
+    if((*_hashTable).find(hash) != (*_hashTable).end()){
+        return (*_hashTable)[hash];
+    }else{
+        return NULL;
+    }
+}
+
+void TranspositionTable::setEntry(TableEntry* te) {
+    if((*_hashTable).find(te->getHash()) == (*_hashTable).end()) {
+        (*_hashTable).insert(std::pair<uint64_t, TableEntry *>(te->getHash(), te));
+        _entryCounter++;
+    }else {
+        (*_hashTable)[te->getHash()] = te;
+    }
+}
+
+int TranspositionTable::getSize() {
+    return _entryCounter;
+}
+
+long int TranspositionTable::getAge() {
+    return _currentAge;
+}
+
+void TranspositionTable::setAge(long int age) {
+    _currentAge = age;
+}
+
+void TranspositionTable::ageingTable(){
+    _currentAge++;
+}
+
+
+
+
+

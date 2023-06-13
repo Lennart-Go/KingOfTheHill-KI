@@ -1,6 +1,7 @@
 #include "board.h"
 #include "util.h"
 #include <map>
+#import "transpositionTable.h"
 
 #ifndef KINGOFTHEHILL_KI_GAME_H
 #define KINGOFTHEHILL_KI_GAME_H
@@ -29,6 +30,9 @@ typedef struct game {
     unsigned enpassants:4;
 
     uint64_t* random;
+
+    TranspositionTable* transpostionTable;
+
 } t_game;
 
 t_game *startGame();
