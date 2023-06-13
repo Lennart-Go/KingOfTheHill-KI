@@ -60,4 +60,8 @@ float max(float num1, float num2);
 int min(int num1, int num2);
 float min(float num1, float num2);
 
+template <typename I> std::string num2hex(I w, size_t hex_len = sizeof(I)<<1);
+
+int countFigure(field singleBoard);
+
 #endif

@@ -41,7 +41,7 @@ bool is_move_legal(t_board *board, t_move move, field color_filter, field enemy_
 bool is_move_legal_nocheck(t_board *board, t_move move, field color_filter, field enemy_color_filter, bool checkBetween);
 bool is_castle_legal(t_board *board, Position kingPosition, bool color, bool direction);
 
-std::vector<t_move> generate_moves(t_game *game, bool color);
+template<bool color> std::vector<t_move> generate_moves(t_game *game);
 
 void printMove(t_move move);
 

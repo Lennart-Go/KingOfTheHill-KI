@@ -8,11 +8,46 @@
 
 #include <cstdlib>
 #include "util.h"
+#include "game.h"
+#include "move.h"
 
 
-field generateXray(Position origin, Position target) {
+field generateMovable(piece p, int positionOffset, bool cutEdge) {
+    // Can also be used to find all pieces of type p that are targeting the positionOffset square
+    field positionMap = (field )1 << positionOffset;
+
+    field kp = p == piece::king ? positionMap : 0;
+    field qp = p == piece::queen ? positionMap : 0;
+    field rp = p == piece::rook ? positionMap : 0;
+    field bp = p == piece::bishop ? positionMap : 0;
+    field np = p == piece::knight ? positionMap : 0;
+
+    board newBoard = board(kp, qp, rp, bp, np, 0, 0, 0, 0, 0, 0, 0);
+    t_game *game = startGame(10000000000000000);
+    game->board = &newBoard;
+
+    std::vector<move> possibleMoves = generate_moves(game, false);
+
+    field targetMap = 0;
+    for (move possibleMove: possibleMoves) {
+        targetMap |= (field )1 << possibleMove.target;
+    }
+
+    if (cutEdge) {
+        // Cut off edge squares before returning
+        field edges = 0b1111111110000001100000011000000110000001100000011000000111111111;
+        return targetMap & ~edges;
+    }
+    return targetMap;
+}
+
+
+field generateXray(int originShift, int targetShift) {
+    Position origin = position_from_shift(originShift);
+    Position target = position_from_shift(targetShift);
+
     if (origin == target) {
-        return (field) 0;
+        return ~(field )0;
     }
 
     int xDiff = (int) target.x - (int) origin.x;
@@ -21,28 +56,27 @@ field generateXray(Position origin, Position target) {
     field xrayMap = 0;
 
     if (abs(xDiff) != abs(yDiff) && (xDiff != 0 && yDiff != 0)) {
-        return (field) 0;
+        return ~(field )0;
     }
 
     int xSign = xDiff != 0 ? xDiff / abs(xDiff) : 0;
     int ySign = yDiff != 0 ? yDiff / abs(yDiff) : 0;
 
+    int x, y;
     Position targetPosition;
-    if (true) {
-        int x, y;
-        for (x = origin.x, y = origin.y;
-             x != target.x || y != target.y;
-             x += xSign, y += ySign) {
-            targetPosition = Position(x, y);
-            xrayMap |= (field) 1 << shift_from_position(targetPosition);
-        }
+    for (x = origin.x, y = origin.y;
+         x != target.x || y != target.y;
+         x += xSign, y += ySign) {
+        targetPosition = Position(x, y);
+        xrayMap |= (field) 1 << shift_from_position(targetPosition);
     }
 
     return xrayMap;
 }
 
 
-field generateRookLookup(int originShift, uint16_t obstructionIdentifier) {
+field generateRookLookup(int originShift, uint16_t obstructionIdentifier, int piecesIgnorable) {
+    // When ignoring the borders the required band can be reduced from 14 to 12 bits (worst case)
     Position originPosition = position_from_shift(originShift);
 
     int upLength = 7 - originPosition.y;  // 2
@@ -55,6 +89,16 @@ field generateRookLookup(int originShift, uint16_t obstructionIdentifier) {
     int rightOffset = leftOffset + leftLength;  // 2
     int downOffset = rightOffset + rightLength;  // 8
 
+    int upOccOffset = upLength != 0 ? 1 : 0;
+    int leftOccOffset = leftLength != 0 ? upOccOffset + 1 : upOccOffset;
+    int rightOccOffset = leftOccOffset;
+    int downOccOffset = rightLength != 0 ? rightOccOffset + 1 : rightOccOffset;
+
+    int upPiecesIgnorable = piecesIgnorable;
+    int leftPiecesIgnorable = piecesIgnorable;
+    int rightPiecesIgnorable = piecesIgnorable;
+    int downPiecesIgnorable = piecesIgnorable;
+
 
     field result = 0;
     // Up direction
@@ -65,9 +109,12 @@ field generateRookLookup(int originShift, uint16_t obstructionIdentifier) {
         result |= (field) 1 << shift_from_position(targetPosition);
 
         // Break loop if target field is occupied
-        int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << up);
+        int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (up - upOccOffset));
         if (obstructionVal != 0) {
-            break;
+            if (upPiecesIgnorable == 0) {
+                break;
+            }
+            upPiecesIgnorable--;
         }
     }
 
@@ -79,9 +126,12 @@ field generateRookLookup(int originShift, uint16_t obstructionIdentifier) {
         result |= (field) 1 << shift_from_position(targetPosition);
 
         // Break loop if target field is occupied
-        int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << left);
+        int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (left - leftOccOffset));
         if (obstructionVal != 0) {
-            break;
+            if (leftPiecesIgnorable == 0) {
+                break;
+            }
+            leftPiecesIgnorable--;
         }
     }
 
@@ -93,9 +143,12 @@ field generateRookLookup(int originShift, uint16_t obstructionIdentifier) {
         result |= (field) 1 << shift_from_position(targetPosition);
 
         // Break loop if target field is occupied
-        int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << right);
+        int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (right - rightOccOffset));
         if (obstructionVal != 0) {
-            break;
+            if (rightPiecesIgnorable == 0) {
+                break;
+            }
+            rightPiecesIgnorable--;
         }
     }
 
@@ -107,9 +160,12 @@ field generateRookLookup(int originShift, uint16_t obstructionIdentifier) {
         result |= (field) 1 << shift_from_position(targetPosition);
 
         // Break loop if target field is occupied
-        int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << down);
+        int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (down - downOccOffset));
         if (obstructionVal != 0) {
-            break;
+            if (downPiecesIgnorable == 0) {
+                break;
+            }
+            downPiecesIgnorable--;
         }
     }
 
@@ -117,8 +173,8 @@ field generateRookLookup(int originShift, uint16_t obstructionIdentifier) {
 }
 
 
-field generateBishopLookup(int originShift, uint16_t obstructionIdentifier) {
-    // When ignoring the borders the required band can be reduced from 14 to 9 bits
+field generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int piecesIgnorable) {
+    // When ignoring the borders the required band can be reduced from 13 to 9 bits (worst case)
     int border_shift_offset = 2;
 
     Position originPosition = position_from_shift(originShift);
@@ -160,6 +216,11 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier) {
     int occOffsetDownLeft = downRightLength != 0 ? occOffsetDown + 1 : occOffsetDown;
     int occOffsetDownRight = downLeftLength != 0 ? occOffsetDown + 1 : occOffsetDown;
 
+    int upLeftPiecesIgnorable = piecesIgnorable;
+    int upRightPiecesIgnorable = piecesIgnorable;
+    int downLeftPiecesIgnorable = piecesIgnorable;
+    int downRightPiecesIgnorable = piecesIgnorable;
+
     field result = 0;
 
     // Up left direction
@@ -182,8 +243,11 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier) {
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (upLeft1 - occOffsetUp + tmp_offset));
             if (obstructionVal != 0) {
-                upLeftStopped = true;
-                break;
+                if (upLeftPiecesIgnorable == 0) {
+                    upLeftStopped = true;
+                    break;
+                }
+                upLeftPiecesIgnorable--;
             }
         }
     }
@@ -200,7 +264,10 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier) {
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (upLeft2 - occOffsetUpLeft));
             if (obstructionVal != 0) {
-                break;
+                if (upLeftPiecesIgnorable == 0) {
+                    break;
+                }
+                upLeftPiecesIgnorable--;
             }
         }
     }
@@ -219,8 +286,11 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier) {
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (upRight1 - occOffsetUp));
             if (obstructionVal != 0) {
-                upRightStopped = true;
-                break;
+                if (upRightPiecesIgnorable == 0) {
+                    upRightStopped = true;
+                    break;
+                }
+                upRightPiecesIgnorable--;
             }
         }
     }
@@ -237,7 +307,10 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier) {
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (upRight2 - occOffsetUpRight));
             if (obstructionVal != 0) {
-                break;
+                if (upRightPiecesIgnorable == 0) {
+                    break;
+                }
+                upRightPiecesIgnorable--;
             }
         }
     }
@@ -261,8 +334,11 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier) {
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (downLeft1 - occOffsetDown));
             if (obstructionVal != 0) {
-                downLeftStopped = true;
-                break;
+                if (downLeftPiecesIgnorable == 0) {
+                    downLeftStopped = true;
+                    break;
+                }
+                downLeftPiecesIgnorable--;
             }
         }
     }
@@ -279,7 +355,10 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier) {
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (downLeft2 - occOffsetDownLeft));
             if (obstructionVal != 0) {
-                break;
+                if (downLeftPiecesIgnorable == 0) {
+                    break;
+                }
+                downLeftPiecesIgnorable--;
             }
         }
     }
@@ -304,8 +383,11 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier) {
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (downRight1 - occOffsetDown - tmp_offset));
             if (obstructionVal != 0) {
-                downRightStopped = true;
-                break;
+                if (downRightPiecesIgnorable == 0) {
+                    downRightStopped = true;
+                    break;
+                }
+                downRightPiecesIgnorable--;
             }
         }
     }
@@ -322,12 +404,50 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier) {
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (downRight2 - occOffsetDownRight));
             if (obstructionVal != 0) {
-                break;
+                if (downRightPiecesIgnorable == 0) {
+                    break;
+                }
+                downRightPiecesIgnorable--;
             }
         }
     }
 
     return result;
+}
+
+
+field generateWhitePawnAttackLookup(int originShift) {
+    Position originPosition = position_from_shift(originShift);
+    field positionMap = (field )1 << originShift;
+
+    field targetMap = 0;
+    if (originPosition.x != 0) {
+        // Take to the left
+        targetMap |= positionMap << 9;
+    }
+    if (originPosition.x != 7) {
+        // Take to the right
+        targetMap |= positionMap << 7;
+    }
+
+    return targetMap;
+}
+
+field generateBlackPawnAttackLookup(int originShift) {
+    Position originPosition = position_from_shift(originShift);
+    field positionMap = (field )1 << originShift;
+
+    field targetMap = 0;
+    if (originPosition.x != 0) {
+        // Take to the left
+        targetMap |= positionMap >> 7;
+    }
+    if (originPosition.x != 7) {
+        // Take to the right
+        targetMap |= positionMap >> 9;
+    }
+
+    return targetMap;
 }
 
 #endif //KINGOFTHEHILL_KI_GENERATORS_H

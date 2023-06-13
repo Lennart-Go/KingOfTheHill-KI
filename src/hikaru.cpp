@@ -11,28 +11,28 @@
 
 
 
-t_move getMoveRandom(t_game *game, bool color) {
-    std::vector<t_move> possibleMoves = generate_moves(game, color);
-
-    if (possibleMoves.empty()) {
-        t_move failureMove = { 0, 0, 0, 0 };
-        return failureMove;
-    }
-
-//    // printf("Found %zu moves!\n", possibleMoves.length());
-//    for (int i = 0; i < possibleMoves.length(); ++i) {
-//        // printMove(possibleMoves.get(i));
+//t_move getMoveRandom(t_game *game, bool color) {
+//    std::vector<t_move> possibleMoves = generate_moves<color>(game);
+//
+//    if (possibleMoves.empty()) {
+//        t_move failureMove = { 0, 0, 0, 0 };
+//        return failureMove;
 //    }
-
-    // Initialize rng
-    timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    srand((unsigned ) ts.tv_nsec);
-
-    // Generate random number within bounds of possible moves list and return the corresponding move
-    int randomMoveIndex = (int )(rand() % possibleMoves.size());
-    return possibleMoves.at(randomMoveIndex);
-}
+//
+////    // printf("Found %zu moves!\n", possibleMoves.length());
+////    for (int i = 0; i < possibleMoves.length(); ++i) {
+////        // printMove(possibleMoves.get(i));
+////    }
+//
+//    // Initialize rng
+//    timespec ts;
+//    clock_gettime(CLOCK_REALTIME, &ts);
+//    srand((unsigned ) ts.tv_nsec);
+//
+//    // Generate random number within bounds of possible moves list and return the corresponding move
+//    int randomMoveIndex = (int )(rand() % possibleMoves.size());
+//    return possibleMoves.at(randomMoveIndex);
+//}
 
 int randn(int start, int stop) {
     // Initialize rng
@@ -85,171 +85,171 @@ float evaluate(const t_game* game) {
     return score;
 }
 
-float alphaBeta(int depth, float alpha, float beta, t_game *game,  field timePerMove, time_t startMoveTime) {
-
-    if (depth == 0 || game->isOver || timeLeft(timePerMove, startMoveTime) <= 0) {
-        return evaluate(game);
-    }
-
-    float score, bestScore;
-    std::vector<t_move> moves = generate_moves(game, game->turn);
-
-    for (int _ = 0; _ < depth; ++_) {
-        // printf("\t");
-    }
-    // printf("Found %zu moves\n", moves.size());
-
-    if (!game->turn) {
-        bestScore = -std::numeric_limits<float>::max();
-
-        // White's turn -> Maximize score
-        for (auto currentMove : moves) {
-            commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
-            revertMove(game, &currentMove);
-
-            for (int _ = 0; _ < depth; ++_) {
-                // printf("\t");
-            }
-            // printMove(currentMove);
-            // printf(" returned value %.4f (current/new max is %.4f/", score, bestScore);
-
-            bestScore = max(bestScore, score);
-            alpha = max(alpha, bestScore);
-
-            // printf("%.4f)\n", bestScore);
-
-            if (beta <= alpha) {
-                // "Opposing" team would always choose one of the already better moves
-                for (int _ = 0; _ < depth; ++_) {
-                    // printf("\t");
-                }
-                // printf("Beta Cutoff (%.4f <= %.4f)\n", beta, alpha);
-                break;
-            }
-        }
-
-        return bestScore;
-    } else {
-        bestScore = std::numeric_limits<float>::max();
-
-        // Black's turn -> Minimize score
-        for (auto currentMove : moves) {
-            commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
-            revertMove(game, &currentMove);
-
-            for (int _ = 0; _ < depth; ++_) {
-                // printf("\t");
-            }
-            // printMove(currentMove);
-            // printf(" returned value %.4f (current/new min is %.4f/", score, bestScore);
-
-            bestScore = min(bestScore, score);
-            beta = min(beta, bestScore);
-
-            // printf("%.4f)\n", bestScore);
-
-            if (beta <= alpha) {
-                // "Opposing" team would always choose one of the already better moves
-                for (int _ = 0; _ < depth; ++_) {
-                    // printf("\t");
-                }
-                // printf("Alpha Cutoff (%.4f <= %.4f)\n", alpha, beta);
-                break;
-            }
-        }
-    }
-
-    return bestScore;
-}
-
-std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, field timePerMove) {
-    int depth = max_depth;  // NOTE: Always use one less than actually wanted
-
-    float alpha = -std::numeric_limits<float>::max();
-    float beta = std::numeric_limits<float>::max();
-    time_t startMoveTime = time(NULL);
-
-    float score, bestScore;
-    t_move currentMove, bestMove;
-    std::vector<t_move> moves = generate_moves(game, game->turn);
-
-//    if (!moves.empty()) {
-//        // Default to first move
-//        bestMove = moves.get(0);
+//float alphaBeta(int depth, float alpha, float beta, t_game *game,  field timePerMove, time_t startMoveTime) {
+//
+//    if (depth == 0 || game->isOver || timeLeft(timePerMove, startMoveTime) <= 0) {
+//        return evaluate(game);
 //    }
+//
+//    float score, bestScore;
+//    std::vector<t_move> moves = generate_moves<game->turn>(game);
+//
+//    for (int _ = 0; _ < depth; ++_) {
+//        // printf("\t");
+//    }
+//    // printf("Found %zu moves\n", moves.size());
+//
+//    if (!game->turn) {
+//        bestScore = -std::numeric_limits<float>::max();
+//
+//        // White's turn -> Maximize score
+//        for (auto currentMove : moves) {
+//            commitMove(game, &currentMove);
+//            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
+//            revertMove(game, &currentMove);
+//
+//            for (int _ = 0; _ < depth; ++_) {
+//                // printf("\t");
+//            }
+//            // printMove(currentMove);
+//            // printf(" returned value %.4f (current/new max is %.4f/", score, bestScore);
+//
+//            bestScore = max(bestScore, score);
+//            alpha = max(alpha, bestScore);
+//
+//            // printf("%.4f)\n", bestScore);
+//
+//            if (beta <= alpha) {
+//                // "Opposing" team would always choose one of the already better moves
+//                for (int _ = 0; _ < depth; ++_) {
+//                    // printf("\t");
+//                }
+//                // printf("Beta Cutoff (%.4f <= %.4f)\n", beta, alpha);
+//                break;
+//            }
+//        }
+//
+//        return bestScore;
+//    } else {
+//        bestScore = std::numeric_limits<float>::max();
+//
+//        // Black's turn -> Minimize score
+//        for (auto currentMove : moves) {
+//            commitMove(game, &currentMove);
+//            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
+//            revertMove(game, &currentMove);
+//
+//            for (int _ = 0; _ < depth; ++_) {
+//                // printf("\t");
+//            }
+//            // printMove(currentMove);
+//            // printf(" returned value %.4f (current/new min is %.4f/", score, bestScore);
+//
+//            bestScore = min(bestScore, score);
+//            beta = min(beta, bestScore);
+//
+//            // printf("%.4f)\n", bestScore);
+//
+//            if (beta <= alpha) {
+//                // "Opposing" team would always choose one of the already better moves
+//                for (int _ = 0; _ < depth; ++_) {
+//                    // printf("\t");
+//                }
+//                // printf("Alpha Cutoff (%.4f <= %.4f)\n", alpha, beta);
+//                break;
+//            }
+//        }
+//    }
+//
+//    return bestScore;
+//}
 
-    for (int _ = 0; _ < depth; ++_) {
-        // printf("\t");
-    }
-    // printf("Found %zu moves\n", moves.size());
-
-    // Set default best move as abort move recognized in play() function
-    bestMove.origin = 0;
-    bestMove.target = 0;
-
-    if (!game->turn) {
-        bestScore = -std::numeric_limits<float>::max();
-
-        // White's turn -> Maximize score
-        for (auto move : moves) {
-            currentMove = move;
-
-            commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
-            revertMove(game, &currentMove);
-
-            for (int _ = 0; _ < depth; ++_) {
-                // printf("\t");
-            }
-            // printMove(currentMove);
-            // printf(" returned value %.4f (current/new max is %.4f/", score, bestScore);
-
-            if (score > bestScore) {
-                bestScore = score;
-                bestMove = currentMove;
-            }
-
-            alpha = max(alpha, bestScore);
-
-            // printf("%.4f)\n", bestScore);
-        }
-        return {bestMove, bestScore};
-    } else {
-        bestScore = std::numeric_limits<float>::max();
-
-        // Black's turn -> Minimize score
-        for (auto move : moves) {
-            currentMove = move;
-
-            commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
-            revertMove(game, &currentMove);
-
-            for (int _ = 0; _ < depth; ++_) {
-                // printf("\t");
-            }
-            // printMove(currentMove);
-            // printf(" returned value %.4f (current/new min is %.4f/", score, bestScore);
-
-            if (score < bestScore) {
-                bestScore = score;
-                bestMove = currentMove;
-            }
-
-            beta = min(beta, bestScore);
-
-            // printf("%.4f)\n", bestScore);
-        }
-    }
-
-    // printf("Returning move ");
-    // printMove(bestMove);
-    // printf("\n");
-
-    return {bestMove, bestScore};
-}
+//std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, field timePerMove) {
+//    int depth = max_depth;  // NOTE: Always use one less than actually wanted
+//
+//    float alpha = -std::numeric_limits<float>::max();
+//    float beta = std::numeric_limits<float>::max();
+//    time_t startMoveTime = time(NULL);
+//
+//    float score, bestScore;
+//    t_move currentMove, bestMove;
+//    std::vector<t_move> moves = generate_moves<game->turn>(game);
+//
+////    if (!moves.empty()) {
+////        // Default to first move
+////        bestMove = moves.get(0);
+////    }
+//
+//    for (int _ = 0; _ < depth; ++_) {
+//        // printf("\t");
+//    }
+//    // printf("Found %zu moves\n", moves.size());
+//
+//    // Set default best move as abort move recognized in play() function
+//    bestMove.origin = 0;
+//    bestMove.target = 0;
+//
+//    if (!game->turn) {
+//        bestScore = -std::numeric_limits<float>::max();
+//
+//        // White's turn -> Maximize score
+//        for (auto move : moves) {
+//            currentMove = move;
+//
+//            commitMove(game, &currentMove);
+//            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
+//            revertMove(game, &currentMove);
+//
+//            for (int _ = 0; _ < depth; ++_) {
+//                // printf("\t");
+//            }
+//            // printMove(currentMove);
+//            // printf(" returned value %.4f (current/new max is %.4f/", score, bestScore);
+//
+//            if (score > bestScore) {
+//                bestScore = score;
+//                bestMove = currentMove;
+//            }
+//
+//            alpha = max(alpha, bestScore);
+//
+//            // printf("%.4f)\n", bestScore);
+//        }
+//        return {bestMove, bestScore};
+//    } else {
+//        bestScore = std::numeric_limits<float>::max();
+//
+//        // Black's turn -> Minimize score
+//        for (auto move : moves) {
+//            currentMove = move;
+//
+//            commitMove(game, &currentMove);
+//            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
+//            revertMove(game, &currentMove);
+//
+//            for (int _ = 0; _ < depth; ++_) {
+//                // printf("\t");
+//            }
+//            // printMove(currentMove);
+//            // printf(" returned value %.4f (current/new min is %.4f/", score, bestScore);
+//
+//            if (score < bestScore) {
+//                bestScore = score;
+//                bestMove = currentMove;
+//            }
+//
+//            beta = min(beta, bestScore);
+//
+//            // printf("%.4f)\n", bestScore);
+//        }
+//    }
+//
+//    // printf("Returning move ");
+//    // printMove(bestMove);
+//    // printf("\n");
+//
+//    return {bestMove, bestScore};
+//}
 
 
 t_move getMove(t_game *game, bool color, field timePerMove) {

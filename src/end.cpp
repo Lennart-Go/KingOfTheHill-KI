@@ -4,15 +4,6 @@
 #include <map>
 
 
-int countFigure(field singleBoard) {
-    int count = 0;
-    for (int i = 0; i < 64; i++) {
-        if (singleBoard & ((field) 1 << i)) {
-            count++;
-        }
-    }
-    return count;
-}
 
 bool positionTracking(t_game *game) {
     /* Function to check if same position occurred for the third time
@@ -61,40 +52,40 @@ void positionTrackingUndo(t_game *game) {
 }
 
 
-bool isCheckmate(t_game *game, bool moving_color) {
-    /* Function to check whether the now moving party is checkmate
-    * Arguments:
-    *  t_board *board: Pointer to the board representing the state of the game
-    *  bool moving_color: the next moving color with "false" for white and "true" for black
-    */
-    field color = moving_color ? game->board->black : game->board->white;
-    field King = moving_color ? game->board->blackKing : game->board->whiteKing;
-    Position kingPosition = position_from_shift((King == 0) ? 0 : (int) log2((long double) King));
-    if (is_threatened(game->board, kingPosition, moving_color)) {
-        std::vector<t_move> possibleMoves = generate_moves(game, moving_color);
-        for (auto currentMove : possibleMoves) {
-            if (!is_move_check(game->board, currentMove)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    return false;
-}
+//bool isCheckmate(t_game *game, bool moving_color) {
+//    /* Function to check whether the now moving party is checkmate
+//    * Arguments:
+//    *  t_board *board: Pointer to the board representing the state of the game
+//    *  bool moving_color: the next moving color with "false" for white and "true" for black
+//    */
+//    field color = moving_color ? game->board->black : game->board->white;
+//    field King = moving_color ? game->board->blackKing : game->board->whiteKing;
+//    Position kingPosition = position_from_shift((King == 0) ? 0 : (int) log2((long double) King));
+//    if (is_threatened(game->board, kingPosition, moving_color)) {
+//        std::vector<t_move> possibleMoves = generate_moves(game, moving_color);
+//        for (auto currentMove : possibleMoves) {
+//            if (!is_move_check(game->board, currentMove)) {
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
+//    return false;
+//}
 
-bool isStalemate(t_game *game, bool moving_color) {
-    /* Function to check whether the party whose turn is now can move. If not the game is stalemate-> draw
-    * Arguments:
-    *  t_board *board: Pointer to the board representing the state of the game
-    *  bool moving_color: the next moving color with "false" for white and "true" for black
-    */
-    std::vector<t_move> possibleMoves = generate_moves(game, moving_color);
-    if (possibleMoves.size() < 1) {
-        return true;
-    } else {
-        return false;
-    }
-}
+//bool isStalemate(t_game *game, bool moving_color) {
+//    /* Function to check whether the party whose turn is now can move. If not the game is stalemate-> draw
+//    * Arguments:
+//    *  t_board *board: Pointer to the board representing the state of the game
+//    *  bool moving_color: the next moving color with "false" for white and "true" for black
+//    */
+//    std::vector<t_move> possibleMoves = generate_moves(game, moving_color);
+//    if (possibleMoves.size() < 1) {
+//        return true;
+//    } else {
+//        return false;
+//    }
+//}
 
 /*bool isInsufficientMatingMaterial(t_board *board){
     // lone king or king with two or fewer knights

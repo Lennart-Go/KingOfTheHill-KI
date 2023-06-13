@@ -235,3 +235,23 @@ float min(float num1, float num2) {
     }
     return num2;
 }
+
+
+template <typename I> std::string num2hex(I w, size_t hex_len) {
+    static const char* digits = "0123456789abcdef";
+    std::string rc(hex_len,'0');
+    for (size_t i=0, j=(hex_len-1)*4 ; i<hex_len; ++i,j-=4)
+        rc[i] = digits[(w>>j) & 0x0f];
+    return rc;
+}
+
+
+int countFigure(field singleBoard) {
+    int count = 0;
+    for (int i = 0; i < 64; i++) {
+        if (singleBoard & ((field) 1 << i)) {
+            count++;
+        }
+    }
+    return count;
+}
