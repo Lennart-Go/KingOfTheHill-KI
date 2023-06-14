@@ -12,32 +12,119 @@
 #include "move.h"
 
 
-field generateMovable(piece p, int positionOffset, bool cutEdge) {
-    // Can also be used to find all pieces of type p that are targeting the positionOffset square
-    field positionMap = (field )1 << positionOffset;
+//field generateMovable(piece p, int positionOffset, bool cutEdge) {
+//    // Can also be used to find all pieces of type p that are targeting the positionOffset square
+//    field positionMap = (field )1 << positionOffset;
+//
+//    field kp = p == piece::king ? positionMap : 0;
+//    field qp = p == piece::queen ? positionMap : 0;
+//    field rp = p == piece::rook ? positionMap : 0;
+//    field bp = p == piece::bishop ? positionMap : 0;
+//    field np = p == piece::knight ? positionMap : 0;
+//
+//    board newBoard = board(kp, qp, rp, bp, np, 0, 0, 0, 0, 0, 0, 0);
+//    t_game *game = startGame(10000000000000000);
+//    game->board = &newBoard;
+//
+//    std::vector<move> possibleMoves = generate_moves(game, false);
+//
+//    field targetMap = 0;
+//    for (move possibleMove: possibleMoves) {
+//        targetMap |= (field )1 << possibleMove.target;
+//    }
+//
+//    if (cutEdge) {
+//        // Cut off edge squares before returning
+//        field edges = 0b1111111110000001100000011000000110000001100000011000000111111111;
+//        return targetMap & ~edges;
+//    }
+//    return targetMap;
+//}
 
-    field kp = p == piece::king ? positionMap : 0;
-    field qp = p == piece::queen ? positionMap : 0;
-    field rp = p == piece::rook ? positionMap : 0;
-    field bp = p == piece::bishop ? positionMap : 0;
-    field np = p == piece::knight ? positionMap : 0;
 
-    board newBoard = board(kp, qp, rp, bp, np, 0, 0, 0, 0, 0, 0, 0);
-    t_game *game = startGame(10000000000000000);
-    game->board = &newBoard;
-
-    std::vector<move> possibleMoves = generate_moves(game, false);
+field generateHorizontal(int originShift) {
+    Position originPosition = position_from_shift(originShift);
 
     field targetMap = 0;
-    for (move possibleMove: possibleMoves) {
-        targetMap |= (field )1 << possibleMove.target;
+    for (int i = 0; i < originPosition.y; ++i) {
+        targetMap |= (field )1 << shift_from_position(Position(originPosition.x, i));
+    }
+    for (int i = originPosition.y + 1; i < 8; ++i) {
+        targetMap |= (field )1 << shift_from_position(Position(originPosition.x, i));
     }
 
-    if (cutEdge) {
-        // Cut off edge squares before returning
-        field edges = 0b1111111110000001100000011000000110000001100000011000000111111111;
-        return targetMap & ~edges;
+    return targetMap;
+}
+
+field generateVertical(int originShift) {
+    Position originPosition = position_from_shift(originShift);
+
+    field targetMap = 0;
+    for (int i = 0; i < originPosition.x; ++i) {
+        targetMap |= (field )1 << shift_from_position(Position(i, originPosition.y));
     }
+    for (int i = originPosition.x + 1; i < 8; ++i) {
+        targetMap |= (field )1 << shift_from_position(Position(i, originPosition.y));
+    }
+
+    return targetMap;
+}
+
+field generateLeftDiagonal(int originShift) {
+    Position originPosition = position_from_shift(originShift);
+
+    field targetMap = 0;
+    int offset = 1;
+    while (true) {
+        Offset targetOffset = Offset(originPosition.x - offset, originPosition.y + offset);
+        if (!targetOffset.isWithinBounds()) {
+            break;
+        }
+        targetMap |= (field )1 << shift_from_position(targetOffset.toPosition());
+
+        offset++;
+    }
+
+    offset = 1;
+    while (true) {
+        Offset targetOffset = Offset(originPosition.x + offset, originPosition.y - offset);
+        if (!targetOffset.isWithinBounds()) {
+            break;
+        }
+        targetMap |= (field )1 << shift_from_position(targetOffset.toPosition());
+
+        offset++;
+    }
+
+    return targetMap;
+}
+
+field generateRightDiagonal(int originShift) {
+    Position originPosition = position_from_shift(originShift);
+
+    field targetMap = 0;
+    int offset = 1;
+    while (true) {
+        Offset targetOffset = Offset(originPosition.x + offset, originPosition.y + offset);
+        if (!targetOffset.isWithinBounds()) {
+            break;
+        }
+        targetMap |= (field )1 << shift_from_position(targetOffset.toPosition());
+
+        offset++;
+    }
+
+    offset = 1;
+    while (true) {
+        Offset targetOffset = Offset(originPosition.x - offset, originPosition.y - offset);
+        if (!targetOffset.isWithinBounds()) {
+            break;
+        }
+        targetMap |= (field )1 << shift_from_position(targetOffset.toPosition());
+
+        offset++;
+    }
+
     return targetMap;
 }
 
@@ -174,6 +261,7 @@ field generateRookLookup(int originShift, uint16_t obstructionIdentifier, int pi
 
 
 field generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int piecesIgnorable) {
+
     // When ignoring the borders the required band can be reduced from 13 to 9 bits (worst case)
     int border_shift_offset = 2;
 

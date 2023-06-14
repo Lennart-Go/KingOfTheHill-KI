@@ -101,7 +101,7 @@ template<piece p> inline static constexpr field lookupSlider(const uint8_t piece
     return (field )0;
 }
 
-template<piece p> inline static constexpr field pinLookUpSlider(const uint8_t piecePosition, const field occ) {
+template<piece p> inline static constexpr field lookupPinSlider(const uint8_t piecePosition, const field occ) {
     switch (p) {
         case piece::rook: {
             field moveMap = rookMoves[piecePosition];
@@ -209,30 +209,35 @@ template<bool color> std::vector<t_move> generate_moves(t_game *game) {
         threatened &= ~board.white;
 
 
-        // -------------------------------------------------------- //
-        // Generate squares causing check and corresponding sliders //
-        // -------------------------------------------------------- //
+        // ------------------------------------------------------------------------ //
+        // Generate squares causing checks and pins and their corresponding sliders //
+        // ------------------------------------------------------------------------ //
+
+        field kingRookLookup = lookupSlider<piece::rook>(blackKingShift, occ);
+        field kingBishopLookup = lookupSlider<piece::bishop>(blackKingShift, occ);
+        field kingKnightLookup = lookup<piece::knight>(blackKingShift);
 
         field checks = 0;
+        field checkSliderPieces = 0;
 
         field blackKingMap = (field )1 << blackKingShift;
         if ((threatened & blackKingMap) != 0) {
             // There is at least one check
 
-            field kingRookLookup = lookupSlider<piece::rook>(blackKingShift, occ);
-            field kingBishopLookup = lookupSlider<piece::rook>(blackKingShift, occ);
-            field kingKnightLookup = lookupSlider<piece::rook>(blackKingShift, occ);
+            // Check from sliding pieces
+            checkSliderPieces |= kingRookLookup & board.whiteQueen;
+            checkSliderPieces |= kingRookLookup & board.whiteRook;
+            checkSliderPieces |= kingBishopLookup & board.whiteQueen;
+            checkSliderPieces |= kingBishopLookup & board.whiteBishop;
 
-            // Check from queens
-            // TODO: Only check one "direction" at a time (up+down, left+right, upleft+downright, upright+downleft)
-            checks |= kingRookLookup & queensTargeting;
-            checks |= kingBishopLookup & queensTargeting;
+            short checkSliderShift;
+            field checkSliders = checkSliderPieces;  // Preserve value of checkSliderPieces
+            while (checkSliders != 0) {
+                checkSliderShift = findFirst(checkSliders);
+                checks |= xray[64 * blackKingShift + checkSliderShift];
 
-            // Check from rooks
-            checks |= kingRookLookup & rooksTargeting;
-
-            // Check from bishops
-            checks |= kingBishopLookup & bishopsTargeting;
+                checkSliders &= (checkSliders - 1);
+            }
 
             // Check from knights
             checks |= kingKnightLookup & board.whiteKnight;
@@ -240,6 +245,18 @@ template<bool color> std::vector<t_move> generate_moves(t_game *game) {
             // Check from pawns
             checks |= ((board.blackKing & ~aFile) >> 7) & board.whitePawn;  // Pawns threatening to the right
             checks |= ((board.blackKing & ~hFile) >> 9) & board.whitePawn;  // Pawns threatening to the left
+
+//            // Check from queens
+//            checks |= kingRookLookup & kingHorizontalLookup & queensTargeting;
+//            checks |= kingRookLookup & kingVerticalLookup & queensTargeting;
+//            checks |= kingBishopLookup & kingLeftDiagonalLookup & queensTargeting;
+//            checks |= kingBishopLookup & kingRightDiagonalLookup & queensTargeting;
+//
+//            // Check from rooks
+//            checks |= kingRookLookup & rooksTargeting;
+//
+//            // Check from bishops
+//            checks |= kingBishopLookup & bishopsTargeting;
         }
 
         // Handle different amounts of checking pieces
@@ -250,12 +267,43 @@ template<bool color> std::vector<t_move> generate_moves(t_game *game) {
         } else if ((checkOrigins & (checkOrigins - 1)) != 0) {
             // More than one check -> Only King can move
             checks = 0;
+
+            // TODO: Generate only king moves
         }
+
+        // Generate pin sliders
+        field verticalPins = 0;
+        field horizontalPins = 0;
+        field leftDiagonalPins = 0;
+        field rightDiagonalPins = 0;
+
+        field kingVerticalMask = verticalMask[blackKingShift];
+        field kingHorizontalMask = horizontalMask[blackKingShift];
+        field kingLeftDiagonalMask = lDiagonalMask[blackKingShift];
+        field kingRightDiagonalMask = rDiagonalMask[blackKingShift];
+
+        field kingQueenPinLookup = lookupPinSlider<piece::queen>(blackKingShift, occ);
+        field pinPieces = kingQueenPinLookup & (board.whiteQueen | board.whiteRook | board.whiteBishop) & ~checkSliderPieces;
+
+        field lateralPinShift;
+        while (pinPieces != 0) {
+            lateralPinShift = findFirst(pinPieces);
+            field pinXray = xray[64 * blackKingShift + lateralPinShift];
+
+            verticalPins |= pinXray & kingVerticalMask;
+            horizontalPins |= pinXray & kingHorizontalMask;
+            leftDiagonalPins |= pinXray & kingLeftDiagonalMask;
+            rightDiagonalPins |= pinXray & kingRightDiagonalMask;
+
+            pinPieces &= (pinPieces - 1);
+        }
+
+
+        field tmp = verticalPins | horizontalPins | leftDiagonalPins | rightDiagonalPins;
+
 
         int test = 0;
 
-
-        // TODO: Generate pins and corresponding sliders
 
         // Friendly pieces
         // TODO: Generate king moves

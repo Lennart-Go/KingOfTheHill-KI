@@ -75,12 +75,6 @@ Offset::Offset() {
 }
 
 Offset::Offset(int val1, int val2) {
-    if (val1 < -7 || val1 > 7) {
-        throw std::invalid_argument("Argument 1 outside bounds [-7,7]");
-    }
-    if (val2 < -7 || val2 > 7) {
-        throw std::invalid_argument("Argument 2 outside bounds [-7,7]");
-    }
     this->x = val1;
     this->y = val2;
 }
@@ -234,15 +228,6 @@ float min(float num1, float num2) {
         return num1;
     }
     return num2;
-}
-
-
-template <typename I> std::string num2hex(I w, size_t hex_len) {
-    static const char* digits = "0123456789abcdef";
-    std::string rc(hex_len,'0');
-    for (size_t i=0, j=(hex_len-1)*4 ; i<hex_len; ++i,j-=4)
-        rc[i] = digits[(w>>j) & 0x0f];
-    return rc;
 }
 
 
