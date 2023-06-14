@@ -13,14 +13,8 @@ include_directories(${GTEST_INCLUDE_DIRS})
 add_executable(KingOfTheHill_KI
         src/board.cpp
         src/board.h
-        src/end.cpp
-        src/end.h
         src/game.cpp
         src/game.h
-        src/gameserver.cpp
-        src/gameserver.h
-        src/hikaru.cpp
-        src/hikaru.h
         src/main.cpp
         src/move.cpp
         src/move.h
