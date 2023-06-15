@@ -296,16 +296,12 @@ template<bool color> std::vector<t_move> generate_moves(t_game *game) {
             pinPieces &= (pinPieces - 1);
         }
 
-
-        field pinned = lateralPinShift | diagonalPins;
-
-
-        int test = 0;
+        field pinned = lateralPins | diagonalPins;
 
 
         // Friendly pieces
         // TODO: Generate king moves
-        field kingMoveTargets = lookup<piece::king>(blackKingShift) & ~threatened & ~board.black;
+        field kingTargets = lookup<piece::king>(blackKingShift) & ~threatened & ~board.black;
 
         // TODO: Generate queen moves
         field queenOrigins = board.blackQueen & ~pinned;
@@ -422,10 +418,10 @@ template<bool color> std::vector<t_move> generate_moves(t_game *game) {
         field pawnEnPassantLeftOriginsPinned = pawnEnPassantLeftTargetsPinned >> 9;
         // TODO: Fix en-passant pin thingy
 
-
         // TODO: Generate promotions (Not explicitly -> Do while generating move
 
         // TODO: Generate castles
+        int test = 0;
     } else {
         // White's turn
 
