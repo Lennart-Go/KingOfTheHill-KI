@@ -48,7 +48,7 @@ void play(int maxRounds, uint64_t gameTime) {
     }
 
     t_game *game = startGame(gameTime);
-    setFen(game->board, (char *)"r2qkbnr/pp1bpppp/2np4/1Bp5/4P3/5N2/PPPP1PPP/RNBQ1RK1");
+   // setFen(game->board, (char *)"r2qkbnr/pp1bpppp/2np4/1Bp5/4P3/5N2/PPPP1PPP/RNBQ1RK1");
     // game->turn = true;
 
     printBoard(game->board);
@@ -71,7 +71,7 @@ void play(int maxRounds, uint64_t gameTime) {
         printf("Next move: ");
         printMove(nextMove);
 
-        printf("\nCurrent board state (Score: %.4f, Round: %d, ", evaluate(game), game->blackMoveCounter + 1);
+        printf("\nCurrent board state (Score: %.4f, Round: %d, ", evaluate(game, &nextMove), game->blackMoveCounter + 1);
 
         if (game->turn == 0) {
             printf("Turn: White)\n");

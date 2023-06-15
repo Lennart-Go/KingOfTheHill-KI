@@ -25,7 +25,8 @@ add_executable(KingOfTheHill_KI
         src/move.cpp
         src/move.h
         src/util.cpp
-        src/util.h)
+        src/util.h
+        src/pieceSquareTable.h)
 target_link_libraries(KingOfTheHill_KI ${GTEST_LIBRARIES} pthread)
 
 add_executable(Tests
@@ -46,5 +47,5 @@ add_executable(Tests
         test/BoardTest.cpp
         test/EndTest.cpp
         test/main.cpp
-        test/MoveTest.cpp)
+        test/MoveTest.cpp src/pieceSquareTable.h)
 target_link_libraries(Tests ${GTEST_LIBRARIES} pthread)
