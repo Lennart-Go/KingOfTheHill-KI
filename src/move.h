@@ -202,8 +202,8 @@ template<bool color> std::vector<t_move> generate_moves(t_game *game) {
         }
 
         // Add fields covered by pawns
-        threatened |= (board.whitePawn & ~aFile) << 9;  // Taking to the left
-        threatened |= (board.whitePawn & ~hFile) << 7;  // Taking to the right
+        threatened |= (board.whitePawn & ~aFile) >> 9;  // Taking to the left
+        threatened |= (board.whitePawn & ~hFile) >> 7;  // Taking to the right
 
         // Remove all fields covered by white pieces
         threatened &= ~board.white;
@@ -272,10 +272,8 @@ template<bool color> std::vector<t_move> generate_moves(t_game *game) {
         }
 
         // Generate pin sliders
-        field verticalPins = 0;
-        field horizontalPins = 0;
-        field leftDiagonalPins = 0;
-        field rightDiagonalPins = 0;
+        field lateralPins = 0;
+        field diagonalPins = 0;
 
         field kingVerticalMask = verticalMask[blackKingShift];
         field kingHorizontalMask = horizontalMask[blackKingShift];
@@ -290,16 +288,16 @@ template<bool color> std::vector<t_move> generate_moves(t_game *game) {
             lateralPinShift = findFirst(pinPieces);
             field pinXray = xray[64 * blackKingShift + lateralPinShift];
 
-            verticalPins |= pinXray & kingVerticalMask;
-            horizontalPins |= pinXray & kingHorizontalMask;
-            leftDiagonalPins |= pinXray & kingLeftDiagonalMask;
-            rightDiagonalPins |= pinXray & kingRightDiagonalMask;
+            lateralPins |= pinXray & kingVerticalMask;
+            lateralPins |= pinXray & kingHorizontalMask;
+            diagonalPins |= pinXray & kingLeftDiagonalMask;
+            diagonalPins |= pinXray & kingRightDiagonalMask;
 
             pinPieces &= (pinPieces - 1);
         }
 
 
-        field tmp = verticalPins | horizontalPins | leftDiagonalPins | rightDiagonalPins;
+        field pinned = lateralPinShift | diagonalPins;
 
 
         int test = 0;
@@ -307,26 +305,125 @@ template<bool color> std::vector<t_move> generate_moves(t_game *game) {
 
         // Friendly pieces
         // TODO: Generate king moves
+        field kingMoveTargets = lookup<piece::king>(blackKingShift) & ~threatened & ~board.black;
 
         // TODO: Generate queen moves
+        field queenOrigins = board.blackQueen & ~pinned;
+        field queenOriginsPinnedLateral = board.blackQueen & lateralPins;
+        field queenOriginsPinnedDiagonal = board.blackQueen & diagonalPins;
+
+        // TODO: Build moves from target map
+
+        short queenShift;
+        field queenTargets;
+        while (queenOrigins != 0) {
+            queenShift = findFirst(queenOrigins);
+            queenTargets = lookupSlider<piece::queen>(queenShift, occ) & checks & ~board.black;
+
+            queenOrigins &= (queenOrigins - 1);
+        }
+        while (queenOriginsPinnedLateral != 0) {
+            queenShift = findFirst(queenOriginsPinnedLateral);
+            queenTargets = lookupSlider<piece::rook>(queenShift, occ) & checks & lateralPins & ~board.black;
+
+            queenOriginsPinnedLateral &= (queenOriginsPinnedLateral - 1);
+        }
+        while (queenOriginsPinnedDiagonal != 0) {
+            queenShift = findFirst(queenOriginsPinnedDiagonal);
+            queenTargets = lookupSlider<piece::bishop>(queenShift, occ) & checks & diagonalPins & ~board.black;
+
+            queenOriginsPinnedDiagonal &= (queenOriginsPinnedDiagonal - 1);
+        }
 
         // TODO: Generate rook moves
+        field rookOrigins = board.blackRook & ~pinned;
+        field rookOriginsPinned = board.blackRook & lateralPins;  // Rooks pinned in diagonal pins can't move
+
+        short rookShift;
+        field rookTargets;
+        while (rookOrigins != 0) {
+            rookShift = findFirst(rookOrigins);
+            rookTargets = lookupSlider<piece::rook>(rookShift, occ) & checks & ~board.black;
+
+            rookOrigins &= (rookOrigins - 1);
+        }
+        while (rookOriginsPinned != 0) {
+            rookShift = findFirst(rookOriginsPinned);
+            rookTargets = lookupSlider<piece::rook>(rookShift, occ) & checks & lateralPins & ~board.black;
+
+            rookOriginsPinned &= (rookOriginsPinned - 1);
+        }
 
         // TODO: Generate bishop moves
+        field bishopOrigins = board.blackBishop & ~pinned;
+        field bishopOriginsPinned = board.blackBishop & diagonalPins;  // Bishops pinned in lateral pins can't move
+
+        short bishopShift;
+        field bishopTargets;
+        while (bishopOrigins != 0) {
+            bishopShift = findFirst(bishopOrigins);
+            bishopTargets = lookupSlider<piece::bishop>(bishopShift, occ) & checks & ~board.black;
+
+            bishopOrigins &= (bishopOrigins - 1);
+        }
+        while (bishopOriginsPinned != 0) {
+            bishopShift = findFirst(bishopOriginsPinned);
+            bishopTargets = lookupSlider<piece::bishop>(bishopShift, occ) & checks & diagonalPins & ~board.black;
+
+            bishopOriginsPinned &= (bishopOriginsPinned - 1);
+        }
 
         // TODO: Generate knight moves
+        field knightOrigins = board.blackKnight & ~pinned;
+
+        short knightShift;
+        field knightTargets;
+        while (knightOrigins != 0) {
+            knightShift = findFirst(knightOrigins);
+            knightTargets = lookup<piece::knight>(knightShift) & checks & ~board.black;
+
+            knightOrigins &= (knightOrigins - 1);
+        }
 
         // TODO: Generate pawn moves
+        field pawnTargets = ((board.blackPawn & ~diagonalPins) << 8) & checks & ~board.black;
+        field pawnOrigins = pawnTargets >> 8;
 
 
         // Special moves
-        // TODO: Generate pawn taking moves
-
         // TODO: Generate pawn pushing moves
+        field pawnPushTargets = ((((board.blackPawn & rank7 & ~diagonalPins) << 8) & ~board.black) << 8) & checks & ~board.black;
+        field pawnPushOrigins = pawnPushTargets >> 16;
+
+        // TODO: Generate pawn taking moves
+        field pawnTakeRightTargets = ((board.blackPawn & ~aFile & ~pinned) << 7) & checks & board.white;
+        field pawnTakeRightOrigins = pawnTakeRightTargets >> 7;
+
+        field pawnTakeRightTargetsPinned = ((board.blackPawn & ~aFile & diagonalPins) << 7) & checks & diagonalPins & board.white;
+        field pawnTakeRightOriginsPinned = pawnTakeRightTargetsPinned >> 7;
+
+        field pawnTakeLeftTargets = ((board.blackPawn & ~hFile & ~pinned) << 9) & checks & board.white;
+        field pawnTakeLeftOrigins = pawnTakeLeftTargets >> 9;
+
+        field pawnTakeLeftTargetsPinned = ((board.blackPawn & ~hFile & diagonalPins) << 9) & checks & diagonalPins & board.white;
+        field pawnTakeLeftOriginsPinned = pawnTakeLeftTargetsPinned >> 9;
 
         // TODO: Generate en-passant if possible
+        field pawnEnPassantRightTargets = ((board.blackPawn & ~aFile & (aFile << (game->enpassants)) & rank4 & ~pinned) << 7) & checks;
+        field pawnEnPassantRightOrigins = pawnEnPassantRightTargets >> 7;
 
-        // TODO: Generate promotions
+        field pawnEnPassantRightTargetsPinned = ((board.blackPawn & ~aFile & (aFile << (game->enpassants)) & rank4 & diagonalPins) << 7) & checks & diagonalPins;
+        field pawnEnPassantRightOriginsPinned = pawnEnPassantRightTargetsPinned >> 7;
+
+        field pawnEnPassantLeftTargets = ((board.blackPawn & ~aFile & (aFile << (game->enpassants)) & rank4 & ~pinned) << 9) & checks;
+        field pawnEnPassantLeftOrigins = pawnEnPassantLeftTargets >> 9;
+
+        field pawnEnPassantLeftTargetsPinned = ((board.blackPawn & ~aFile & (aFile << (game->enpassants)) & rank4 & diagonalPins) << 9) & checks & diagonalPins;
+        field pawnEnPassantLeftOriginsPinned = pawnEnPassantLeftTargetsPinned >> 9;
+        // TODO: Fix en-passant pin thingy
+
+
+        // TODO: Generate promotions (Not explicitly -> Do while generating move
 
         // TODO: Generate castles
     } else {
