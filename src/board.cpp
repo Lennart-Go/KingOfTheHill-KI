@@ -127,7 +127,7 @@ char* shortenFen(char* fen) {
     return newFen;
 }
 
-void printBoard(t_board *board) {
+void printBoard(const t_board *board) {
     wchar_t boardChar[64] = {};
 
     //KING

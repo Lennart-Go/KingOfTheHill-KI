@@ -19,16 +19,16 @@ typedef struct game {
     unsigned whiteCanCastleLong:1;
     unsigned whiteCastled:1;
     uint32_t whiteMoveCounter;
-    uint32_t whiteMoveTime;  // Cumulative move time of white team in ms
+    uint32_t whiteMoveTime;  // Cumulative move_old time of white team in ms
 
     unsigned blackWon:1;
     unsigned blackCanCastleShort:1;
     unsigned blackCanCastleLong:1;
     unsigned blackCastled:1;
     uint32_t blackMoveCounter;
-    uint32_t blackMoveTime;  // Cumulative move time of black team in ms
+    uint32_t blackMoveTime;  // Cumulative move_old time of black team in ms
 
-    unsigned enpassants:4;  // 0 for no enpassants, otherwise the number of the file (1 -> A, 2 -> B, ...)
+    unsigned enpassants:4;  // 0 for no enpassant, otherwise the number of the file (1 -> A, 2 -> B, ...)
 } t_game;
 
 t_game *startGame(field gameTime);

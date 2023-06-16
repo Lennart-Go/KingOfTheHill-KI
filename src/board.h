@@ -49,22 +49,28 @@ typedef struct board {
             occupied(white | black),
             king(wk | bk), queen(wq | bq), rook(wr | br), bishop(wb | bb), knight(wn | bn), pawn(wp | bp) {}
 
+//    constexpr board(const board &other) :
+//            whiteKing(other.whiteKing), whiteQueen(other.whiteQueen), whiteRook(other.whiteRook), whiteBishop(other.whiteBishop), whiteKnight(other.whiteKnight), whitePawn(other.whitePawn),
+//            blackKing(other.blackKing), blackQueen(other.blackQueen), blackRook(other.blackRook), blackBishop(other.blackBishop), blackKnight(other.blackKnight), blackPawn(other.blackPawn),
+//            white(other.white),
+//            black(other.black),
+//            occupied(other.occupied),
+//            king(other.king), queen(other.queen), rook(other.rook), bishop(other.bishop), knight(other.knight), pawn(other.pawn) {}
 
-//    constexpr board& operator=(board const &other) {
-//        return board(other.whiteKing, other.whiteQueen, other.whiteRook, other.whiteBishop, other.whiteKnight, other.whitePawn,
-//                     other.blackKing, other.blackQueen, other.blackRook, other.blackBishop, other.blackKnight, other.blackPawn);
+
+    constexpr board(const board &other) = default;
 //    }
 } t_board;
 
 
 enum class piece {
-    none,
     king,
     queen,
     rook,
     bishop,
     knight,
-    pawn
+    pawn,
+    none
 };
 
 
@@ -115,7 +121,7 @@ t_board setFen(char fen[]);
 
 char *getFen(t_board *board);
 
-void printBoard(t_board *);
+void printBoard(const t_board *board);
 
 char *shortenFen(char *fen);
 

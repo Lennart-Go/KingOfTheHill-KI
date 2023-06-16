@@ -26,10 +26,10 @@
 //    t_game *game = startGame(10000000000000000);
 //    game->board = &newBoard;
 //
-//    std::vector<move> possibleMoves = generate_moves(game, false);
+//    std::vector<move_old> possibleMoves = generate_moves(game, false);
 //
 //    field targetMap = 0;
-//    for (move possibleMove: possibleMoves) {
+//    for (move_old possibleMove: possibleMoves) {
 //        targetMap |= (field )1 << possibleMove.target;
 //    }
 //

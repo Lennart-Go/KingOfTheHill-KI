@@ -62,7 +62,7 @@ void positionTrackingUndo(t_game *game) {
 //    field King = moving_color ? game->board->blackKing : game->board->whiteKing;
 //    Position kingPosition = position_from_shift((King == 0) ? 0 : (int) log2((long double) King));
 //    if (is_threatened(game->board, kingPosition, moving_color)) {
-//        std::vector<t_move> possibleMoves = generate_moves(game, moving_color);
+//        std::vector<t_move_old> possibleMoves = generate_moves(game, moving_color);
 //        for (auto currentMove : possibleMoves) {
 //            if (!is_move_check(game->board, currentMove)) {
 //                return false;
@@ -74,12 +74,12 @@ void positionTrackingUndo(t_game *game) {
 //}
 
 //bool isStalemate(t_game *game, bool moving_color) {
-//    /* Function to check whether the party whose turn is now can move. If not the game is stalemate-> draw
+//    /* Function to check whether the party whose turn is now can move_old. If not the game is stalemate-> draw
 //    * Arguments:
 //    *  t_board *board: Pointer to the board representing the state of the game
 //    *  bool moving_color: the next moving color with "false" for white and "true" for black
 //    */
-//    std::vector<t_move> possibleMoves = generate_moves(game, moving_color);
+//    std::vector<t_move_old> possibleMoves = generate_moves(game, moving_color);
 //    if (possibleMoves.size() < 1) {
 //        return true;
 //    } else {

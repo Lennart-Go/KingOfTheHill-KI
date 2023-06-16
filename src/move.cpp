@@ -6,7 +6,7 @@
 #include "moveMaps.h"
 
 
-bool is_enpassant(t_board *board, t_move *move) {
+bool is_enpassant(t_board *board, t_move_old *move) {
     if (!board_value_from_shift(board->pawn, move->origin)) {
         return false;
     }
@@ -19,7 +19,7 @@ bool is_enpassant(t_board *board, t_move *move) {
     return false;
 }
 
-bool is_double_pawn_move(t_board *board, t_move *move) {
+bool is_double_pawn_move(t_board *board, t_move_old *move) {
     if (!board_value_from_shift(board->pawn, move->origin)) {
         return false;
     }
@@ -30,7 +30,7 @@ bool is_double_pawn_move(t_board *board, t_move *move) {
     return false;
 }
 
-bool is_castle(t_board *board, t_move *move) {
+bool is_castle(t_board *board, t_move_old *move) {
     int shift_diff = abs((int) (move->target) - (int) (move->origin));
     if (shift_diff == 2 && board_value_from_shift(board->king, move->origin)) {
         return true;
@@ -38,7 +38,7 @@ bool is_castle(t_board *board, t_move *move) {
     return false;
 }
 
-void doMove(t_board *board, t_move *move) {
+void doMove(t_board *board, t_move_old *move) {
     bool isEnpassant = is_enpassant(board, move);
     bool isCastle = is_castle(board, move);
 
@@ -65,9 +65,9 @@ void doMove(t_board *board, t_move *move) {
     board->black &= ~bitTarget;
 
     // TODO: Idea: Instead of using if condition for each piece, calculate dynamically?
-    // TODO:        board->piece |= board_value_from_shift(board->piece, move->origin) * bitTarget;
-    // TODO:        board->piece &= board_value_from_shift(board->piece, move->origin) * ~bitOrigin;
-    //get originfigure and move it
+    // TODO:        board->piece |= board_value_from_shift(board->piece, move_old->origin) * bitTarget;
+    // TODO:        board->piece &= board_value_from_shift(board->piece, move_old->origin) * ~bitOrigin;
+    //get originfigure and move_old it
     if ((board->king & bitOrigin) != 0) {
         board->king &= ~bitOrigin;
         board->king |= bitTarget;
@@ -88,7 +88,7 @@ void doMove(t_board *board, t_move *move) {
         board->pawn |= bitTarget;
     }
 
-    //clear originfield and set move color
+    //clear originfield and set move_old color
     if ((board->black & bitOrigin) != 0) {
         board->black &= ~bitOrigin;
         move->color = 1;
@@ -97,7 +97,7 @@ void doMove(t_board *board, t_move *move) {
         move->color = 0;
     }
 
-    //set color of targefield to move color
+    //set color of targefield to move_old color
     if (move->color == 0) {
         board->black &= ~bitTarget;
         board->white |= bitTarget;
@@ -124,7 +124,7 @@ void doMove(t_board *board, t_move *move) {
         board->black &= ~takenPositionBitmask;
         board->pawn &= ~takenPositionBitmask;
     } else if (isCastle) {
-        t_move castleRookMove;
+        t_move_old castleRookMove;
         if (move->origin < move->target) {
             // Short castle
             castleRookMove.origin = move->target + 1;
@@ -155,12 +155,12 @@ void doMove(t_board *board, t_move *move) {
     }
 }
 
-void undoMove(t_board *board, t_move *move) {
+void undoMove(t_board *board, t_move_old *move) {
     //generate bitmask for fields
     field bitOrigin = (field) 1 << move->origin;
     field bitTarget = (field) 1 << move->target;
 
-    //get targetfigure and move it
+    //get targetfigure and move_old it
     if ((board->king & bitTarget) != 0) {
         board->king &= ~bitTarget;
         board->king |= bitOrigin;
@@ -233,7 +233,7 @@ void undoMove(t_board *board, t_move *move) {
         // printPosition(takenPosition);
         // printf("\n");
     } else if (isCastle) {
-        t_move castleRookMove;
+        t_move_old castleRookMove;
         if (move->origin < move->target) {
             // Short castle
             castleRookMove.origin = move->target + 1;
@@ -245,8 +245,8 @@ void undoMove(t_board *board, t_move *move) {
             castleRookMove.target = move->target + 1;
             castleRookMove.color = move->color;
 
-//            printf("Long castle move: ");
-//            printMove(castleRookMove);
+//            printf("Long castle move_old: ");
+//            printMoveOld(castleRookMove);
         }
         undoMove(board, &castleRookMove);
     } else if (move->promoted) {
@@ -271,9 +271,9 @@ void undoMove(t_board *board, t_move *move) {
     }
 }
 
-void commitMove(t_game *game, t_move *move) {
+void commitMove(t_game *game, t_move_old *move) {
     if (move->origin == move->target) {
-        // Failure move -> No moves generated
+        // Failure move_old -> No moves generated
         game->isOver = true;
         return;
     }
@@ -283,10 +283,10 @@ void commitMove(t_game *game, t_move *move) {
     move->enpassants = game->enpassants;  // Save previous enpassant possibilities to enable reverting
     game->enpassants = 0;
 
-    // Handle double-forward pawn move
+    // Handle double-forward pawn move_old
     if (is_double_pawn_move(game->board, move)) {
         //printf("DOUBLE PAWN MOVE!\n");
-        // Set according bit if the move was a double-forward pawn move
+        // Set according bit if the move_old was a double-forward pawn move_old
         game->enpassants = position_from_shift(move->origin).x + 1;
     } else if (is_castle(game->board, move)) {
         //printf("CASTLE!\n");
@@ -353,9 +353,9 @@ void commitMove(t_game *game, t_move *move) {
     }
 }
 
-void revertMove(t_game *game, t_move *move) {
+void revertMove(t_game *game, t_move_old *move) {
     if (move->origin == move->target) {
-        // Failure move -> No moves were possible
+        // Failure move_old -> No moves were possible
         game->isOver = false;
         return;
     }
@@ -405,7 +405,7 @@ void revertMove(t_game *game, t_move *move) {
     undoMove(game->board, move);
 }
 
-void printMove(const t_move move) {
+void printMoveOld(const t_move_old move) {
     Position origin = position_from_shift(move.origin);
     Position target = position_from_shift(move.target);
     printf("Move %c%d -> %c%d", columnToLetter(origin.x), origin.y + 1, columnToLetter(target.x), target.y + 1);

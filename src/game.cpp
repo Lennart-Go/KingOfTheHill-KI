@@ -64,13 +64,13 @@ int time_limit() {
 //
 //        // sleep(1);
 //
-//        // Generate next move
-//        t_move nextMove = getMove(game, game->turn, timePerMove);
+//        // Generate next move_old
+//        t_move_old nextMove = getMove(game, game->turn, timePerMove);
 //        commitMove(game, &nextMove);
 //
-//        // Print next move and resulting board state
-//        printf("Next move: ");
-//        printMove(nextMove);
+//        // Print next move_old and resulting board state
+//        printf("Next move_old: ");
+//        printMoveOld(nextMove);
 //
 //        printf("\nCurrent board state (Score: %.4f, Round: %d, ", evaluate(game), game->blackMoveCounter + 1);
 //
