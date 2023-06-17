@@ -23,7 +23,7 @@ class MoveTest : public ::testing::Test {
 protected:
     virtual void SetUp()
     {
-        game = startGame();
+        game = startGame(600);
         game->whiteCanCastleLong = false;
         game->whiteCanCastleShort = false;
         game->blackCanCastleLong = false;

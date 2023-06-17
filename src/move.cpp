@@ -1469,6 +1469,10 @@ void undoMove(t_board *board, t_move *move) {
             board->knight &= ~targetPositionBitmask;
         }
     }
+
+    if (countFigure(board->pawn & board->white) > 8) {
+        board->pawn = board->pawn;
+    }
 }
 
 void commitMove(t_game *game, t_move *move) {

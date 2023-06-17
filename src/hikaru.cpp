@@ -7,6 +7,7 @@
 #include "hikaru.h"
 #include "end.h"
 #include <limits>
+#include <time.h>
 
 
 
@@ -44,6 +45,13 @@ int randn(int start, int stop) {
 }
 
 
+// calculates the time left finding a move
+uint64_t timeLeft(uint64_t timePerMove, time_t startMoveTime) {
+    time_t currentTime = time(NULL);
+    return currentTime - timePerMove - startMoveTime;
+}
+
+
 float evaluate(const t_game* game) {
     // Simple approach to evaluating positions by taking a look at the available material
     if (game->isOver) {
@@ -56,7 +64,7 @@ float evaluate(const t_game* game) {
         } else {
             // Draw -> Return neutral score, as neither side should get any scores out of it
             int sign = (game->turn * 2) - 1;
-            return (float )sign / (float )(game->blackMoveCounter * game->blackMoveCounter);
+            return (float )sign / (float )(game->blackMoveCounter * game->blackMoveCounter + 1);
         }
     }
 
@@ -79,13 +87,13 @@ float evaluate(const t_game* game) {
     return score;
 }
 
-float alphaBeta(int depth, float alpha, float beta, t_game *game) {
-    if (depth == 0 || game->isOver) {
+float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t timePerMove, time_t startMoveTime) {
+
+    if (depth == 0 || game->isOver || timeLeft(timePerMove, startMoveTime) <= 0) {
         return evaluate(game);
     }
 
     float score, bestScore;
-    t_move currentMove;
     std::vector<t_move> moves = generate_moves(game, game->turn);
 
     for (int _ = 0; _ < depth; ++_) {
@@ -97,11 +105,9 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game) {
         bestScore = -std::numeric_limits<float>::max();
 
         // White's turn -> Maximize score
-        for (auto move : moves) {
-            currentMove = move;
-
+        for (auto currentMove : moves) {
             commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game);
+            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
             revertMove(game, &currentMove);
 
             for (int _ = 0; _ < depth; ++_) {
@@ -111,7 +117,7 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game) {
             // printf(" returned value %.4f (current/new max is %.4f/", score, bestScore);
 
             bestScore = max(bestScore, score);
-            alpha = max(alpha, score);
+            alpha = max(alpha, bestScore);
 
             // printf("%.4f)\n", bestScore);
 
@@ -124,15 +130,15 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game) {
                 break;
             }
         }
+
+        return bestScore;
     } else {
         bestScore = std::numeric_limits<float>::max();
 
         // Black's turn -> Minimize score
-        for (auto move : moves) {
-            currentMove = move;
-
+        for (auto currentMove : moves) {
             commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game);
+            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
             revertMove(game, &currentMove);
 
             for (int _ = 0; _ < depth; ++_) {
@@ -142,11 +148,11 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game) {
             // printf(" returned value %.4f (current/new min is %.4f/", score, bestScore);
 
             bestScore = min(bestScore, score);
-            beta = min(beta, score);
+            beta = min(beta, bestScore);
 
             // printf("%.4f)\n", bestScore);
 
-            if (alpha <= beta) {
+            if (beta <= alpha) {
                 // "Opposing" team would always choose one of the already better moves
                 for (int _ = 0; _ < depth; ++_) {
                     // printf("\t");
@@ -160,11 +166,12 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game) {
     return bestScore;
 }
 
-std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth) {
+std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t timePerMove) {
     int depth = max_depth;  // NOTE: Always use one less than actually wanted
 
     float alpha = -std::numeric_limits<float>::max();
     float beta = std::numeric_limits<float>::max();
+    time_t startMoveTime = time(NULL);
 
     float score, bestScore;
     t_move currentMove, bestMove;
@@ -192,7 +199,7 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth) {
             currentMove = move;
 
             commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game);
+            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
             revertMove(game, &currentMove);
 
             for (int _ = 0; _ < depth; ++_) {
@@ -206,10 +213,11 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth) {
                 bestMove = currentMove;
             }
 
-            alpha = max(alpha, score);
+            alpha = max(alpha, bestScore);
 
             // printf("%.4f)\n", bestScore);
         }
+        return {bestMove, bestScore};
     } else {
         bestScore = std::numeric_limits<float>::max();
 
@@ -218,7 +226,7 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth) {
             currentMove = move;
 
             commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game);
+            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
             revertMove(game, &currentMove);
 
             for (int _ = 0; _ < depth; ++_) {
@@ -232,7 +240,7 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth) {
                 bestMove = currentMove;
             }
 
-            beta = min(beta, score);
+            beta = min(beta, bestScore);
 
             // printf("%.4f)\n", bestScore);
         }
@@ -246,9 +254,9 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth) {
 }
 
 
-t_move getMove(t_game *game, bool color) {
+t_move getMove(t_game *game, bool color, uint64_t timePerMove) {
     // t_move bestMove = getMoveRandom(game, color);
-    std::pair<t_move, float> abReturn = alphaBetaHead(game, 5);
+    std::pair<t_move, float> abReturn = alphaBetaHead(game, 4, timePerMove);
 
     t_move bestMove = abReturn.first;
     float bestScore = abReturn.second;

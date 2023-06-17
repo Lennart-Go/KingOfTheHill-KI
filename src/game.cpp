@@ -7,11 +7,12 @@
 #include "hash.h"
 
 
-t_game *startGame() {
+t_game *startGame(uint64_t gameTime) {
     t_game *game = (t_game *) calloc(1, sizeof(t_game));
     t_board *board = initializeBoard();
 
     game->board = board;
+    game->gameTime = gameTime;
     game->turn = 0;  // White's turn
     game->latestMoveTime = 0;  // TODO: Set latestMoveTime to current time in ms
     game->isOver = false;
@@ -44,16 +45,19 @@ int time_limit() {
     return 2 * 60 * 60 / 40;
 }
 
-void play(int maxRounds) {
+void play(int maxRounds, uint64_t gameTime) {
     if (maxRounds < 0) {
         maxRounds = INT32_MAX;
     }
 
-    t_game *game = startGame();
-    // setFen(game->board, (char *)"r3k2r/8/8/8/8/8/p1r4r/R3K2R");
+    t_game *game = startGame(gameTime);
+    setFen(game->board, (char *)"r2qkbnr/pp1bpppp/2np4/1Bp5/4P3/5N2/PPPP1PPP/RNBQ1RK1");
+    // game->turn = true;
 
     printBoard(game->board);
     // sleep(4);
+
+    uint64_t timePerMove = gameTime / 40;
 
     while (!game->isOver && (game->blackMoveCounter + 1) <= maxRounds) {
         /*  if (game->blackMoveCounter > 0) {
@@ -63,7 +67,7 @@ void play(int maxRounds) {
         // sleep(1);
 
         // Generate next move
-        t_move nextMove = getMove(game, game->turn);
+        t_move nextMove = getMove(game, game->turn, timePerMove);
         commitMove(game, &nextMove);
 
         // Print next move and resulting board state

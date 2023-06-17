@@ -8,6 +8,7 @@
 
 typedef struct game {
     t_board *board;
+    uint64_t gameTime;
     unsigned turn:1;  // 0 for white, 1 for black
     uint64_t latestMoveTime;
     bool isOver;
@@ -35,7 +36,7 @@ typedef struct game {
 
 } t_game;
 
-t_game *startGame();
-void play(int maxRounds);
+t_game *startGame(uint64_t gameTime);
+void play(int maxRounds, uint64_t gameTime);
 
 #endif //KINGOFTHEHILL_KI_GAME_H
