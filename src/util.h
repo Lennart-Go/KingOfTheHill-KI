@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <cstring>
 #include "board.h"
+#include "hash.h"
 
 //template <typename T> class List {
 //private:
@@ -161,18 +162,6 @@ public:
     bool isWithinBounds() const;
 
     Position toPosition() const;
-};
-
-class Boardc {
-public:
-    Boardc(t_board* board);
-    bool operator < (const Boardc& a) const;
-    bool operator > (const Boardc& a) const;
-    bool operator == (const Boardc& a) const;
-    t_board* _board;
-private:
-   uint64_t _boardValue;
-
 };
 
 int shift_from_position(Position position);
