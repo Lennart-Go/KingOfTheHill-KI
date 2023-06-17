@@ -12,15 +12,15 @@
 #include "move.h"
 
 
-//field generateMovable(piece p, int positionOffset, bool cutEdge) {
+//uint64_t generateMovable(piece p, int positionOffset, bool cutEdge) {
 //    // Can also be used to find all pieces of type p that are targeting the positionOffset square
-//    field positionMap = (field )1 << positionOffset;
+//    uint64_t positionMap = (uint64_t )1 << positionOffset;
 //
-//    field kp = p == piece::king ? positionMap : 0;
-//    field qp = p == piece::queen ? positionMap : 0;
-//    field rp = p == piece::rook ? positionMap : 0;
-//    field bp = p == piece::bishop ? positionMap : 0;
-//    field np = p == piece::knight ? positionMap : 0;
+//    uint64_t kp = p == piece::king ? positionMap : 0;
+//    uint64_t qp = p == piece::queen ? positionMap : 0;
+//    uint64_t rp = p == piece::rook ? positionMap : 0;
+//    uint64_t bp = p == piece::bishop ? positionMap : 0;
+//    uint64_t np = p == piece::knight ? positionMap : 0;
 //
 //    board newBoard = board(kp, qp, rp, bp, np, 0, 0, 0, 0, 0, 0, 0);
 //    t_gameOld *gameOld = startGame(10000000000000000);
@@ -28,59 +28,59 @@
 //
 //    std::vector<move> possibleMoves = generate_moves(gameOld, false);
 //
-//    field targetMap = 0;
+//    uint64_t targetMap = 0;
 //    for (move possibleMove: possibleMoves) {
-//        targetMap |= (field )1 << possibleMove.target;
+//        targetMap |= (uint64_t )1 << possibleMove.target;
 //    }
 //
 //    if (cutEdge) {
 //        // Cut off edge squares before returning
-//        field edges = 0b1111111110000001100000011000000110000001100000011000000111111111;
+//        uint64_t edges = 0b1111111110000001100000011000000110000001100000011000000111111111;
 //        return targetMap & ~edges;
 //    }
 //    return targetMap;
 //}
 
 
-field generateHorizontal(int originShift) {
+uint64_t generateHorizontal(int originShift) {
     Position originPosition = position_from_shift(originShift);
 
-    field targetMap = 0;
+    uint64_t targetMap = 0;
     for (int i = 0; i < originPosition.y; ++i) {
-        targetMap |= (field )1 << shift_from_position(Position(originPosition.x, i));
+        targetMap |= (uint64_t )1 << shift_from_position(Position(originPosition.x, i));
     }
     for (int i = originPosition.y + 1; i < 8; ++i) {
-        targetMap |= (field )1 << shift_from_position(Position(originPosition.x, i));
+        targetMap |= (uint64_t )1 << shift_from_position(Position(originPosition.x, i));
     }
 
     return targetMap;
 }
 
-field generateVertical(int originShift) {
+uint64_t generateVertical(int originShift) {
     Position originPosition = position_from_shift(originShift);
 
-    field targetMap = 0;
+    uint64_t targetMap = 0;
     for (int i = 0; i < originPosition.x; ++i) {
-        targetMap |= (field )1 << shift_from_position(Position(i, originPosition.y));
+        targetMap |= (uint64_t )1 << shift_from_position(Position(i, originPosition.y));
     }
     for (int i = originPosition.x + 1; i < 8; ++i) {
-        targetMap |= (field )1 << shift_from_position(Position(i, originPosition.y));
+        targetMap |= (uint64_t )1 << shift_from_position(Position(i, originPosition.y));
     }
 
     return targetMap;
 }
 
-field generateLeftDiagonal(int originShift) {
+uint64_t generateLeftDiagonal(int originShift) {
     Position originPosition = position_from_shift(originShift);
 
-    field targetMap = 0;
+    uint64_t targetMap = 0;
     int offset = 1;
     while (true) {
         Offset targetOffset = Offset(originPosition.x - offset, originPosition.y + offset);
         if (!targetOffset.isWithinBounds()) {
             break;
         }
-        targetMap |= (field )1 << shift_from_position(targetOffset.toPosition());
+        targetMap |= (uint64_t )1 << shift_from_position(targetOffset.toPosition());
 
         offset++;
     }
@@ -91,7 +91,7 @@ field generateLeftDiagonal(int originShift) {
         if (!targetOffset.isWithinBounds()) {
             break;
         }
-        targetMap |= (field )1 << shift_from_position(targetOffset.toPosition());
+        targetMap |= (uint64_t )1 << shift_from_position(targetOffset.toPosition());
 
         offset++;
     }
@@ -99,17 +99,17 @@ field generateLeftDiagonal(int originShift) {
     return targetMap;
 }
 
-field generateRightDiagonal(int originShift) {
+uint64_t generateRightDiagonal(int originShift) {
     Position originPosition = position_from_shift(originShift);
 
-    field targetMap = 0;
+    uint64_t targetMap = 0;
     int offset = 1;
     while (true) {
         Offset targetOffset = Offset(originPosition.x + offset, originPosition.y + offset);
         if (!targetOffset.isWithinBounds()) {
             break;
         }
-        targetMap |= (field )1 << shift_from_position(targetOffset.toPosition());
+        targetMap |= (uint64_t )1 << shift_from_position(targetOffset.toPosition());
 
         offset++;
     }
@@ -120,7 +120,7 @@ field generateRightDiagonal(int originShift) {
         if (!targetOffset.isWithinBounds()) {
             break;
         }
-        targetMap |= (field )1 << shift_from_position(targetOffset.toPosition());
+        targetMap |= (uint64_t )1 << shift_from_position(targetOffset.toPosition());
 
         offset++;
     }
@@ -129,21 +129,21 @@ field generateRightDiagonal(int originShift) {
 }
 
 
-field generateXray(int originShift, int targetShift) {
+uint64_t generateXray(int originShift, int targetShift) {
     Position origin = position_from_shift(originShift);
     Position target = position_from_shift(targetShift);
 
     if (origin == target) {
-        return ~(field )0;
+        return ~(uint64_t )0;
     }
 
     int xDiff = (int) target.x - (int) origin.x;
     int yDiff = (int) target.y - (int) origin.y;
 
-    field xrayMap = 0;
+    uint64_t xrayMap = 0;
 
     if (abs(xDiff) != abs(yDiff) && (xDiff != 0 && yDiff != 0)) {
-        return ~(field )0;
+        return ~(uint64_t )0;
     }
 
     int xSign = xDiff != 0 ? xDiff / abs(xDiff) : 0;
@@ -155,14 +155,14 @@ field generateXray(int originShift, int targetShift) {
          x != target.x || y != target.y;
          x += xSign, y += ySign) {
         targetPosition = Position(x, y);
-        xrayMap |= (field) 1 << shift_from_position(targetPosition);
+        xrayMap |= (uint64_t) 1 << shift_from_position(targetPosition);
     }
 
     return xrayMap;
 }
 
 
-field generateRookLookup(int originShift, uint16_t obstructionIdentifier, int piecesIgnorable) {
+uint64_t generateRookLookup(int originShift, uint16_t obstructionIdentifier, int piecesIgnorable) {
     // When ignoring the borders the required band can be reduced from 14 to 12 bits (worst case)
     Position originPosition = position_from_shift(originShift);
 
@@ -187,15 +187,15 @@ field generateRookLookup(int originShift, uint16_t obstructionIdentifier, int pi
     int downPiecesIgnorable = piecesIgnorable;
 
 
-    field result = 0;
+    uint64_t result = 0;
     // Up direction
     for (int up = upOffset + upLength - 1; up >= upOffset; --up) {
         Offset targetPositionOffset = Offset(0, (upOffset + upLength - up));
         Position targetPosition = (targetPositionOffset + originPosition).toPosition();
 
-        result |= (field) 1 << shift_from_position(targetPosition);
+        result |= (uint64_t) 1 << shift_from_position(targetPosition);
 
-        // Break loop if target field is occupied
+        // Break loop if target uint64_t is occupied
         int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (up - upOccOffset));
         if (obstructionVal != 0) {
             if (upPiecesIgnorable == 0) {
@@ -210,9 +210,9 @@ field generateRookLookup(int originShift, uint16_t obstructionIdentifier, int pi
         Offset targetPositionOffset = Offset(-(leftOffset + leftLength - left), 0);
         Position targetPosition = (targetPositionOffset + originPosition).toPosition();
 
-        result |= (field) 1 << shift_from_position(targetPosition);
+        result |= (uint64_t) 1 << shift_from_position(targetPosition);
 
-        // Break loop if target field is occupied
+        // Break loop if target uint64_t is occupied
         int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (left - leftOccOffset));
         if (obstructionVal != 0) {
             if (leftPiecesIgnorable == 0) {
@@ -227,9 +227,9 @@ field generateRookLookup(int originShift, uint16_t obstructionIdentifier, int pi
         Offset targetPositionOffset = Offset(right - (rightOffset - 1), 0);
         Position targetPosition = (targetPositionOffset + originPosition).toPosition();
 
-        result |= (field) 1 << shift_from_position(targetPosition);
+        result |= (uint64_t) 1 << shift_from_position(targetPosition);
 
-        // Break loop if target field is occupied
+        // Break loop if target uint64_t is occupied
         int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (right - rightOccOffset));
         if (obstructionVal != 0) {
             if (rightPiecesIgnorable == 0) {
@@ -244,9 +244,9 @@ field generateRookLookup(int originShift, uint16_t obstructionIdentifier, int pi
         Offset targetPositionOffset = Offset(0, -(down - (downOffset - 1)));
         Position targetPosition = (targetPositionOffset + originPosition).toPosition();
 
-        result |= (field) 1 << shift_from_position(targetPosition);
+        result |= (uint64_t) 1 << shift_from_position(targetPosition);
 
-        // Break loop if target field is occupied
+        // Break loop if target uint64_t is occupied
         int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (down - downOccOffset));
         if (obstructionVal != 0) {
             if (downPiecesIgnorable == 0) {
@@ -260,7 +260,7 @@ field generateRookLookup(int originShift, uint16_t obstructionIdentifier, int pi
 }
 
 
-field generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int piecesIgnorable) {
+uint64_t generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int piecesIgnorable) {
 
     // When ignoring the borders the required band can be reduced from 13 to 9 bits (worst case)
     int border_shift_offset = 2;
@@ -309,7 +309,7 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int 
     int downLeftPiecesIgnorable = piecesIgnorable;
     int downRightPiecesIgnorable = piecesIgnorable;
 
-    field result = 0;
+    uint64_t result = 0;
 
     // Up left direction
     // Inner
@@ -327,7 +327,7 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int 
                 tmp_offset = 1;
             }
 
-            result |= (field) 1 << shift_from_position(targetPosition);
+            result |= (uint64_t) 1 << shift_from_position(targetPosition);
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (upLeft1 - occOffsetUp + tmp_offset));
             if (obstructionVal != 0) {
@@ -348,7 +348,7 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int 
             Offset targetPositionOffset = Offset(-offset, offset);
             Position targetPosition = (targetPositionOffset + originPosition).toPosition();
 
-            result |= (field) 1 << shift_from_position(targetPosition);
+            result |= (uint64_t) 1 << shift_from_position(targetPosition);
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (upLeft2 - occOffsetUpLeft));
             if (obstructionVal != 0) {
@@ -370,7 +370,7 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int 
             Offset targetPositionOffset = Offset(offset, offset);
             Position targetPosition = (targetPositionOffset + originPosition).toPosition();
 
-            result |= (field) 1 << shift_from_position(targetPosition);
+            result |= (uint64_t) 1 << shift_from_position(targetPosition);
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (upRight1 - occOffsetUp));
             if (obstructionVal != 0) {
@@ -391,7 +391,7 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int 
             Offset targetPositionOffset = Offset(offset, offset);
             Position targetPosition = (targetPositionOffset + originPosition).toPosition();
 
-            result |= (field) 1 << shift_from_position(targetPosition);
+            result |= (uint64_t) 1 << shift_from_position(targetPosition);
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (upRight2 - occOffsetUpRight));
             if (obstructionVal != 0) {
@@ -418,7 +418,7 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int 
                 // tmp_offset = 1;
             }
 
-            result |= (field) 1 << shift_from_position(targetPosition);
+            result |= (uint64_t) 1 << shift_from_position(targetPosition);
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (downLeft1 - occOffsetDown));
             if (obstructionVal != 0) {
@@ -439,7 +439,7 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int 
             Offset targetPositionOffset = Offset(-offset, -offset);
             Position targetPosition = (targetPositionOffset + originPosition).toPosition();
 
-            result |= (field) 1 << shift_from_position(targetPosition);
+            result |= (uint64_t) 1 << shift_from_position(targetPosition);
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (downLeft2 - occOffsetDownLeft));
             if (obstructionVal != 0) {
@@ -467,7 +467,7 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int 
                 tmp_offset = 1;
             }
 
-            result |= (field) 1 << shift_from_position(targetPosition);
+            result |= (uint64_t) 1 << shift_from_position(targetPosition);
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (downRight1 - occOffsetDown - tmp_offset));
             if (obstructionVal != 0) {
@@ -488,7 +488,7 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int 
             Offset targetPositionOffset = Offset(offset, -offset);
             Position targetPosition = (targetPositionOffset + originPosition).toPosition();
 
-            result |= (field) 1 << shift_from_position(targetPosition);
+            result |= (uint64_t) 1 << shift_from_position(targetPosition);
 
             int obstructionVal = obstructionIdentifier & ((uint16_t) 1 << (downRight2 - occOffsetDownRight));
             if (obstructionVal != 0) {
@@ -504,11 +504,11 @@ field generateBishopLookup(int originShift, uint16_t obstructionIdentifier, int 
 }
 
 
-field generateWhitePawnAttackLookup(int originShift) {
+uint64_t generateWhitePawnAttackLookup(int originShift) {
     Position originPosition = position_from_shift(originShift);
-    field positionMap = (field )1 << originShift;
+    uint64_t positionMap = (uint64_t )1 << originShift;
 
-    field targetMap = 0;
+    uint64_t targetMap = 0;
     if (originPosition.x != 0) {
         // Take to the left
         targetMap |= positionMap << 9;
@@ -521,11 +521,11 @@ field generateWhitePawnAttackLookup(int originShift) {
     return targetMap;
 }
 
-field generateBlackPawnAttackLookup(int originShift) {
+uint64_t generateBlackPawnAttackLookup(int originShift) {
     Position originPosition = position_from_shift(originShift);
-    field positionMap = (field )1 << originShift;
+    uint64_t positionMap = (uint64_t )1 << originShift;
 
-    field targetMap = 0;
+    uint64_t targetMap = 0;
     if (originPosition.x != 0) {
         // Take to the left
         targetMap |= positionMap >> 7;

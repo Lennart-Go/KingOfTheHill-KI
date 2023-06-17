@@ -66,7 +66,7 @@ static inline t_gameState getMoveRandom(t_game *game) {
 }
 
 template<bool color>
-static inline float alphaBeta(int depth, float alpha, float beta, t_game *game, field timePerMove, time_t startMoveTime) {
+static inline float alphaBeta(int depth, float alpha, float beta, t_game *game, uint64_t timePerMove, time_t startMoveTime) {
 
     if (depth == 0 || game->isOver || timeLeft(timePerMove, startMoveTime) <= 0) {
         return evaluate(game);
@@ -118,7 +118,7 @@ static inline float alphaBeta(int depth, float alpha, float beta, t_game *game, 
 }
 
 //template<float color>
-//std::pair<t_gameState, float> alphaBetaHead(t_game *game, int max_depth, field timePerMove) {
+//std::pair<t_gameState, float> alphaBetaHead(t_game *game, int max_depth, uint64_t timePerMove) {
 //    int depth = max_depth;  // NOTE: Always use one less than actually wanted
 //
 //    float alpha = -std::numeric_limits<float>::max();
@@ -170,11 +170,11 @@ static inline float alphaBeta(int depth, float alpha, float beta, t_game *game, 
 
 
 template<bool color>
-inline std::pair<t_gameState, float> alphaBetaHead(t_game *game, int max_depth, field timePerMove);
+inline std::pair<t_gameState, float> alphaBetaHead(t_game *game, int max_depth, uint64_t timePerMove);
 
 
 template<>
-inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_depth, field timePerMove) {
+inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_depth, uint64_t timePerMove) {
     int depth = max_depth;  // NOTE: Always use one less than actually wanted
 
     float alpha = -std::numeric_limits<float>::max();
@@ -207,7 +207,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
 
 
 template<>
-inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_depth, field timePerMove) {
+inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_depth, uint64_t timePerMove) {
     int depth = max_depth;  // NOTE: Always use one less than actually wanted
 
     float alpha = -std::numeric_limits<float>::max();

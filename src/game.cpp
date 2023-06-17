@@ -6,7 +6,7 @@
 #include "move.h"
 
 
-t_gameOld *startGame(field gameTime) {
+t_gameOld *startGame(uint64_t gameTime) {
     t_gameOld *game = (t_gameOld *) calloc(1, sizeof(t_gameOld));
     t_board startBoard = initializeBoard();
 
@@ -42,7 +42,7 @@ int time_limit() {
     return 2 * 60 * 60 / 40;
 }
 
-void play(int maxRounds, field gameTime) {
+void play(int maxRounds, uint64_t gameTime) {
     if (maxRounds < 0) {
         maxRounds = INT32_MAX;
     }

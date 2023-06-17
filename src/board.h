@@ -10,31 +10,31 @@
  * 1x White Positions (8 bytes)
  * 1x Black Positions (8 bytes)
  * 6x Figure Positions (6x8 bytes)
- * => Total 64 bytes (8 * field)
+ * => Total 64 bytes (8 * uint64_t)
  */
 
 typedef struct board {
-    const field whiteKing;
-    const field whiteQueen;
-    const field whiteRook;
-    const field whiteBishop;
-    const field whiteKnight;
-    const field whitePawn;
+    const uint64_t whiteKing;
+    const uint64_t whiteQueen;
+    const uint64_t whiteRook;
+    const uint64_t whiteBishop;
+    const uint64_t whiteKnight;
+    const uint64_t whitePawn;
 
-    const field blackKing;
-    const field blackQueen;
-    const field blackRook;
-    const field blackBishop;
-    const field blackKnight;
-    const field blackPawn;
+    const uint64_t blackKing;
+    const uint64_t blackQueen;
+    const uint64_t blackRook;
+    const uint64_t blackBishop;
+    const uint64_t blackKnight;
+    const uint64_t blackPawn;
 
-    field white;
-    field black;
-    const field occupied;
+    uint64_t white;
+    uint64_t black;
+    const uint64_t occupied;
 
     board(
-            field wk, field wq, field wr, field wb, field wn, field wp,
-            field bk, field bq, field br, field bb, field bn, field bp) :
+            uint64_t wk, uint64_t wq, uint64_t wr, uint64_t wb, uint64_t wn, uint64_t wp,
+            uint64_t bk, uint64_t bq, uint64_t br, uint64_t bb, uint64_t bn, uint64_t bp) :
             whiteKing(wk), whiteQueen(wq), whiteRook(wr), whiteBishop(wb), whiteKnight(wn), whitePawn(wp),
             blackKing(bk), blackQueen(bq), blackRook(br), blackBishop(bb), blackKnight(bn), blackPawn(bp),
             white(wk | wq | wr | wb | wn | wp),
@@ -118,6 +118,6 @@ void printBoard(t_board board);
 
 char *shortenFen(char *fen);
 
-void debug_printSingleBoard(field singeBoard);
+void debug_printSingleBoard(uint64_t singeBoard);
 
 #endif

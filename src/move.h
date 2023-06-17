@@ -35,11 +35,11 @@ typedef struct move_old {
 
 
 typedef struct move {
-    const field originMap;
-    const field targetMap;
+    const uint64_t originMap;
+    const uint64_t targetMap;
 
     move() : originMap(0), targetMap(0) {}
-    move(field origin, field target) : originMap(origin), targetMap(target) {}
+    move(uint64_t origin, uint64_t target) : originMap(origin), targetMap(target) {}
     move(const move &other) = default;
 } t_move;
 
@@ -73,12 +73,12 @@ typedef struct gameState {
 } t_gameState;
 
 
-inline static uint8_t findFirst(const field pieces) {
+inline static uint8_t findFirst(const uint64_t pieces) {
     return static_cast<uint8_t>(log2(static_cast<double>(pieces & -pieces)));
 }
 
 
-inline static uint16_t occIdentifier(field moveMap, const field occ) {
+inline static uint16_t occIdentifier(uint64_t moveMap, const uint64_t occ) {
     uint16_t occIdentifier = 0;
     for (long bitNumber = 1; moveMap != 0; bitNumber += bitNumber) {
         if ((occ & moveMap & -moveMap) != 0) {
@@ -92,22 +92,22 @@ inline static uint16_t occIdentifier(field moveMap, const field occ) {
 
 
 template<piece p, bool color>
-inline static t_board move(t_board currentBoard, field origin, field target) {
-    field wk = currentBoard.whiteKing;
-    field wq = currentBoard.whiteQueen;
-    field wr = currentBoard.whiteRook;
-    field wb = currentBoard.whiteBishop;
-    field wn = currentBoard.whiteKnight;
-    field wp = currentBoard.whitePawn;
+inline static t_board move(t_board currentBoard, uint64_t origin, uint64_t target) {
+    uint64_t wk = currentBoard.whiteKing;
+    uint64_t wq = currentBoard.whiteQueen;
+    uint64_t wr = currentBoard.whiteRook;
+    uint64_t wb = currentBoard.whiteBishop;
+    uint64_t wn = currentBoard.whiteKnight;
+    uint64_t wp = currentBoard.whitePawn;
 
-    field bk = currentBoard.blackKing;
-    field bq = currentBoard.blackQueen;
-    field br = currentBoard.blackRook;
-    field bb = currentBoard.blackBishop;
-    field bn = currentBoard.blackKnight;
-    field bp = currentBoard.blackPawn;
+    uint64_t bk = currentBoard.blackKing;
+    uint64_t bq = currentBoard.blackQueen;
+    uint64_t br = currentBoard.blackRook;
+    uint64_t bb = currentBoard.blackBishop;
+    uint64_t bn = currentBoard.blackKnight;
+    uint64_t bp = currentBoard.blackPawn;
 
-    field move = origin | target;
+    uint64_t move = origin | target;
 
     if (color) {
         // Black is moving
@@ -162,20 +162,20 @@ inline static t_board move(t_board currentBoard, field origin, field target) {
 
 
 template <piece p, bool color>
-inline static t_board placePiece(t_board currentBoard, field target) {
-    field wk = currentBoard.whiteKing;
-    field wq = currentBoard.whiteQueen;
-    field wr = currentBoard.whiteRook;
-    field wb = currentBoard.whiteBishop;
-    field wn = currentBoard.whiteKnight;
-    field wp = currentBoard.whitePawn;
+inline static t_board placePiece(t_board currentBoard, uint64_t target) {
+    uint64_t wk = currentBoard.whiteKing;
+    uint64_t wq = currentBoard.whiteQueen;
+    uint64_t wr = currentBoard.whiteRook;
+    uint64_t wb = currentBoard.whiteBishop;
+    uint64_t wn = currentBoard.whiteKnight;
+    uint64_t wp = currentBoard.whitePawn;
 
-    field bk = currentBoard.blackKing;
-    field bq = currentBoard.blackQueen;
-    field br = currentBoard.blackRook;
-    field bb = currentBoard.blackBishop;
-    field bn = currentBoard.blackKnight;
-    field bp = currentBoard.blackPawn;
+    uint64_t bk = currentBoard.blackKing;
+    uint64_t bq = currentBoard.blackQueen;
+    uint64_t br = currentBoard.blackRook;
+    uint64_t bb = currentBoard.blackBishop;
+    uint64_t bn = currentBoard.blackKnight;
+    uint64_t bp = currentBoard.blackPawn;
 
     if (color) {
         // Black is moving
@@ -230,7 +230,7 @@ inline static t_board placePiece(t_board currentBoard, field target) {
 
 
 template<bool color>
-inline static void moveKing(std::vector<t_gameState> *moves, t_gameState currentState, field origin, field targets) {
+inline static void moveKing(std::vector<t_gameState> *moves, t_gameState currentState, uint64_t origin, uint64_t targets) {
     unsigned wCastleShort, wCastleLong, bCastleShort, bCastleLong;
     if (color) {
         wCastleShort = currentState.wCastleShort;
@@ -246,7 +246,7 @@ inline static void moveKing(std::vector<t_gameState> *moves, t_gameState current
         bCastleLong = currentState.bCastleLong;
     }
 
-    field currentTarget;
+    uint64_t currentTarget;
     while (targets != 0) {
         currentTarget = (targets & -targets);
 
@@ -272,11 +272,11 @@ inline static void moveKingCastleShort(std::vector<t_gameState> *moves, t_gameSt
         bCastleShort = false;
         bCastleLong = false;
 
-        field kingOrigin = currentState.board.blackKing;
-        field kingTarget = kingOrigin << 2;
+        uint64_t kingOrigin = currentState.board.blackKing;
+        uint64_t kingTarget = kingOrigin << 2;
 
-        field rookOrigin = 0b00000000000000000000000000000000000000000000000010000000;
-        field rookTarget = 0b00000000000000000000000000000000000000000000000000100000;
+        uint64_t rookOrigin = 0b00000000000000000000000000000000000000000000000010000000;
+        uint64_t rookTarget = 0b00000000000000000000000000000000000000000000000000100000;
 
         t_board targetBoardKingMoved = move<piece::king, color>(currentState.board, kingOrigin, kingTarget);
         t_board targetBoard = move<piece::rook, color>(targetBoardKingMoved, rookOrigin, rookTarget);
@@ -292,11 +292,11 @@ inline static void moveKingCastleShort(std::vector<t_gameState> *moves, t_gameSt
         bCastleShort = currentState.bCastleShort;
         bCastleLong = currentState.bCastleLong;
 
-        field kingOrigin = currentState.board.blackKing;
-        field kingTarget = kingOrigin << 2;
+        uint64_t kingOrigin = currentState.board.blackKing;
+        uint64_t kingTarget = kingOrigin << 2;
 
-        field rookOrigin = 0b10000000000000000000000000000000000000000000000000000000;
-        field rookTarget = 0b00100000000000000000000000000000000000000000000000000000;
+        uint64_t rookOrigin = 0b10000000000000000000000000000000000000000000000000000000;
+        uint64_t rookTarget = 0b00100000000000000000000000000000000000000000000000000000;
 
         t_board targetBoardKingMoved = move<piece::king, color>(currentState.board, kingOrigin, kingTarget);
         t_board targetBoard = move<piece::rook, color>(targetBoardKingMoved, rookOrigin, rookTarget);
@@ -319,11 +319,11 @@ inline static void moveKingCastleLong(std::vector<t_gameState> *moves, t_gameSta
         bCastleShort = false;
         bCastleLong = false;
 
-        field kingOrigin = currentState.board.blackKing;
-        field kingTarget = kingOrigin >> 2;
+        uint64_t kingOrigin = currentState.board.blackKing;
+        uint64_t kingTarget = kingOrigin >> 2;
 
-        field rookOrigin = 0b00000000000000000000000000000000000000000000000000000001;
-        field rookTarget = 0b00000000000000000000000000000000000000000000000000001000;
+        uint64_t rookOrigin = 0b00000000000000000000000000000000000000000000000000000001;
+        uint64_t rookTarget = 0b00000000000000000000000000000000000000000000000000001000;
 
         t_board targetBoardKingMoved = move<piece::king, color>(currentState.board, kingOrigin, kingTarget);
         t_board targetBoard = move<piece::rook, color>(targetBoardKingMoved, rookOrigin, rookTarget);
@@ -339,11 +339,11 @@ inline static void moveKingCastleLong(std::vector<t_gameState> *moves, t_gameSta
         bCastleShort = currentState.bCastleShort;
         bCastleLong = currentState.bCastleLong;
 
-        field kingOrigin = currentState.board.blackKing;
-        field kingTarget = kingOrigin >> 2;
+        uint64_t kingOrigin = currentState.board.blackKing;
+        uint64_t kingTarget = kingOrigin >> 2;
 
-        field rookOrigin = 0b00000001000000000000000000000000000000000000000000000000;
-        field rookTarget = 0b00001000000000000000000000000000000000000000000000000000;
+        uint64_t rookOrigin = 0b00000001000000000000000000000000000000000000000000000000;
+        uint64_t rookTarget = 0b00001000000000000000000000000000000000000000000000000000;
 
         t_board targetBoardKingMoved = move<piece::king, color>(currentState.board, kingOrigin, kingTarget);
         t_board targetBoard = move<piece::rook, color>(targetBoardKingMoved, rookOrigin, rookTarget);
@@ -357,10 +357,10 @@ inline static void moveKingCastleLong(std::vector<t_gameState> *moves, t_gameSta
 
 
 template<bool color>
-inline static void moveQueens(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, field targets) {
-    field origin = (field )1 << originShift;
+inline static void moveQueens(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, uint64_t targets) {
+    uint64_t origin = (uint64_t )1 << originShift;
 
-    field currentTarget;
+    uint64_t currentTarget;
     while (targets != 0) {
         currentTarget = (targets & -targets);
 
@@ -377,8 +377,8 @@ inline static void moveQueens(std::vector<t_gameState> *moves, t_gameState curre
 
 
 template<bool color>
-inline static void moveRooks(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, field targets) {
-    field origin = (field )1 << originShift;
+inline static void moveRooks(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, uint64_t targets) {
+    uint64_t origin = (uint64_t )1 << originShift;
 
     unsigned wCastleShort, wCastleLong, bCastleShort, bCastleLong;
     if (color) {
@@ -395,7 +395,7 @@ inline static void moveRooks(std::vector<t_gameState> *moves, t_gameState curren
         bCastleLong = currentState.bCastleLong;
     }
 
-    field currentTarget;
+    uint64_t currentTarget;
     while (targets != 0) {
         currentTarget = (targets & -targets);
 
@@ -412,10 +412,10 @@ inline static void moveRooks(std::vector<t_gameState> *moves, t_gameState curren
 
 
 template<bool color>
-inline static void moveBishops(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, field targets) {
-    field origin = (field )1 << originShift;
+inline static void moveBishops(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, uint64_t targets) {
+    uint64_t origin = (uint64_t )1 << originShift;
 
-    field currentTarget;
+    uint64_t currentTarget;
     while (targets != 0) {
         currentTarget = (targets & -targets);
 
@@ -432,10 +432,10 @@ inline static void moveBishops(std::vector<t_gameState> *moves, t_gameState curr
 
 
 template<bool color>
-inline static void moveKnights(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, field targets) {
-    field origin = (field )1 << originShift;
+inline static void moveKnights(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, uint64_t targets) {
+    uint64_t origin = (uint64_t )1 << originShift;
 
-    field currentTarget;
+    uint64_t currentTarget;
     while (targets != 0) {
         currentTarget = (targets & -targets);
 
@@ -452,10 +452,10 @@ inline static void moveKnights(std::vector<t_gameState> *moves, t_gameState curr
 
 
 template<bool color>
-inline static void movePawns(std::vector<t_gameState> *moves, t_gameState currentState, field origins, field targets) {
+inline static void movePawns(std::vector<t_gameState> *moves, t_gameState currentState, uint64_t origins, uint64_t targets) {
     // TODO: Handle promotions
 
-    field currentOrigin, currentTarget;
+    uint64_t currentOrigin, currentTarget;
     while (targets != 0) {
         currentOrigin = (origins & -origins);
         currentTarget = (targets & -targets);
@@ -474,8 +474,8 @@ inline static void movePawns(std::vector<t_gameState> *moves, t_gameState curren
 
 
 template<bool color>
-inline static void movePawnsPromotion(std::vector<t_gameState> *moves, t_gameState currentState, field origins, field targets) {
-    field currentOrigin, currentTarget;
+inline static void movePawnsPromotion(std::vector<t_gameState> *moves, t_gameState currentState, uint64_t origins, uint64_t targets) {
+    uint64_t currentOrigin, currentTarget;
     while (targets != 0) {
         currentOrigin = (origins & -origins);
         currentTarget = (targets & -targets);
@@ -534,9 +534,9 @@ inline static void movePawnsPromotion(std::vector<t_gameState> *moves, t_gameSta
 
 
 template <bool color>
-inline static void movePawnsPush(std::vector<t_gameState> *moves, t_gameState currentState, field origins, field targets) {
+inline static void movePawnsPush(std::vector<t_gameState> *moves, t_gameState currentState, uint64_t origins, uint64_t targets) {
     uint8_t currentFile;
-    field currentOrigin, currentTarget;
+    uint64_t currentOrigin, currentTarget;
     while (targets != 0) {
         currentOrigin = (origins & -origins);
         currentTarget = (targets & -targets);
@@ -557,15 +557,15 @@ inline static void movePawnsPush(std::vector<t_gameState> *moves, t_gameState cu
 
 
 template <bool color>
-inline static void movePawnsEnPassant(std::vector<t_gameState> *moves, t_gameState currentState, field origins, field target) {
-    field targetPawn;
+inline static void movePawnsEnPassant(std::vector<t_gameState> *moves, t_gameState currentState, uint64_t origins, uint64_t target) {
+    uint64_t targetPawn;
     if (color) {
         targetPawn = target >> 8;
     } else {
         targetPawn = target << 8;
     }
 
-    field currentOrigin;
+    uint64_t currentOrigin;
     while (origins != 0) {
         currentOrigin = (origins & -origins);
 
@@ -590,23 +590,23 @@ inline static void movePawnsEnPassant(std::vector<t_gameState> *moves, t_gameSta
 
 
 template<piece p>
-inline static field lookupSlider(const uint8_t piecePosition, const field occ) {
+inline static uint64_t lookupSlider(const uint8_t piecePosition, const uint64_t occ) {
     switch (p) {
         case piece::rook: {
-            field moveMap = rookMoves[piecePosition];
+            uint64_t moveMap = rookMoves[piecePosition];
             uint16_t occId = occIdentifier(moveMap, occ);
 
             return rookLookup[64 * occId + piecePosition];
         }
         case piece::bishop: {
-            field moveMap = bishopMoves[piecePosition];
+            uint64_t moveMap = bishopMoves[piecePosition];
             uint16_t occId = occIdentifier(moveMap, occ);
 
             return bishopLookup[64 * occId + piecePosition];
         }
         case piece::queen: {
-            field rookMoveMap = rookMoves[piecePosition];
-            field bishopMoveMap = bishopMoves[piecePosition];
+            uint64_t rookMoveMap = rookMoves[piecePosition];
+            uint64_t bishopMoveMap = bishopMoves[piecePosition];
 
             uint16_t rookOccId = occIdentifier(rookMoveMap, occ);
             uint16_t bishopOccId = occIdentifier(bishopMoveMap, occ);
@@ -615,27 +615,27 @@ inline static field lookupSlider(const uint8_t piecePosition, const field occ) {
         }
     }
 
-    return (field) 0;
+    return (uint64_t) 0;
 }
 
 template<piece p>
-inline static field lookupPinSlider(const uint8_t piecePosition, const field occ) {
+inline static uint64_t lookupPinSlider(const uint8_t piecePosition, const uint64_t occ) {
     switch (p) {
         case piece::rook: {
-            field moveMap = rookMoves[piecePosition];
+            uint64_t moveMap = rookMoves[piecePosition];
             uint16_t occId = occIdentifier(moveMap, occ);
 
             return rookPinLookup[64 * occId + piecePosition];
         }
         case piece::bishop: {
-            field moveMap = bishopMoves[piecePosition];
+            uint64_t moveMap = bishopMoves[piecePosition];
             uint16_t occId = occIdentifier(moveMap, occ);
 
             return bishopPinLookup[64 * occId + piecePosition];
         }
         case piece::queen: {
-            field rookMoveMap = rookMoves[piecePosition];
-            field bishopMoveMap = bishopMoves[piecePosition];
+            uint64_t rookMoveMap = rookMoves[piecePosition];
+            uint64_t bishopMoveMap = bishopMoves[piecePosition];
 
             uint16_t rookOccId = occIdentifier(rookMoveMap, occ);
             uint16_t bishopOccId = occIdentifier(bishopMoveMap, occ);
@@ -644,11 +644,11 @@ inline static field lookupPinSlider(const uint8_t piecePosition, const field occ
         }
     }
 
-    return (field) 0;
+    return (uint64_t) 0;
 }
 
 template<piece p>
-inline static field lookup(const uint8_t piecePosition) {
+inline static uint64_t lookup(const uint8_t piecePosition) {
     switch (p) {
         case piece::king: {
             return kingMoves[piecePosition];
@@ -658,87 +658,87 @@ inline static field lookup(const uint8_t piecePosition) {
         }
     }
 
-    return (field) 0;
+    return (uint64_t) 0;
 }
 
 
 template<bool color>
-inline field getThreatened(const t_board board) {
-    field occ = board.occupied;
-    field threatened = 0;
+inline uint64_t getThreatened(const t_board board) {
+    uint64_t occ = board.occupied;
+    uint64_t threatened = 0;
 
     if (color) {
-        // Add fields covered by the king
+        // Add uint64_ts covered by the king
         threatened |= lookup<piece::king>(board.whiteKing);
 
-        // Add fields covered by the queens
-        field queens = board.whiteQueen;
+        // Add uint64_ts covered by the queens
+        uint64_t queens = board.whiteQueen;
         while (queens != 0) {
             threatened |= lookupSlider<piece::queen>(findFirst(queens), occ);
 
             queens &= (queens - 1);
         }
 
-        // Add fields covered by the rooks
-        field rooks = board.whiteRook;
+        // Add uint64_ts covered by the rooks
+        uint64_t rooks = board.whiteRook;
         while (rooks != 0) {
             threatened |= lookupSlider<piece::rook>(findFirst(rooks), occ);
 
             rooks &= (rooks - 1);
         }
 
-        // Add fields covered by the bishops
-        field bishops = board.whiteBishop;
+        // Add uint64_ts covered by the bishops
+        uint64_t bishops = board.whiteBishop;
         while (bishops != 0) {
             threatened |= lookupSlider<piece::bishop>(findFirst(bishops), occ);
             bishops &= (bishops - 1);
         }
 
-        // Add fields covered by the knights
-        field knights = board.whiteKnight;
+        // Add uint64_ts covered by the knights
+        uint64_t knights = board.whiteKnight;
         while (knights != 0) {
             threatened |= lookup<piece::knight>(findFirst(knights));
             knights &= (knights - 1);
         }
 
-        // Add fields covered by pawns
+        // Add uint64_ts covered by pawns
         threatened |= (board.whitePawn & ~aFile) >> 9;  // Taking to the left
         threatened |= (board.whitePawn & ~hFile) >> 7;  // Taking to the right
     } else {
-        // Add fields covered by the king
+        // Add uint64_ts covered by the king
         threatened |= lookup<piece::king>(board.blackKing);
 
-        // Add fields covered by the queens
-        field queens = board.blackQueen;
+        // Add uint64_ts covered by the queens
+        uint64_t queens = board.blackQueen;
         while (queens != 0) {
             threatened |= lookupSlider<piece::queen>(findFirst(queens), occ);
 
             queens &= (queens - 1);
         }
 
-        // Add fields covered by the rooks
-        field rooks = board.blackRook;
+        // Add uint64_ts covered by the rooks
+        uint64_t rooks = board.blackRook;
         while (rooks != 0) {
             threatened |= lookupSlider<piece::rook>(findFirst(rooks), occ);
 
             rooks &= (rooks - 1);
         }
 
-        // Add fields covered by the bishops
-        field bishops = board.blackBishop;
+        // Add uint64_ts covered by the bishops
+        uint64_t bishops = board.blackBishop;
         while (bishops != 0) {
             threatened |= lookupSlider<piece::bishop>(findFirst(bishops), occ);
             bishops &= (bishops - 1);
         }
 
-        // Add fields covered by the knights
-        field knights = board.blackKnight;
+        // Add uint64_ts covered by the knights
+        uint64_t knights = board.blackKnight;
         while (knights != 0) {
             threatened |= lookup<piece::knight>(findFirst(knights));
             knights &= (knights - 1);
         }
 
-        // Add fields covered by pawns
+        // Add uint64_ts covered by pawns
         threatened |= (board.blackPawn & ~hFile) << 9;  // Taking to the left
         threatened |= (board.blackPawn & ~aFile) << 7;  // Taking to the right
     }
@@ -754,12 +754,12 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
     std::vector<t_gameState> moves = std::vector<t_gameState>();
 
     t_board board = gameState.board;
-    field occ = board.occupied;
+    uint64_t occ = board.occupied;
 
     uint8_t whiteKingShift = findFirst(board.whiteKing);
     uint8_t blackKingShift = findFirst(board.blackKing);
-    field whiteKingMap = board.whiteKing;
-    field blackKingMap = board.blackKing;
+    uint64_t whiteKingMap = board.whiteKing;
+    uint64_t blackKingMap = board.blackKing;
 
     if (color) {
         // Black's turn
@@ -768,19 +768,19 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate threatened squares //
         // --------------------------- //
 
-        field threatened = getThreatened<color>(board);
+        uint64_t threatened = getThreatened<color>(board);
 
 
         // ----------------------------------------------------------- //
         // Generate squares causing checks their corresponding sliders //
         // ----------------------------------------------------------- //
 
-        field checks = 0;
-        field checkSliderPieces = 0;
+        uint64_t checks = 0;
+        uint64_t checkSliderPieces = 0;
         {
-            field kingRookLookup = lookupSlider<piece::rook>(blackKingShift, occ);
-            field kingBishopLookup = lookupSlider<piece::bishop>(blackKingShift, occ);
-            field kingKnightLookup = lookup<piece::knight>(blackKingShift);
+            uint64_t kingRookLookup = lookupSlider<piece::rook>(blackKingShift, occ);
+            uint64_t kingBishopLookup = lookupSlider<piece::bishop>(blackKingShift, occ);
+            uint64_t kingKnightLookup = lookup<piece::knight>(blackKingShift);
 
             if ((threatened & blackKingMap) != 0) {
                 // There is at least one check
@@ -792,7 +792,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
                 checkSliderPieces |= kingBishopLookup & board.whiteBishop;
 
                 short checkSliderShift;
-                field checkSliders = checkSliderPieces;  // Preserve value of checkSliderPieces
+                uint64_t checkSliders = checkSliderPieces;  // Preserve value of checkSliderPieces
                 while (checkSliders != 0) {
                     checkSliderShift = findFirst(checkSliders);
                     checks |= xray[64 * blackKingShift + checkSliderShift];
@@ -809,13 +809,13 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
             }
 
             // Handle different amounts of checking pieces
-            field checkOrigins = checks & board.white;
+            uint64_t checkOrigins = checks & board.white;
             if (checkOrigins == 0) {
-                // No checks -> Set all fields to 1
+                // No checks -> Set all uint64_ts to 1
                 checks = ~0;
             } else if ((checkOrigins & (checkOrigins - 1)) != 0) {
                 // More than one check -> Only King can move
-                field kingTargets = lookup<piece::king>(blackKingShift) & ~threatened & ~board.black;
+                uint64_t kingTargets = lookup<piece::king>(blackKingShift) & ~threatened & ~board.black;
                 moveKing<true>(&moves, gameState, blackKingMap, kingTargets);
 
                 return moves;
@@ -827,23 +827,23 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate squares causing pins their corresponding sliders //
         // --------------------------------------------------------- //
 
-        field pinned;
-        field lateralPins = 0;
-        field diagonalPins = 0;
+        uint64_t pinned;
+        uint64_t lateralPins = 0;
+        uint64_t diagonalPins = 0;
         {
-            field kingVerticalMask = verticalMask[blackKingShift];
-            field kingHorizontalMask = horizontalMask[blackKingShift];
-            field kingLeftDiagonalMask = lDiagonalMask[blackKingShift];
-            field kingRightDiagonalMask = rDiagonalMask[blackKingShift];
+            uint64_t kingVerticalMask = verticalMask[blackKingShift];
+            uint64_t kingHorizontalMask = horizontalMask[blackKingShift];
+            uint64_t kingLeftDiagonalMask = lDiagonalMask[blackKingShift];
+            uint64_t kingRightDiagonalMask = rDiagonalMask[blackKingShift];
 
-            field kingQueenPinLookup = lookupPinSlider<piece::queen>(blackKingShift, occ);
-            field pinPieces =
+            uint64_t kingQueenPinLookup = lookupPinSlider<piece::queen>(blackKingShift, occ);
+            uint64_t pinPieces =
                     kingQueenPinLookup & (board.whiteQueen | board.whiteRook | board.whiteBishop) & ~checkSliderPieces;
 
-            field lateralPinShift;
+            uint64_t lateralPinShift;
             while (pinPieces != 0) {
                 lateralPinShift = findFirst(pinPieces);
-                field pinXray = xray[64 * blackKingShift + lateralPinShift];
+                uint64_t pinXray = xray[64 * blackKingShift + lateralPinShift];
 
                 lateralPins |= pinXray & kingVerticalMask;
                 lateralPins |= pinXray & kingHorizontalMask;
@@ -863,7 +863,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate king moves
         {
-            field kingTargets = lookup<piece::king>(blackKingShift) & ~threatened & ~board.black;
+            uint64_t kingTargets = lookup<piece::king>(blackKingShift) & ~threatened & ~board.black;
             moveKing<true>(&moves, gameState, blackKingMap, kingTargets);
         }
 
@@ -885,12 +885,12 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate queen moves
         {
-            field queenOrigins = board.blackQueen & ~pinned;
-            field queenOriginsPinnedLateral = board.blackQueen & lateralPins;
-            field queenOriginsPinnedDiagonal = board.blackQueen & diagonalPins;
+            uint64_t queenOrigins = board.blackQueen & ~pinned;
+            uint64_t queenOriginsPinnedLateral = board.blackQueen & lateralPins;
+            uint64_t queenOriginsPinnedDiagonal = board.blackQueen & diagonalPins;
 
             short queenShift;
-            field queenTargets;
+            uint64_t queenTargets;
             while (queenOrigins != 0) {
                 queenShift = findFirst(queenOrigins);
 
@@ -920,11 +920,11 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate rook moves
         {
-            field rookOrigins = board.blackRook & ~pinned;
-            field rookOriginsPinned = board.blackRook & lateralPins;  // Rooks pinned in diagonal pins can't move
+            uint64_t rookOrigins = board.blackRook & ~pinned;
+            uint64_t rookOriginsPinned = board.blackRook & lateralPins;  // Rooks pinned in diagonal pins can't move
 
             short rookShift;
-            field rookTargets;
+            uint64_t rookTargets;
             while (rookOrigins != 0) {
                 rookShift = findFirst(rookOrigins);
 
@@ -946,12 +946,12 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate bishop moves
         {
-            field bishopOrigins = board.blackBishop & ~pinned;
-            field bishopOriginsPinned =
+            uint64_t bishopOrigins = board.blackBishop & ~pinned;
+            uint64_t bishopOriginsPinned =
                     board.blackBishop & diagonalPins;  // Bishops pinned in lateral pins can't move
 
             short bishopShift;
-            field bishopTargets;
+            uint64_t bishopTargets;
             while (bishopOrigins != 0) {
                 bishopShift = findFirst(bishopOrigins);
 
@@ -973,10 +973,10 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate knight moves
         {
-            field knightOrigins = board.blackKnight & ~pinned;
+            uint64_t knightOrigins = board.blackKnight & ~pinned;
 
             short knightShift;
-            field knightTargets;
+            uint64_t knightTargets;
             while (knightOrigins != 0) {
                 knightShift = findFirst(knightOrigins);
 
@@ -990,13 +990,13 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate pawn moves
         {
-            field pawnTargets = ((board.blackPawn & ~diagonalPins) << 8) & checks & ~occ;
+            uint64_t pawnTargets = ((board.blackPawn & ~diagonalPins) << 8) & checks & ~occ;
 
-            field pawnTargetsPromotion = pawnTargets & rank1;
+            uint64_t pawnTargetsPromotion = pawnTargets & rank1;
             pawnTargets &= ~pawnTargetsPromotion;
 
-            field pawnOrigins = pawnTargets >> 8;
-            field pawnOriginsPromotion = pawnTargetsPromotion >> 8;
+            uint64_t pawnOrigins = pawnTargets >> 8;
+            uint64_t pawnOriginsPromotion = pawnTargetsPromotion >> 8;
 
             movePawns<true>(&moves, gameState, pawnOrigins, pawnTargets);
             movePawnsPromotion<true>(&moves, gameState, pawnOriginsPromotion, pawnTargetsPromotion);
@@ -1005,9 +1005,9 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate pawn pushing moves
         {
-            field pawnPushTargets =
+            uint64_t pawnPushTargets =
                     ((((board.blackPawn & rank7 & ~diagonalPins) << 8) & ~occ) << 8) & checks & ~occ;
-            field pawnPushOrigins = pawnPushTargets >> 16;
+            uint64_t pawnPushOrigins = pawnPushTargets >> 16;
 
             movePawnsPush<true>(&moves, gameState, pawnPushOrigins, pawnPushTargets);
         }
@@ -1015,31 +1015,31 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate pawn taking moves
         {
-            field pawnTakeRightTargets;
+            uint64_t pawnTakeRightTargets;
             pawnTakeRightTargets = ((board.blackPawn & ~aFile & ~pinned) << 7) & checks & board.white;
             pawnTakeRightTargets |=
                     ((board.blackPawn & ~aFile & diagonalPins) << 7) & checks & diagonalPins & board.white;
 
-            field pawnTakeRightTargetsPromotion = pawnTakeRightTargets & rank1;
+            uint64_t pawnTakeRightTargetsPromotion = pawnTakeRightTargets & rank1;
             pawnTakeRightTargets &= ~pawnTakeRightTargetsPromotion;
 
-            field pawnTakeRightOrigins = pawnTakeRightTargets >> 7;
-            field pawnTakeRightOriginsPromotion = pawnTakeRightTargetsPromotion >> 7;
+            uint64_t pawnTakeRightOrigins = pawnTakeRightTargets >> 7;
+            uint64_t pawnTakeRightOriginsPromotion = pawnTakeRightTargetsPromotion >> 7;
 
             movePawns<true>(&moves, gameState, pawnTakeRightOrigins, pawnTakeRightTargets);
             movePawnsPromotion<true>(&moves, gameState, pawnTakeRightOriginsPromotion, pawnTakeRightTargetsPromotion);
 
 
-            field pawnTakeLeftTargets;
+            uint64_t pawnTakeLeftTargets;
             pawnTakeLeftTargets = ((board.blackPawn & ~hFile & ~pinned) << 9) & checks & board.white;
             pawnTakeLeftTargets |=
                     ((board.blackPawn & ~hFile & diagonalPins) << 9) & checks & diagonalPins & board.white;
 
-            field pawnTakeLeftTargetsPromotion = pawnTakeLeftTargets & rank1;
+            uint64_t pawnTakeLeftTargetsPromotion = pawnTakeLeftTargets & rank1;
             pawnTakeLeftTargets &= ~pawnTakeLeftTargetsPromotion;
 
-            field pawnTakeLeftOrigins = pawnTakeLeftTargets >> 9;
-            field pawnTakeLeftOriginsPromotion = pawnTakeLeftTargetsPromotion >> 9;
+            uint64_t pawnTakeLeftOrigins = pawnTakeLeftTargets >> 9;
+            uint64_t pawnTakeLeftOriginsPromotion = pawnTakeLeftTargetsPromotion >> 9;
 
             movePawns<true>(&moves, gameState, pawnTakeLeftOrigins, pawnTakeLeftTargets);
             movePawnsPromotion<true>(&moves, gameState, pawnTakeLeftOriginsPromotion, pawnTakeLeftTargetsPromotion);
@@ -1049,24 +1049,24 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate en-passants
         {
             // TODO: Approaches (left & right) not working for enpassant=8
-            field pawnEnPassantRightTarget;  // There can only be one en-passant move per direction
+            uint64_t pawnEnPassantRightTarget;  // There can only be one en-passant move per direction
             pawnEnPassantRightTarget =
                     ((board.blackPawn & ~aFile & (aFile << (gameState.enpassant)) & rank4 & ~pinned) << 7) & checks;
             pawnEnPassantRightTarget |=
                     ((board.blackPawn & ~aFile & (aFile << (gameState.enpassant)) & rank4 & diagonalPins) << 7) &
                     checks &
                     diagonalPins;
-            field pawnEnPassantRightOrigins = pawnEnPassantRightTarget >> 7;
+            uint64_t pawnEnPassantRightOrigins = pawnEnPassantRightTarget >> 7;
 
             movePawnsEnPassant<true>(&moves, gameState, pawnEnPassantRightOrigins, pawnEnPassantRightTarget);
 
 
-            field pawnEnPassantLeftTarget;  // There can only be one en-passant move per direction
+            uint64_t pawnEnPassantLeftTarget;  // There can only be one en-passant move per direction
             pawnEnPassantLeftTarget =
                     ((board.blackPawn & ~hFile & (hFile >> (8 - gameState.enpassant)) & rank4 & ~pinned) << 9) & checks;
             pawnEnPassantLeftTarget |=
                     ((board.blackPawn & ~hFile & (hFile >> (8 - gameState.enpassant)) & rank4 & diagonalPins) << 9) & checks & diagonalPins;
-            field pawnEnPassantLeftOrigins = pawnEnPassantLeftTarget >> 9;
+            uint64_t pawnEnPassantLeftOrigins = pawnEnPassantLeftTarget >> 9;
 
             movePawnsEnPassant<true>(&moves, gameState, pawnEnPassantLeftOrigins, pawnEnPassantLeftTarget);
         }
@@ -1081,46 +1081,46 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate threatened squares //
         // --------------------------- //
 
-        field threatened = 0;
+        uint64_t threatened = 0;
         {
-            // Add fields covered by the king
+            // Add uint64_ts covered by the king
             threatened |= lookup<piece::king>(blackKingShift);
 
-            // Add fields covered by the queens
-            field queens = board.blackQueen;
+            // Add uint64_ts covered by the queens
+            uint64_t queens = board.blackQueen;
             while (queens != 0) {
                 threatened |= lookupSlider<piece::queen>(findFirst(queens), occ);
 
                 queens &= (queens - 1);
             }
 
-            // Add fields covered by the rooks
-            field rooks = board.blackRook;
+            // Add uint64_ts covered by the rooks
+            uint64_t rooks = board.blackRook;
             while (rooks != 0) {
                 threatened |= lookupSlider<piece::rook>(findFirst(rooks), occ);
 
                 rooks &= (rooks - 1);
             }
 
-            // Add fields covered by the bishops
-            field bishops = board.blackBishop;
+            // Add uint64_ts covered by the bishops
+            uint64_t bishops = board.blackBishop;
             while (bishops != 0) {
                 threatened |= lookupSlider<piece::bishop>(findFirst(bishops), occ);
                 bishops &= (bishops - 1);
             }
 
-            // Add fields covered by the knights
-            field knights = board.blackKnight;
+            // Add uint64_ts covered by the knights
+            uint64_t knights = board.blackKnight;
             while (knights != 0) {
                 threatened |= lookup<piece::knight>(findFirst(knights));
                 knights &= (knights - 1);
             }
 
-            // Add fields covered by pawns
+            // Add uint64_ts covered by pawns
             threatened |= (board.blackPawn & ~aFile) << 9;  // Taking to the left
             threatened |= (board.blackPawn & ~hFile) << 7;  // Taking to the right
 
-            // Remove all fields covered by black pieces
+            // Remove all uint64_ts covered by black pieces
             threatened &= ~board.black;
         }
 
@@ -1129,12 +1129,12 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate squares causing checks their corresponding sliders //
         // ----------------------------------------------------------- //
 
-        field checks = 0;
-        field checkSliderPieces = 0;
+        uint64_t checks = 0;
+        uint64_t checkSliderPieces = 0;
         {
-            field kingRookLookup = lookupSlider<piece::rook>(whiteKingShift, occ);
-            field kingBishopLookup = lookupSlider<piece::bishop>(whiteKingShift, occ);
-            field kingKnightLookup = lookup<piece::knight>(whiteKingShift);
+            uint64_t kingRookLookup = lookupSlider<piece::rook>(whiteKingShift, occ);
+            uint64_t kingBishopLookup = lookupSlider<piece::bishop>(whiteKingShift, occ);
+            uint64_t kingKnightLookup = lookup<piece::knight>(whiteKingShift);
 
             if ((threatened & whiteKingMap) != 0) {
                 // There is at least one check
@@ -1146,7 +1146,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
                 checkSliderPieces |= kingBishopLookup & board.blackBishop;
 
                 short checkSliderShift;
-                field checkSliders = checkSliderPieces;  // Preserve value of checkSliderPieces
+                uint64_t checkSliders = checkSliderPieces;  // Preserve value of checkSliderPieces
                 while (checkSliders != 0) {
                     checkSliderShift = findFirst(checkSliders);
                     checks |= xray[64 * blackKingShift + checkSliderShift];
@@ -1163,13 +1163,13 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
             }
 
             // Handle different amounts of checking pieces
-            field checkOrigins = checks & board.black;
+            uint64_t checkOrigins = checks & board.black;
             if (checkOrigins == 0) {
-                // No checks -> Set all fields to 1
+                // No checks -> Set all uint64_ts to 1
                 checks = ~0;
             } else if ((checkOrigins & (checkOrigins - 1)) != 0) {
                 // More than one check -> Only King can move
-                field kingTargets = lookup<piece::king>(whiteKingShift) & ~threatened & ~board.white;
+                uint64_t kingTargets = lookup<piece::king>(whiteKingShift) & ~threatened & ~board.white;
                 moveKing<false>(&moves, gameState, whiteKingMap, kingTargets);
 
                 return moves;
@@ -1181,23 +1181,23 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate squares causing pins their corresponding sliders //
         // --------------------------------------------------------- //
 
-        field pinned;
-        field lateralPins = 0;
-        field diagonalPins = 0;
+        uint64_t pinned;
+        uint64_t lateralPins = 0;
+        uint64_t diagonalPins = 0;
         {
-            field kingVerticalMask = verticalMask[whiteKingShift];
-            field kingHorizontalMask = horizontalMask[whiteKingShift];
-            field kingLeftDiagonalMask = lDiagonalMask[whiteKingShift];
-            field kingRightDiagonalMask = rDiagonalMask[whiteKingShift];
+            uint64_t kingVerticalMask = verticalMask[whiteKingShift];
+            uint64_t kingHorizontalMask = horizontalMask[whiteKingShift];
+            uint64_t kingLeftDiagonalMask = lDiagonalMask[whiteKingShift];
+            uint64_t kingRightDiagonalMask = rDiagonalMask[whiteKingShift];
 
-            field kingQueenPinLookup = lookupPinSlider<piece::queen>(whiteKingShift, occ);
-            field pinPieces =
+            uint64_t kingQueenPinLookup = lookupPinSlider<piece::queen>(whiteKingShift, occ);
+            uint64_t pinPieces =
                     kingQueenPinLookup & (board.blackQueen | board.blackRook | board.blackBishop) & ~checkSliderPieces;
 
-            field lateralPinShift;
+            uint64_t lateralPinShift;
             while (pinPieces != 0) {
                 lateralPinShift = findFirst(pinPieces);
-                field pinXray = xray[64 * whiteKingShift + lateralPinShift];
+                uint64_t pinXray = xray[64 * whiteKingShift + lateralPinShift];
 
                 lateralPins |= pinXray & kingVerticalMask;
                 lateralPins |= pinXray & kingHorizontalMask;
@@ -1217,7 +1217,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate king moves
         {
-            field kingTargets = lookup<piece::king>(whiteKingShift) & ~threatened & ~board.white;
+            uint64_t kingTargets = lookup<piece::king>(whiteKingShift) & ~threatened & ~board.white;
             moveKing<false>(&moves, gameState, whiteKingMap, kingTargets);
         }
 
@@ -1239,12 +1239,12 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate queen moves
         {
-            field queenOrigins = board.whiteQueen & ~pinned;
-            field queenOriginsPinnedLateral = board.whiteQueen & lateralPins;
-            field queenOriginsPinnedDiagonal = board.whiteQueen & diagonalPins;
+            uint64_t queenOrigins = board.whiteQueen & ~pinned;
+            uint64_t queenOriginsPinnedLateral = board.whiteQueen & lateralPins;
+            uint64_t queenOriginsPinnedDiagonal = board.whiteQueen & diagonalPins;
 
             short queenShift;
-            field queenTargets;
+            uint64_t queenTargets;
             while (queenOrigins != 0) {
                 queenShift = findFirst(queenOrigins);
 
@@ -1274,11 +1274,11 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate rook moves
         {
-            field rookOrigins = board.whiteRook & ~pinned;
-            field rookOriginsPinned = board.whiteRook & lateralPins;  // Rooks pinned in diagonal pins can't move
+            uint64_t rookOrigins = board.whiteRook & ~pinned;
+            uint64_t rookOriginsPinned = board.whiteRook & lateralPins;  // Rooks pinned in diagonal pins can't move
 
             short rookShift;
-            field rookTargets;
+            uint64_t rookTargets;
             while (rookOrigins != 0) {
                 rookShift = findFirst(rookOrigins);
 
@@ -1300,12 +1300,12 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate bishop moves
         {
-            field bishopOrigins = board.whiteBishop & ~pinned;
-            field bishopOriginsPinned =
+            uint64_t bishopOrigins = board.whiteBishop & ~pinned;
+            uint64_t bishopOriginsPinned =
                     board.whiteBishop & diagonalPins;  // Bishops pinned in lateral pins can't move
 
             short bishopShift;
-            field bishopTargets;
+            uint64_t bishopTargets;
             while (bishopOrigins != 0) {
                 bishopShift = findFirst(bishopOrigins);
 
@@ -1327,10 +1327,10 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate knight moves
         {
-            field knightOrigins = board.whiteKnight & ~pinned;
+            uint64_t knightOrigins = board.whiteKnight & ~pinned;
 
             short knightShift;
-            field knightTargets;
+            uint64_t knightTargets;
             while (knightOrigins != 0) {
                 knightShift = findFirst(knightOrigins);
 
@@ -1344,13 +1344,13 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate pawn moves
         {
-            field pawnTargets = ((board.whitePawn & ~diagonalPins) >> 8) & checks & ~occ;
+            uint64_t pawnTargets = ((board.whitePawn & ~diagonalPins) >> 8) & checks & ~occ;
 
-            field pawnTargetsPromotion = pawnTargets & rank8;
+            uint64_t pawnTargetsPromotion = pawnTargets & rank8;
             pawnTargets &= ~pawnTargetsPromotion;
 
-            field pawnOrigins = pawnTargets << 8;
-            field pawnOriginsPromotion = pawnTargetsPromotion << 8;
+            uint64_t pawnOrigins = pawnTargets << 8;
+            uint64_t pawnOriginsPromotion = pawnTargetsPromotion << 8;
 
             movePawns<false>(&moves, gameState, pawnOrigins, pawnTargets);
             movePawnsPromotion<false>(&moves, gameState, pawnOriginsPromotion, pawnTargetsPromotion);
@@ -1359,9 +1359,9 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate pawn pushing moves
         {
-            field pawnPushTargets =
+            uint64_t pawnPushTargets =
                     ((((board.white & rank2 & ~diagonalPins) >> 8) & ~occ) >> 8) & checks & ~occ;
-            field pawnPushOrigins = pawnPushTargets << 16;
+            uint64_t pawnPushOrigins = pawnPushTargets << 16;
 
             movePawnsPush<false>(&moves, gameState, pawnPushOrigins, pawnPushTargets);
         }
@@ -1369,31 +1369,31 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate pawn taking moves
         {
-            field pawnTakeRightTargets;
+            uint64_t pawnTakeRightTargets;
             pawnTakeRightTargets = ((board.whitePawn & ~hFile & ~pinned) >> 7) & checks & board.black;
             pawnTakeRightTargets |=
                     ((board.whitePawn & ~hFile & diagonalPins) >> 7) & checks & diagonalPins & board.black;
 
-            field pawnTakeRightTargetsPromotion = pawnTakeRightTargets & rank8;
+            uint64_t pawnTakeRightTargetsPromotion = pawnTakeRightTargets & rank8;
             pawnTakeRightTargets &= ~pawnTakeRightTargetsPromotion;
 
-            field pawnTakeRightOrigins = pawnTakeRightTargets << 7;
-            field pawnTakeRightOriginsPromotion = pawnTakeRightTargetsPromotion << 7;
+            uint64_t pawnTakeRightOrigins = pawnTakeRightTargets << 7;
+            uint64_t pawnTakeRightOriginsPromotion = pawnTakeRightTargetsPromotion << 7;
 
             movePawns<false>(&moves, gameState, pawnTakeRightOrigins, pawnTakeRightTargets);
             movePawnsPromotion<false>(&moves, gameState, pawnTakeRightOriginsPromotion, pawnTakeRightTargetsPromotion);
 
 
-            field pawnTakeLeftTargets;
+            uint64_t pawnTakeLeftTargets;
             pawnTakeLeftTargets = ((board.whitePawn & ~aFile & ~pinned) >> 9) & checks & board.black;
             pawnTakeLeftTargets |=
                     ((board.whitePawn & ~aFile & diagonalPins) >> 9) & checks & diagonalPins & board.black;
 
-            field pawnTakeLeftTargetsPromotion = pawnTakeLeftTargets & rank8;
+            uint64_t pawnTakeLeftTargetsPromotion = pawnTakeLeftTargets & rank8;
             pawnTakeLeftTargets &= ~pawnTakeLeftTargetsPromotion;
 
-            field pawnTakeLeftOrigins = pawnTakeLeftTargets << 9;
-            field pawnTakeLeftOriginsPromotion = pawnTakeLeftTargetsPromotion << 9;
+            uint64_t pawnTakeLeftOrigins = pawnTakeLeftTargets << 9;
+            uint64_t pawnTakeLeftOriginsPromotion = pawnTakeLeftTargetsPromotion << 9;
 
             movePawns<false>(&moves, gameState, pawnTakeLeftOrigins, pawnTakeLeftTargets);
             movePawnsPromotion<false>(&moves, gameState, pawnTakeLeftOriginsPromotion, pawnTakeLeftTargetsPromotion);
@@ -1402,24 +1402,24 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate en-passants
         {
-            field pawnEnPassantLeftTarget;  // There can only be one en-passant move per direction
+            uint64_t pawnEnPassantLeftTarget;  // There can only be one en-passant move per direction
             pawnEnPassantLeftTarget =
                     ((board.whitePawn & ~aFile & (aFile << (gameState.enpassant)) & rank5 & ~pinned) >> 9) & checks;
             pawnEnPassantLeftTarget |=
                     ((board.whitePawn & ~aFile & (aFile << (gameState.enpassant)) & rank5 & diagonalPins) >> 9) &
                     checks &
                     diagonalPins;
-            field pawnEnPassantLeftOrigins = pawnEnPassantLeftTarget << 9;
+            uint64_t pawnEnPassantLeftOrigins = pawnEnPassantLeftTarget << 9;
 
             movePawnsEnPassant<false>(&moves, gameState, pawnEnPassantLeftOrigins, pawnEnPassantLeftTarget);
 
 
-            field pawnEnPassantRightTarget;  // There can only be one en-passant move per direction
+            uint64_t pawnEnPassantRightTarget;  // There can only be one en-passant move per direction
             pawnEnPassantRightTarget =
                     ((((board.blackPawn & ~hFile & ~pinned) << 1) & (hFile >> (8 - gameState.enpassant)) & rank5) >> 8) & checks;
             pawnEnPassantRightTarget |=
                     ((((board.blackPawn & ~hFile & diagonalPins) << 1) & (hFile >> (8 - gameState.enpassant)) & rank5) >> 8) & checks & diagonalPins;
-            field pawnEnPassantRightOrigins = pawnEnPassantRightTarget << 7;
+            uint64_t pawnEnPassantRightOrigins = pawnEnPassantRightTarget << 7;
 
             movePawnsEnPassant<false>(&moves, gameState, pawnEnPassantRightOrigins, pawnEnPassantRightTarget);
         }

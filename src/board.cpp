@@ -4,14 +4,14 @@
 
 t_board setFen(char *fen) {
 
-    field king = 0;
-    field queen = 0;
-    field rook  = 0;
-    field bishop = 0;
-    field knight = 0;
-    field pawn = 0;
-    field white = 0;
-    field black = 0;
+    uint64_t king = 0;
+    uint64_t queen = 0;
+    uint64_t rook  = 0;
+    uint64_t bishop = 0;
+    uint64_t knight = 0;
+    uint64_t pawn = 0;
+    uint64_t white = 0;
+    uint64_t black = 0;
 
     int j = 0;
     for (int i = 0; i < strlen(fen); i++) {
@@ -21,15 +21,15 @@ t_board setFen(char *fen) {
             continue;
         }
         else if (currChar == UTF_SLASH) continue;
-        else if (currChar == UTF_K || currChar == UTF_K + UTF_BIG_SMALL_OFFSET) king |= (field) 1 << j;
-        else if (currChar == UTF_Q || currChar == UTF_Q + UTF_BIG_SMALL_OFFSET) queen |= (field) 1 << j;
-        else if (currChar == UTF_R || currChar == UTF_R + UTF_BIG_SMALL_OFFSET) rook |= (field) 1 << j;
-        else if (currChar == UTF_B || currChar == UTF_B + UTF_BIG_SMALL_OFFSET) bishop |= (field) 1 << j;
-        else if (currChar == UTF_N || currChar == UTF_N + UTF_BIG_SMALL_OFFSET) knight |= (field) 1 << j;
-        else if (currChar == UTF_P || currChar == UTF_P + UTF_BIG_SMALL_OFFSET) pawn |= (field) 1 << j;
+        else if (currChar == UTF_K || currChar == UTF_K + UTF_BIG_SMALL_OFFSET) king |= (uint64_t) 1 << j;
+        else if (currChar == UTF_Q || currChar == UTF_Q + UTF_BIG_SMALL_OFFSET) queen |= (uint64_t) 1 << j;
+        else if (currChar == UTF_R || currChar == UTF_R + UTF_BIG_SMALL_OFFSET) rook |= (uint64_t) 1 << j;
+        else if (currChar == UTF_B || currChar == UTF_B + UTF_BIG_SMALL_OFFSET) bishop |= (uint64_t) 1 << j;
+        else if (currChar == UTF_N || currChar == UTF_N + UTF_BIG_SMALL_OFFSET) knight |= (uint64_t) 1 << j;
+        else if (currChar == UTF_P || currChar == UTF_P + UTF_BIG_SMALL_OFFSET) pawn |= (uint64_t) 1 << j;
 
-        if (currChar >= UTF_BIGLETTER_FIRST && currChar <= UTF_BIGLETTER_LAST) white |= (field) 1 << j;
-        else if (currChar >= UTF_BIGLETTER_FIRST + UTF_BIG_SMALL_OFFSET && currChar < UTF_BIGLETTER_LAST + UTF_BIG_SMALL_OFFSET) black |= (field) 1 << j;
+        if (currChar >= UTF_BIGLETTER_FIRST && currChar <= UTF_BIGLETTER_LAST) white |= (uint64_t) 1 << j;
+        else if (currChar >= UTF_BIGLETTER_FIRST + UTF_BIG_SMALL_OFFSET && currChar < UTF_BIGLETTER_LAST + UTF_BIG_SMALL_OFFSET) black |= (uint64_t) 1 << j;
 
         j++;
     }
@@ -49,7 +49,7 @@ char* getFen(t_board *board) {
     char slash[2] = {UTF_SLASH, '\0'};
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            field bitMask = ((field) 1 << (i*8 + j));
+            uint64_t bitMask = ((uint64_t) 1 << (i*8 + j));
             int currChar;
             if ((board->whiteKing & bitMask) != 0) currChar = UTF_K;
             else if ((board->whiteQueen & bitMask) != 0) currChar = UTF_Q;
@@ -132,72 +132,72 @@ void printBoard(const t_board *board) {
 
     //KING
     for (int i = 0; i < 64; i++) {
-        if ((board->whiteKing & ((field) 1 << i)) >> i) {
+        if ((board->whiteKing & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_WHITE_KING;
         }
     }
     for (int i = 0; i < 64; i++) {
-        if ((board->blackKing & ((field) 1 << i)) >> i) {
+        if ((board->blackKing & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_BLACK_KING;
         }
     }
 
     //QUEEN
     for (int i = 0; i < 64; i++) {
-        if ((board->whiteQueen & ((field) 1 << i)) >> i) {
+        if ((board->whiteQueen & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_WHITE_QUEEN;
         }
     }
     for (int i = 0; i < 64; i++) {
-        if ((board->blackQueen & ((field) 1 << i)) >> i) {
+        if ((board->blackQueen & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_BLACK_QUEEN;
         }
     }
 
     //ROOK
     for (int i = 0; i < 64; i++) {
-        if ((board->whiteRook & ((field) 1 << i)) >> i) {
+        if ((board->whiteRook & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_WHITE_ROOK;
         }
     }
     for (int i = 0; i < 64; i++) {
-        if ((board->blackRook & ((field) 1 << i)) >> i) {
+        if ((board->blackRook & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_BLACK_ROOK;
         }
     }
 
     //BISHOP
     for (int i = 0; i < 64; i++) {
-        if ((board->whiteBishop & ((field) 1 << i)) >> i) {
+        if ((board->whiteBishop & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_WHITE_BISHOP;
         }
     }
     for (int i = 0; i < 64; i++) {
-        if ((board->blackBishop & ((field) 1 << i)) >> i) {
+        if ((board->blackBishop & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_BLACK_BISHOP;
         }
     }
 
     //KNIGHT
     for (int i = 0; i < 64; i++) {
-        if ((board->whiteKnight & ((field) 1 << i)) >> i) {
+        if ((board->whiteKnight & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_WHITE_KNIGHT;
         }
     }
     for (int i = 0; i < 64; i++) {
-        if ((board->blackKnight & ((field) 1 << i)) >> i) {
+        if ((board->blackKnight & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_BLACK_KNIGHT;
         }
     }
 
     //PAWN
     for (int i = 0; i < 64; i++) {
-        if ((board->whitePawn & ((field) 1 << i)) >> i) {
+        if ((board->whitePawn & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_WHITE_PAWN;
         }
     }
     for (int i = 0; i < 64; i++) {
-        if ((board->blackPawn & ((field) 1 << i)) >> i) {
+        if ((board->blackPawn & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_BLACK_PAWN;
         }
     }
@@ -228,72 +228,72 @@ void printBoard(const t_board board) {
 
     //KING
     for (int i = 0; i < 64; i++) {
-        if ((board.whiteKing & ((field) 1 << i)) >> i) {
+        if ((board.whiteKing & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_WHITE_KING;
         }
     }
     for (int i = 0; i < 64; i++) {
-        if ((board.blackKing & ((field) 1 << i)) >> i) {
+        if ((board.blackKing & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_BLACK_KING;
         }
     }
 
     //QUEEN
     for (int i = 0; i < 64; i++) {
-        if ((board.whiteQueen & ((field) 1 << i)) >> i) {
+        if ((board.whiteQueen & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_WHITE_QUEEN;
         }
     }
     for (int i = 0; i < 64; i++) {
-        if ((board.blackQueen & ((field) 1 << i)) >> i) {
+        if ((board.blackQueen & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_BLACK_QUEEN;
         }
     }
 
     //ROOK
     for (int i = 0; i < 64; i++) {
-        if ((board.whiteRook & ((field) 1 << i)) >> i) {
+        if ((board.whiteRook & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_WHITE_ROOK;
         }
     }
     for (int i = 0; i < 64; i++) {
-        if ((board.blackRook & ((field) 1 << i)) >> i) {
+        if ((board.blackRook & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_BLACK_ROOK;
         }
     }
 
     //BISHOP
     for (int i = 0; i < 64; i++) {
-        if ((board.whiteBishop & ((field) 1 << i)) >> i) {
+        if ((board.whiteBishop & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_WHITE_BISHOP;
         }
     }
     for (int i = 0; i < 64; i++) {
-        if ((board.blackBishop & ((field) 1 << i)) >> i) {
+        if ((board.blackBishop & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_BLACK_BISHOP;
         }
     }
 
     //KNIGHT
     for (int i = 0; i < 64; i++) {
-        if ((board.whiteKnight & ((field) 1 << i)) >> i) {
+        if ((board.whiteKnight & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_WHITE_KNIGHT;
         }
     }
     for (int i = 0; i < 64; i++) {
-        if ((board.blackKnight & ((field) 1 << i)) >> i) {
+        if ((board.blackKnight & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_BLACK_KNIGHT;
         }
     }
 
     //PAWN
     for (int i = 0; i < 64; i++) {
-        if ((board.whitePawn & ((field) 1 << i)) >> i) {
+        if ((board.whitePawn & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_WHITE_PAWN;
         }
     }
     for (int i = 0; i < 64; i++) {
-        if ((board.blackPawn & ((field) 1 << i)) >> i) {
+        if ((board.blackPawn & ((uint64_t) 1 << i)) >> i) {
             boardChar[i] = UNICODE_BLACK_PAWN;
         }
     }
@@ -318,10 +318,10 @@ void printBoard(const t_board board) {
     printf("\n");
 }
 
-void debug_printSingleBoard(field singleBoard) {
+void debug_printSingleBoard(uint64_t singleBoard) {
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            if (((singleBoard) & ((field)1 << (i * 8 + j) )) >> (i * 8 + j) == 1) {
+            if (((singleBoard) & ((uint64_t)1 << (i * 8 + j) )) >> (i * 8 + j) == 1) {
                 printf("1 ");
             }
             else {

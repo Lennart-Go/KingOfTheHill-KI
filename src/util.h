@@ -49,8 +49,8 @@ public:
 int shift_from_position(Position position);
 Position position_from_shift(int shift);
 
-bool board_value_from_shift(field board, int shift);
-std::vector<Position> board_value_positions(field board);
+bool board_value_from_shift(uint64_t board, int shift);
+std::vector<Position> board_value_positions(uint64_t board);
 
 char columnToLetter(int column);
 void printPosition(Position pos);
@@ -68,7 +68,7 @@ template <typename I> std::string num2hex(I w, size_t hex_len = sizeof(I)<<1) {
     return rc;
 }
 
-int countFigure(field singleBoard);
+int countFigure(uint64_t singleBoard);
 int randn(int start, int stop);
 
 #endif

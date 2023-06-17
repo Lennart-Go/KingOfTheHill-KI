@@ -13,9 +13,9 @@
 typedef struct gameOld {
     t_board *board;
 
-    field gameTime;
+    uint64_t gameTime;
     unsigned turn:1;  // 0 for white, 1 for black
-    field latestMoveTime;
+    uint64_t latestMoveTime;
     bool isOver;
     std::map<std::string,int> *positionHistory;
 
@@ -257,7 +257,7 @@ typedef struct game {
     }
 } t_game;
 
-t_gameOld *startGame(field gameTime);
-void play(int maxRounds, field gameTime);
+t_gameOld *startGame(uint64_t gameTime);
+void play(int maxRounds, uint64_t gameTime);
 
 #endif //KINGOFTHEHILL_KI_GAME_H

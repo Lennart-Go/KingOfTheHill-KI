@@ -175,14 +175,14 @@ Position position_from_shift(int shift) {
 }
 
 
-bool board_value_from_shift(field board, int shift) {
-    if ((board & ((field )1 << shift)) != 0)
+bool board_value_from_shift(uint64_t board, int shift) {
+    if ((board & ((uint64_t )1 << shift)) != 0)
         return true;
     return false;
 }
 
 
-std::vector<Position> board_value_positions(field board) {
+std::vector<Position> board_value_positions(uint64_t board) {
     std::vector<Position> positions;
 
     for (int shift = 0; shift < 64; ++shift) {
@@ -231,10 +231,10 @@ float min(float num1, float num2) {
 }
 
 
-int countFigure(field singleBoard) {
+int countFigure(uint64_t singleBoard) {
     int count = 0;
     for (int i = 0; i < 64; i++) {
-        if (singleBoard & ((field) 1 << i)) {
+        if (singleBoard & ((uint64_t) 1 << i)) {
             count++;
         }
     }
