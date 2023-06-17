@@ -1,17 +1,16 @@
 #include <cstdlib>
 #include "game.h"
-#include "hikaru.h"
 #include "end.h"
+#include "board.h"
+#include "hikaru.h"
 #include "move.h"
-#include "unistd.h"
-#include "hash.h"
 
 
-t_game *startGame(uint64_t gameTime) {
-    t_game *game = (t_game *) calloc(1, sizeof(t_game));
-    t_board *board = initializeBoard();
+t_gameOld *startGame(uint64_t gameTime) {
+    t_gameOld *game = (t_gameOld *) calloc(1, sizeof(t_gameOld));
+    t_board startBoard = initializeBoard();
 
-    game->board = board;
+    game->board = &startBoard;
     game->gameTime = gameTime;
     game->turn = 0;  // White's turn
     game->latestMoveTime = 0;  // TODO: Set latestMoveTime to current time in ms
@@ -50,62 +49,73 @@ void play(int maxRounds, uint64_t gameTime) {
         maxRounds = INT32_MAX;
     }
 
-    t_game *game = startGame(gameTime);
-   // setFen(game->board, (char *)"r2qkbnr/pp1bpppp/2np4/1Bp5/4P3/5N2/PPPP1PPP/RNBQ1RK1");
-    // game->turn = true;
+    // t_game game = t_game((char *)"rnbqkbnr/pppppp2/8/6P1/5Pp1/8/PPPPP3/RNBQKBNR", true, 0b1111, 8, gameTime);
+    t_game game = t_game(gameTime);
+    printBoard(game.state->board);
 
-    printBoard(game->board);
-    // sleep(4);
+
+//    std::vector<t_gameState> moves = generate_moves<true>(*game.state);
+//
+//    for (auto move : moves) {
+//        printMove(move);
+//        printBoard(move.board);
+//        debug_printSingleBoard(move.board.occupied);
+//        printf("\n");
+//    }
+
 
     uint64_t timePerMove = gameTime / 40;
 
-    while (!game->isOver && (game->blackMoveCounter + 1) <= maxRounds) {
-        /*  if (game->blackMoveCounter > 0) {
-              break;
-          } */
-
-        // sleep(1);
+    while (!game.isOver && (game.moveCounter/2 + 1) <= maxRounds) {
 
         // Generate next move
-        t_move nextMove = getMove(game, game->turn, timePerMove);
-        commitMove(game, &nextMove);
+        t_gameState *nextMove;
+
+        if (game.turn) {
+            std::pair<gameState, float> result = getMove<true>(&game, timePerMove);
+            nextMove = &result.first;
+        } else {
+            std::pair<gameState, float> result = getMove<false>(&game, timePerMove);
+            nextMove = &result.first;
+        }
+
+        game.commitMove(*nextMove);
 
         // Print next move and resulting board state
         printf("Next move: ");
-        printMove(nextMove);
+        printMove(*nextMove);
 
-        printf("\nCurrent board state (Score: %.4f, Round: %d, ", evaluate(game), game->blackMoveCounter + 1);
+        printf("\nCurrent board state (Score: %.4f, Round: %d, ", evaluate(&game), game.moveCounter/2 + 1);
 
-        if (game->turn == 0) {
+        if (game.turn == 0) {
             printf("Turn: White)\n");
         } else {
             printf("Turn: Black)\n");
         }
 
 
-        printBoard(game->board);
+        printBoard(game.board());
 
         // Check and announce checks
-        Position kingPosition;
-        if (!game->turn) {
-            kingPosition = board_value_positions(game->board->white & game->board->king).at(0);
+        bool threatened;
+        if (!game.turn) {
+            threatened = game.board().whiteKing & getThreatened<true>(game.board());
         } else {
-            kingPosition = board_value_positions(game->board->black & game->board->king).at(0);
+            threatened = game.board().blackKing & getThreatened<true>(game.board());
         }
 
-        if (is_threatened(game->board, kingPosition, game->turn)) {
+        if (threatened) {
             printf("CHECK\n");
         }
     }
 
     printf("Game over!\n");
-    printf("Game is over: %d\n", game->isOver);
-    printf("White won: %d\n", game->whiteWon);
-    printf("Black won: %d\n", game->blackWon);
-    printf("Total rounds: %d\n", game->blackMoveCounter + 1);
-    printf("Turn: %d\n", game->turn);
+    printf("Game is over: %d\n", game.isOver);
+    printf("White won: %d\n", game.whiteWon);
+    printf("Black won: %d\n", game.blackWon);
+    printf("Total rounds: %d\n", game.moveCounter/2 + 1);
+    printf("Turn: %d\n", game.turn);
 
     // Free memory
-    delete game->positionHistory;
-    free(game);
+    delete game.positionHistory;
 }
