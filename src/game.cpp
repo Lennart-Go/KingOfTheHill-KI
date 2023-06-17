@@ -71,7 +71,7 @@ void play(int maxRounds, uint64_t gameTime) {
         printf("Next move: ");
         printMove(nextMove);
 
-        printf("\nCurrent board state (Score: %.4f, Round: %d, ", evaluate(game, &nextMove), game->blackMoveCounter + 1);
+        printf("\nCurrent board state (Score: %.4f, Round: %d, ", evaluate(game), game->blackMoveCounter + 1);
 
         if (game->turn == 0) {
             printf("Turn: White)\n");

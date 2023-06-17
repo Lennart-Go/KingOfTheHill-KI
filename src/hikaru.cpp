@@ -53,7 +53,7 @@ uint64_t timeLeft(uint64_t timePerMove, time_t startMoveTime) {
 }
 
 
-float evaluate(const t_game* game, t_move* lastMove) {
+float evaluate(const t_game* game) {
     // Simple approach to evaluating positions by taking a look at the available material
     if (game->isOver) {
         if (game->whiteWon) {
@@ -69,7 +69,6 @@ float evaluate(const t_game* game, t_move* lastMove) {
         }
     }
 
-    // count pieces
     float score = 0;
     uint64_t whiteColorFilter = game->board->white;
     uint64_t blackColorFilter = game->board->black;
@@ -154,10 +153,10 @@ float evaluate(const t_game* game, t_move* lastMove) {
     return score;
 }
 
-float alphaBeta(int depth, float alpha, float beta, t_game *game, t_move* lastMove,  uint64_t timePerMove, time_t startMoveTime) {
+float alphaBeta(int depth, float alpha, float beta, t_game *game, uint64_t timePerMove, time_t startMoveTime) {
 
     if (depth == 0 || game->isOver) { // || timeLeft(timePerMove, startMoveTime) <= 0
-        return evaluate(game, lastMove);
+        return evaluate(game);
     }
 
     float score, bestScore;
@@ -175,7 +174,7 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game, t_move* lastMo
         // White's turn -> Maximize score
         for (auto currentMove : moves) {
             commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game, &currentMove, timePerMove, startMoveTime);
+            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
             revertMove(game, &currentMove);
 
             for (int _ = 0; _ < depth; ++_) {
@@ -206,7 +205,7 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game, t_move* lastMo
         // Black's turn -> Minimize score
         for (auto currentMove : moves) {
             commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game, &currentMove, timePerMove, startMoveTime);
+            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
             revertMove(game, &currentMove);
 
             for (int _ = 0; _ < depth; ++_) {
@@ -267,7 +266,7 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t tim
             currentMove = move;
 
             commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game, nullptr, timePerMove, startMoveTime);
+            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
             revertMove(game, &currentMove);
 
             for (int _ = 0; _ < depth; ++_) {
@@ -294,7 +293,7 @@ std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t tim
             currentMove = move;
 
             commitMove(game, &currentMove);
-            score = alphaBeta(depth-1, alpha, beta, game, nullptr, timePerMove, startMoveTime);
+            score = alphaBeta(depth-1, alpha, beta, game, timePerMove, startMoveTime);
             revertMove(game, &currentMove);
 
             for (int _ = 0; _ < depth; ++_) {

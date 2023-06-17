@@ -15,6 +15,6 @@
 
 t_move getMove(t_game *game, bool color, uint64_t timePerMove);
 std::pair<t_move, float> alphaBetaHead(t_game* game, int max_depth, uint64_t timePerMove);
-float evaluate(const t_game *game, t_move* lastMove);
+float evaluate(const t_game *game);
 
 #endif //KINGOFTHEHILL_KI_HIKARU_H
