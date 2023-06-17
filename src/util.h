@@ -7,6 +7,8 @@
 #include <cstdint>
 #include <stdexcept>
 #include <cstring>
+#include "board.h"
+#include "hash.h"
 
 //template <typename T> class List {
 //private:

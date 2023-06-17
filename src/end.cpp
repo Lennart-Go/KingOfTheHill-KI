@@ -2,6 +2,7 @@
 #include "move.h"
 #include <math.h>
 #include <map>
+#include <util.h>
 
 
 int countFigure(uint64_t singleBoard) {
@@ -19,45 +20,43 @@ bool positionTracking(t_game *game) {
     * Arguments:
     *  t_game *game: Pointer to the game representing the state of the game
     */
-    std::map<std::string, int> &map = *game->positionHistory;
-    char *currentFen = getFen(game->board);
+    uint64_t boardHash = hash(game->random,game);
+    std::map<uint64_t , int> &map = *game->positionHistory;
     bool positionRepetitionDraw = false;
 
     if (game->positionHistory == nullptr) {
-        std::map<std::string, int> *mapInit = new std::map<std::string, int>();
+        std::map<uint64_t , int> *mapInit = new std::map<uint64_t , int>();
         game->positionHistory = mapInit;
-        (*mapInit).insert(std::make_pair(currentFen, 1));
+        (*mapInit).insert(std::pair<uint64_t ,int>(hash(game->random,game), 1));
     } else {
-        if (map.find(currentFen) != map.end()) {
-            int n = map[currentFen];
-            map[currentFen] = n + 1;
-            if (map[currentFen] > 2) {
+        if (map.find(boardHash) != map.end()) {
+            int n = map[boardHash];
+            map[boardHash] = n + 1;
+            if (map[boardHash] > 2) {
                 positionRepetitionDraw = true;
             }
         } else {
-            map.insert(std::make_pair(currentFen, 1));
+            map.insert(std::make_pair(boardHash, 1));
         }
     }
 
-    free(currentFen);
     return positionRepetitionDraw;
 }
 
 void positionTrackingUndo(t_game *game) {
-    std::map<std::string, int> &map = *game->positionHistory;
-    char *currentFen = getFen(game->board);
+    uint64_t comparableBoard = hash(game->random,game);
+    std::map<uint64_t , int> &map = *game->positionHistory;
 
     if (game->positionHistory != nullptr) {
-        if (map.find(currentFen) != map.end()) {
-            int n = map[currentFen];
+        if (map.find(comparableBoard) != map.end()) {
+            int n = map[comparableBoard];
 
             if (n > 0) {
-                map[currentFen] = n - 1;
+                map[comparableBoard] = n - 1;
             }
         }
     }
 
-    free(currentFen);
 }
 
 

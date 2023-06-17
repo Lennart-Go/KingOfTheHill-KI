@@ -26,7 +26,12 @@ add_executable(KingOfTheHill_KI
         src/move.h
         src/util.cpp
         src/util.h
-        src/pieceSquareTable.h)
+        src/pieceSquareTable.h
+        src/main.cpp
+        src/hash.cpp
+        src/hash.h
+        src/transpositionTable.cpp
+        src/transpositionTable.h)
 target_link_libraries(KingOfTheHill_KI ${GTEST_LIBRARIES} pthread)
 
 add_executable(Tests

@@ -4,6 +4,7 @@
 #include "end.h"
 #include "move.h"
 #include "unistd.h"
+#include "hash.h"
 
 
 t_game *startGame(uint64_t gameTime) {
@@ -32,6 +33,8 @@ t_game *startGame(uint64_t gameTime) {
     game->blackMoveTime = 0;
 
     game->enpassants = 0;
+
+    game->random = init_hash();
 
     return game;
 }

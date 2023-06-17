@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 
+
 /* #############################################################################
  * ########################## List class definitions ###########################
  * #############################################################################
@@ -168,7 +169,6 @@ int shift_from_position(Position position) {
     return 63 - (position.y * 8 + (7 - position.x));
     // return 63 - (position.y * 8 + position.x);
 }
-
 
 Position position_from_shift(int shift) {
     int val = 63 - shift;
