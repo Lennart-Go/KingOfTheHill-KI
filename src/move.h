@@ -1,11 +1,14 @@
+#ifndef KINGOFTHEHILL_KI_MOVE_H
+#define KINGOFTHEHILL_KI_MOVE_H
+
+
 #include <cmath>
+#include <cstdint>
 
 #include "util.h"
 #include "board.h"
 #include "moveMaps.h"
 
-#ifndef KINGOFTHEHILL_KI_MOVE_H
-#define KINGOFTHEHILL_KI_MOVE_H
 
 /*
  * Move representation
@@ -63,8 +66,21 @@ typedef struct gameState {
             wCastleShort(whiteCastleShort), wCastleLong(whiteCastleLong),
             bCastleShort(blackCastleShort), bCastleLong(blackCastleLong),
             enpassant(en_passant) {}
+    gameState(const t_board &brd,
+              unsigned whiteCastleShort, unsigned whiteCastleLong,
+              unsigned blackCastleShort, unsigned blackCastleLong,
+              short en_passant) :
+            board(brd), move(),
+            wCastleShort(whiteCastleShort), wCastleLong(whiteCastleLong),
+            bCastleShort(blackCastleShort), bCastleLong(blackCastleLong),
+            enpassant(en_passant) {}
     gameState(const t_board &brd, t_move mov) :
             board(brd), move(mov),
+            wCastleShort(true), wCastleLong(true),
+            bCastleShort(true), bCastleLong(true),
+            enpassant(0) {}
+    explicit gameState(const t_board &brd) :
+            board(brd), move(),
             wCastleShort(true), wCastleLong(true),
             bCastleShort(true), bCastleLong(true),
             enpassant(0) {}

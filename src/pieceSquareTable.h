@@ -1,7 +1,8 @@
-#include <cstdint>
-
-//#ifndef KINGOFTHEHILL_KI_PIECE_SQUARE_TABLE_H
+#ifndef KINGOFTHEHILL_KI_PIECE_SQUARE_TABLE_H
 #define KINGOFTHEHILL_KI_PIECE_SQUARE_TABLE_H
+
+
+#include <cstdint>
 
 // WHITE
 
@@ -138,3 +139,5 @@ const int pst_pawn_black[64] = {  0,  0,  0,  0,  0,  0,  0,  0,
                                   10, 10, 20, 30, 30, 20, 10, 10,
                                   50, 50, 50, 50, 50, 50, 50, 50,
                                   0, 0, 0, 0, 0, 0, 0, 0};
+
+#endif

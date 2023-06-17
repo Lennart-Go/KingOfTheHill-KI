@@ -3,7 +3,10 @@
 
 #include <cstdint>
 #include <map>
+
 #include "move.h"
+
+
 /*
 typedef struct tableentry {
     uint64_t hash;
@@ -43,7 +46,7 @@ class TableEntry{
 
     private:
         uint64_t _hash;
-        t_move _bestMove;
+        t_move *_bestMove;
         float _score;
         uint8_t _vision;
 };
@@ -56,8 +59,8 @@ class TranspositionTable{
         void removeEntry(TableEntry* entry);
         TableEntry* getEntry(uint64_t hash);
         void setEntry(TableEntry* te);
-        int getSize();
-        long int getAge();
+        int getSize() const;
+        long int getAge() const;
         void setAge(long int age);
         void ageingTable();
     private:

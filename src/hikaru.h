@@ -1,9 +1,14 @@
-#include "board.h"
-#include "move.h"
-#include "game.h"
-
 #ifndef KINGOFTHEHILL_KI_HIKARU_H
 #define KINGOFTHEHILL_KI_HIKARU_H
+
+
+#include <cstdint>
+#include <ctime>
+
+#include "util.h"
+#include "move.h"
+#include "game.h"
+#include "pieceSquareTable.h"
 
 #define KING_VALUE 20000
 #define QUEEN_VALUE 900
@@ -11,6 +16,7 @@
 #define BISHOP_VALUE 330
 #define KNIGHT_VALUE 320
 #define PAWN_VALUE 100
+
 
 
 // calculates the time left finding a move
@@ -37,18 +43,117 @@ inline float evaluate(const t_game* game) {
 
     float score = 0;
 
-    score += (float )countFigure(game->board().whiteQueen) * QUEEN_VALUE;
-    score += (float )countFigure(game->board().whiteRook) * ROOK_VALUE;
-    score += (float )countFigure(game->board().whiteBishop) * BISHOP_VALUE;
-    score += (float )countFigure(game->board().whiteKnight) * KNIGHT_VALUE;
-    score += (float )countFigure(game->board().whitePawn) * PAWN_VALUE;
+//    score += (float )countFigure(game->board().whiteQueen) * QUEEN_VALUE;
+//    score += (float )countFigure(game->board().whiteRook) * ROOK_VALUE;
+//    score += (float )countFigure(game->board().whiteBishop) * BISHOP_VALUE;
+//    score += (float )countFigure(game->board().whiteKnight) * KNIGHT_VALUE;
+//    score += (float )countFigure(game->board().whitePawn) * PAWN_VALUE;
+//
+//    score -= (float )countFigure(game->board().blackQueen) * QUEEN_VALUE;
+//    score -= (float )countFigure(game->board().blackRook) * ROOK_VALUE;
+//    score -= (float )countFigure(game->board().blackBishop) * BISHOP_VALUE;
+//    score -= (float )countFigure(game->board().blackKnight) * KNIGHT_VALUE;
+//    score -= (float )countFigure(game->board().blackPawn ) * PAWN_VALUE;
 
-    score -= (float )countFigure(game->board().blackQueen) * QUEEN_VALUE;
-    score -= (float )countFigure(game->board().blackRook) * ROOK_VALUE;
-    score -= (float )countFigure(game->board().blackBishop) * BISHOP_VALUE;
-    score -= (float )countFigure(game->board().blackKnight) * KNIGHT_VALUE;
-    score -= (float )countFigure(game->board().blackPawn ) * PAWN_VALUE;
+    t_board board = game->board();
 
+    // ------------ //
+    // White pieces //
+    // ------------ //
+    
+    // King
+    short wKingShift = findFirst(board.whiteKing);
+    score += (float )pst_king_white[wKingShift];
+
+    // Queens
+    field wQueens = board.whiteQueen;
+    while (wQueens != 0) {
+        short shift = findFirst(wQueens);
+        score += QUEEN_VALUE + pst_queen_white[shift];
+        wQueens &= (wQueens - 1);
+    }
+    
+    // Rooks
+    field wRooks = board.whiteQueen;
+    while (wRooks != 0) {
+        short shift = findFirst(wRooks);
+        score += ROOK_VALUE + pst_rook_white[shift];
+        wRooks &= (wRooks - 1);
+    }
+    
+    // Bishops
+    field wBishops = board.whiteQueen;
+    while (wBishops != 0) {
+        short shift = findFirst(wBishops);
+        score += BISHOP_VALUE + pst_bishop_white[shift];
+        wBishops &= (wBishops - 1);
+    }
+    
+    // Knight
+    field wKnights = board.whiteQueen;
+    while (wKnights != 0) {
+        short shift = findFirst(wKnights);
+        score += KNIGHT_VALUE + pst_knight_white[shift];
+        wKnights &= (wKnights - 1);
+    }
+    
+    // Pawns
+    field wPawns = board.whiteQueen;
+    while (wPawns != 0) {
+        short shift = findFirst(wPawns);
+        score += PAWN_VALUE + pst_pawn_white[shift];
+        wPawns &= (wPawns - 1);
+    }
+    
+    
+    // ------------ //
+    // Black pieces //
+    // ------------ //
+
+    // King
+    short bKingShift = findFirst(board.blackKing);
+    score += (float )pst_king_black[bKingShift];
+
+    // Queens
+    field bQueens = board.whiteQueen;
+    while (bQueens != 0) {
+        short shift = findFirst(bQueens);
+        score += QUEEN_VALUE + pst_queen_black[shift];
+        bQueens &= (bQueens - 1);
+    }
+
+    // Rooks
+    field bRooks = board.whiteQueen;
+    while (bRooks != 0) {
+        short shift = findFirst(bRooks);
+        score += ROOK_VALUE + pst_rook_black[shift];
+        bRooks &= (bRooks - 1);
+    }
+
+    // Bishops
+    field bBishops = board.whiteQueen;
+    while (bBishops != 0) {
+        short shift = findFirst(bBishops);
+        score += BISHOP_VALUE + pst_bishop_black[shift];
+        bBishops &= (bBishops - 1);
+    }
+
+    // Knight
+    field bKnights = board.whiteQueen;
+    while (bKnights != 0) {
+        short shift = findFirst(bKnights);
+        score += KNIGHT_VALUE + pst_knight_black[shift];
+        bKnights &= (bKnights - 1);
+    }
+
+    // Pawns
+    field bPawns = board.whiteQueen;
+    while (bPawns != 0) {
+        short shift = findFirst(bPawns);
+        score += PAWN_VALUE + pst_pawn_black[shift];
+        bPawns &= (bPawns - 1);
+    }
+    
     return score;
 }
 

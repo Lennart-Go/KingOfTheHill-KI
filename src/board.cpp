@@ -1,6 +1,11 @@
+#include <cstdint>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
+#include <clocale>
+
 #include "board.h"
-#include "move.h"
-#include <malloc.h>
+
 
 t_board setFen(char *fen) {
 

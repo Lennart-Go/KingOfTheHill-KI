@@ -1,14 +1,11 @@
-#include <vector>
-
 #ifndef KINGOFTHEHILL_KI_UTIL_H
 #define KINGOFTHEHILL_KI_UTIL_H
 
+#include <vector>
 #include <cstdlib>
 #include <cstdint>
 #include <stdexcept>
 #include <cstring>
-#include "board.h"
-#include "hash.h"
 
 #define field uint64_t
 
@@ -70,7 +67,7 @@ template <typename I> std::string num2hex(I w, size_t hex_len = sizeof(I)<<1) {
     return rc;
 }
 
-int countFigure(uint64_t singleBoard);
+int countFigure(field singleBoard);
 int randn(int start, int stop);
 
 #endif

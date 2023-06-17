@@ -1,9 +1,11 @@
-#include <cstdlib>
-#include "game.h"
-#include "end.h"
+#include <cstdint>
+#include <cstdio>
+#include <utility>
+
 #include "board.h"
+#include "game.h"
+#include "hash.h"
 #include "hikaru.h"
-#include "move.h"
 
 
 t_gameOld *startGame(uint64_t gameTime) {

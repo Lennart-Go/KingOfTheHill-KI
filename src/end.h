@@ -1,9 +1,10 @@
-#include "board.h"
-#include "move.h"
-#include "game.h"
-
 #ifndef KINGOFTHEHILL_KI_END_H
 #define KINGOFTHEHILL_KI_END_H
+
+
+#include "game.h"
+#include "moveMaps.h"
+
 
 typedef enum {
     NOTOVER,

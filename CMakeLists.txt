@@ -11,19 +11,20 @@ find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
 add_executable(KingOfTheHill_KI
-        src/board.cpp
-        src/board.h
-        src/end.h
-        src/game.cpp
-        src/game.h
-        src/hikaru.h
         src/main.cpp
-        src/move.h
         src/util.h
-        src/moveMaps.h src/generators.h
-        src/pieceSquareTable.h
+        src/util.cpp
         src/hash.cpp
         src/hash.h
+        src/board.cpp
+        src/board.h
+        src/move.h
+        src/end.h
+        src/hikaru.h
+        src/game.cpp
+        src/game.h
+        src/moveMaps.h
+        src/pieceSquareTable.h
         src/transpositionTable.cpp
         src/transpositionTable.h)
 target_link_libraries(KingOfTheHill_KI ${GTEST_LIBRARIES} pthread)

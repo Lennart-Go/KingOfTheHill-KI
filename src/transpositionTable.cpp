@@ -1,4 +1,3 @@
-#include <inttypes.h>
 #include "transpositionTable.h"
 
 /*t_table* init_table() {
@@ -104,7 +103,10 @@ void print_table(t_table* table) {
 
 TableEntry::TableEntry(uint64_t hash, t_move bestMove, float score, uint8_t vision) {
     _hash = hash;
-    _bestMove = bestMove;
+
+    _bestMove = static_cast<t_move *>(calloc(1, sizeof(t_move)));
+    memcpy(_bestMove, &bestMove, sizeof(t_move));
+
     _score  = score;
     _vision = vision;
 }
@@ -118,11 +120,11 @@ void TableEntry::setHash(uint64_t hash) {
 }
 
 const t_move &TableEntry::getBestMove() const {
-    return _bestMove;
+    return *_bestMove;
 }
 
 void TableEntry::setBestMove(const t_move &bestMove) {
-    _bestMove = bestMove;
+    memcpy(_bestMove, &bestMove, sizeof(t_move));
 }
 
 float TableEntry::getScore() const {
@@ -147,7 +149,7 @@ TranspositionTable::TranspositionTable() {
     _hashTable = new std::map<uint64_t,TableEntry*>();
 }
 
-TranspositionTable::~TranspositionTable(){
+TranspositionTable::~TranspositionTable() {
     delete _hashTable;
 };
 
@@ -163,7 +165,7 @@ TableEntry* TranspositionTable::getEntry(uint64_t hash) {
     if((*_hashTable).find(hash) != (*_hashTable).end()){
         return (*_hashTable)[hash];
     }else{
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -176,16 +178,16 @@ void TranspositionTable::setEntry(TableEntry* te) {
     }
 }
 
-int TranspositionTable::getSize() {
-    return _entryCounter;
+int TranspositionTable::getSize() const {
+    return (int )_entryCounter;
 }
 
-long int TranspositionTable::getAge() {
+long int TranspositionTable::getAge() const {
     return _currentAge;
 }
 
 void TranspositionTable::setAge(long int age) {
-    _currentAge = age;
+    _currentAge = (int )age;
 }
 
 void TranspositionTable::ageingTable(){

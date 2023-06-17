@@ -1,7 +1,8 @@
 #ifndef KINGOFTHEHILL_KI_HASH_H
 #define KINGOFTHEHILL_KI_HASH_H
 
-#include "game.h"
+#include <cstdint>
+#include "move.h"
 
 #define OFFSET 6
 
@@ -13,8 +14,8 @@
 #define PAWN 5
 
 
-uint64_t hash(uint64_t* random, t_game* game);
+uint64_t hash(const uint64_t* random, t_gameState *state);
 uint64_t* init_hash();
-int getFigureOnPos(t_game* game, int pos);
+int getFigureOnPos(t_board board, int pos);
 
 #endif //KINGOFTHEHILL_KI_HASH_H
