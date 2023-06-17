@@ -678,86 +678,91 @@ inline static uint64_t lookup(const uint8_t piecePosition) {
 }
 
 
-template<bool color>
-inline uint64_t getThreatened(const t_board board) {
+inline uint64_t getThreatenedWhite(const t_board board) {
     uint64_t occ = board.occupied;
     uint64_t threatened = 0;
 
-    if (color) {
-        // Add uint64_ts covered by the king
-        threatened |= lookup<piece::king>(board.whiteKing);
+    // Add uint64_ts covered by the king
+    threatened |= lookup<piece::king>(findFirst(board.blackKing));
 
-        // Add uint64_ts covered by the queens
-        uint64_t queens = board.whiteQueen;
-        while (queens != 0) {
-            threatened |= lookupSlider<piece::queen>(findFirst(queens), occ);
+    // Add uint64_ts covered by the queens
+    uint64_t queens = board.blackQueen;
+    while (queens != 0) {
+        threatened |= lookupSlider<piece::queen>(findFirst(queens), occ);
 
-            queens &= (queens - 1);
-        }
-
-        // Add uint64_ts covered by the rooks
-        uint64_t rooks = board.whiteRook;
-        while (rooks != 0) {
-            threatened |= lookupSlider<piece::rook>(findFirst(rooks), occ);
-
-            rooks &= (rooks - 1);
-        }
-
-        // Add uint64_ts covered by the bishops
-        uint64_t bishops = board.whiteBishop;
-        while (bishops != 0) {
-            threatened |= lookupSlider<piece::bishop>(findFirst(bishops), occ);
-            bishops &= (bishops - 1);
-        }
-
-        // Add uint64_ts covered by the knights
-        uint64_t knights = board.whiteKnight;
-        while (knights != 0) {
-            threatened |= lookup<piece::knight>(findFirst(knights));
-            knights &= (knights - 1);
-        }
-
-        // Add uint64_ts covered by pawns
-        threatened |= (board.whitePawn & ~aFile) >> 9;  // Taking to the left
-        threatened |= (board.whitePawn & ~hFile) >> 7;  // Taking to the right
-    } else {
-        // Add uint64_ts covered by the king
-        threatened |= lookup<piece::king>(board.blackKing);
-
-        // Add uint64_ts covered by the queens
-        uint64_t queens = board.blackQueen;
-        while (queens != 0) {
-            threatened |= lookupSlider<piece::queen>(findFirst(queens), occ);
-
-            queens &= (queens - 1);
-        }
-
-        // Add uint64_ts covered by the rooks
-        uint64_t rooks = board.blackRook;
-        while (rooks != 0) {
-            threatened |= lookupSlider<piece::rook>(findFirst(rooks), occ);
-
-            rooks &= (rooks - 1);
-        }
-
-        // Add uint64_ts covered by the bishops
-        uint64_t bishops = board.blackBishop;
-        while (bishops != 0) {
-            threatened |= lookupSlider<piece::bishop>(findFirst(bishops), occ);
-            bishops &= (bishops - 1);
-        }
-
-        // Add uint64_ts covered by the knights
-        uint64_t knights = board.blackKnight;
-        while (knights != 0) {
-            threatened |= lookup<piece::knight>(findFirst(knights));
-            knights &= (knights - 1);
-        }
-
-        // Add uint64_ts covered by pawns
-        threatened |= (board.blackPawn & ~hFile) << 9;  // Taking to the left
-        threatened |= (board.blackPawn & ~aFile) << 7;  // Taking to the right
+        queens &= (queens - 1);
     }
+
+    // Add uint64_ts covered by the rooks
+    uint64_t rooks = board.blackRook;
+    while (rooks != 0) {
+        threatened |= lookupSlider<piece::rook>(findFirst(rooks), occ);
+
+        rooks &= (rooks - 1);
+    }
+
+    // Add uint64_ts covered by the bishops
+    uint64_t bishops = board.blackBishop;
+    while (bishops != 0) {
+        threatened |= lookupSlider<piece::bishop>(findFirst(bishops), occ);
+        bishops &= (bishops - 1);
+    }
+
+    // Add uint64_ts covered by the knights
+    uint64_t knights = board.blackKnight;
+    while (knights != 0) {
+        threatened |= lookup<piece::knight>(findFirst(knights));
+        knights &= (knights - 1);
+    }
+
+    // Add uint64_ts covered by pawns
+    threatened |= (board.blackPawn & ~hFile) << 9;  // Taking to the left
+    threatened |= (board.blackPawn & ~aFile) << 7;  // Taking to the right
+
+    return threatened;
+}
+
+
+inline field getThreatenedBlack(const t_board board) {
+    uint64_t occ = board.occupied;
+    uint64_t threatened = 0;
+
+    // Add uint64_ts covered by the king
+    threatened |= lookup<piece::king>(findFirst(board.whiteKing));
+
+    // Add uint64_ts covered by the queens
+    uint64_t queens = board.whiteQueen;
+    while (queens != 0) {
+        threatened |= lookupSlider<piece::queen>(findFirst(queens), occ);
+
+        queens &= (queens - 1);
+    }
+
+    // Add uint64_ts covered by the rooks
+    uint64_t rooks = board.whiteRook;
+    while (rooks != 0) {
+        threatened |= lookupSlider<piece::rook>(findFirst(rooks), occ);
+
+        rooks &= (rooks - 1);
+    }
+
+    // Add uint64_ts covered by the bishops
+    uint64_t bishops = board.whiteBishop;
+    while (bishops != 0) {
+        threatened |= lookupSlider<piece::bishop>(findFirst(bishops), occ);
+        bishops &= (bishops - 1);
+    }
+
+    // Add uint64_ts covered by the knights
+    uint64_t knights = board.whiteKnight;
+    while (knights != 0) {
+        threatened |= lookup<piece::knight>(findFirst(knights));
+        knights &= (knights - 1);
+    }
+
+    // Add uint64_ts covered by pawns
+    threatened |= (board.whitePawn & ~aFile) >> 9;  // Taking to the left
+    threatened |= (board.whitePawn & ~hFile) >> 7;  // Taking to the right
 
     return threatened;
 }
@@ -784,7 +789,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate threatened squares //
         // --------------------------- //
 
-        uint64_t threatened = getThreatened<color>(board);
+        uint64_t threatened = getThreatenedBlack(board);
 
 
         // ----------------------------------------------------------- //
@@ -1097,48 +1102,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate threatened squares //
         // --------------------------- //
 
-        uint64_t threatened = 0;
-        {
-            // Add uint64_ts covered by the king
-            threatened |= lookup<piece::king>(blackKingShift);
-
-            // Add uint64_ts covered by the queens
-            uint64_t queens = board.blackQueen;
-            while (queens != 0) {
-                threatened |= lookupSlider<piece::queen>(findFirst(queens), occ);
-
-                queens &= (queens - 1);
-            }
-
-            // Add uint64_ts covered by the rooks
-            uint64_t rooks = board.blackRook;
-            while (rooks != 0) {
-                threatened |= lookupSlider<piece::rook>(findFirst(rooks), occ);
-
-                rooks &= (rooks - 1);
-            }
-
-            // Add uint64_ts covered by the bishops
-            uint64_t bishops = board.blackBishop;
-            while (bishops != 0) {
-                threatened |= lookupSlider<piece::bishop>(findFirst(bishops), occ);
-                bishops &= (bishops - 1);
-            }
-
-            // Add uint64_ts covered by the knights
-            uint64_t knights = board.blackKnight;
-            while (knights != 0) {
-                threatened |= lookup<piece::knight>(findFirst(knights));
-                knights &= (knights - 1);
-            }
-
-            // Add uint64_ts covered by pawns
-            threatened |= (board.blackPawn & ~aFile) << 9;  // Taking to the left
-            threatened |= (board.blackPawn & ~hFile) << 7;  // Taking to the right
-
-            // Remove all uint64_ts covered by black pieces
-            threatened &= ~board.black;
-        }
+        uint64_t threatened = getThreatenedWhite(board);
 
 
         // ----------------------------------------------------------- //
@@ -1165,7 +1129,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
                 uint64_t checkSliders = checkSliderPieces;  // Preserve value of checkSliderPieces
                 while (checkSliders != 0) {
                     checkSliderShift = findFirst(checkSliders);
-                    checks |= xray[64 * blackKingShift + checkSliderShift];
+                    checks |= xray[64 * whiteKingShift + checkSliderShift];
 
                     checkSliders &= (checkSliders - 1);
                 }
@@ -1179,11 +1143,10 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
             }
 
             // Handle different amounts of checking pieces
-            uint64_t checkOrigins = checks & board.black;
-            if (checkOrigins == 0) {
+            if (checkSliderPieces == 0) {
                 // No checks -> Set all uint64_ts to 1
                 checks = ~0;
-            } else if ((checkOrigins & (checkOrigins - 1)) != 0) {
+            } else if ((checkSliderPieces & (checkSliderPieces - 1)) != 0) {
                 // More than one check -> Only King can move
                 uint64_t kingTargets = lookup<piece::king>(whiteKingShift) & ~threatened & ~board.white;
                 moveKing<false>(&moves, gameState, whiteKingMap, kingTargets);
@@ -1457,7 +1420,7 @@ inline void printMove(t_gameState state) {
     Position originPosition = position_from_shift(originShift);
     Position targetPosition = position_from_shift(targetShift);
 
-    printf("Move %c%d -> %c%d",
+    printf("Move %c%d -> %c%d\n",
            columnToLetter(originPosition.x), originPosition.y + 1,
            columnToLetter(targetPosition.x), targetPosition.y + 1);
 }

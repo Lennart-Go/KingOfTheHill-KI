@@ -2,8 +2,8 @@
 #define KINGOFTHEHILL_KI_END_H
 
 
-#include "game.h"
 #include "moveMaps.h"
+#include "game.h"
 
 
 typedef enum {
@@ -14,45 +14,46 @@ typedef enum {
 } winner_t;
 
 
-template<bool color>
-inline static bool isCheckmate(t_game *game) {
+inline static bool isCheckmate(bool color, t_gameState *state) {
     /* Function to check whether the now moving party is checkmate
     * Arguments:
     *  t_board *board: Pointer to the board representing the state of the game
     *  bool color: the next moving color with "false" for white and "true" for black
     */
 
-    t_board board = game->board();
+    t_board board = state->board;
 
     if (color) {
-        bool kingThreatened = board.blackKing & getThreatened<color>(board);
+        bool kingThreatened = board.blackKing & getThreatenedBlack(board);
         if (kingThreatened) {
-            return generate_moves<color>(*game->state).empty();  // King is threatened and there are no moves
+            return generate_moves<true>(*state).empty();  // King is threatened and there are no moves
         }
     } else {
-        bool kingThreatened = board.whiteKing & getThreatened<color>(board);
+        bool kingThreatened = board.whiteKing & getThreatenedWhite(board);
         if (kingThreatened) {
-            return generate_moves<color>(*game->state).empty();  // King is threatened and there are no moves
+            return generate_moves<false>(*state).empty();  // King is threatened and there are no moves
         }
     }
 
     return false;
 }
 
-template<bool color>
-inline static bool isStalemate(t_game *game) {
+inline static bool isStalemate(bool color, t_gameState *state) {
     /* Function to check whether the party whose turn is now can move. If not the game is stalemate-> draw
     * Arguments:
     *  t_board *board: Pointer to the board representing the state of the game
     *  bool color: the next moving color with "false" for white and "true" for black
     */
-    std::vector<t_gameState> possibleMoves = generate_moves<color>(game->state);
-    return possibleMoves.empty();
+
+    if (color) {
+        return generate_moves<true>(*state).empty();
+    } else {
+        return generate_moves<false>(*state).empty();
+    }
 }
 
 
-template<bool color>
-inline static bool isKingOfTheHill(t_board *board) {
+inline static bool isKingOfTheHill(bool color, t_board board) {
     /* Function to check whether King of the Hill condition is fulfilled
      * Arguments:
      *  t_board *board: Pointer to the board representing the state of the gameOld
@@ -60,29 +61,61 @@ inline static bool isKingOfTheHill(t_board *board) {
      */
 
     if (color) {
-        return (board->blackKing & kingOfTheHill) != 0;
+        return (board.blackKing & kingOfTheHill) != 0;
     } else {
-        return (board->whiteKing & kingOfTheHill) != 0;
+        return (board.whiteKing & kingOfTheHill) != 0;
     }
 }
 
-template<bool color>
-inline static winner_t checkEnd(t_game *game) {
-    /* Function to check whether one of the gameOld ending conditions is fulfilled and Returns the winner or DRAW. Given is the last moved color
-     * tho check if the last action finished the gameOld.
+
+inline static winner_t checkEndLimited(bool color, t_gameState *state) {
+    // Check for game end while ignoring possible ends that can also be detected with empty move-generator lists
+    // NOTE: color = side that last moved
+
+    if (isKingOfTheHill(color, state->board)) {
+        if (color) {
+            return BLACK;
+        } else {
+            return WHITE;
+        }
+    }
+
+    return NOTOVER;
+}
+
+
+inline static winner_t checkEndNoMoves(bool color, t_gameState *state) {
+    // Check for game end while assuming that no more moves were found
+    // NOTE: color = side that last moved
+    t_board board = state->board;
+    if (!color) {
+        if (getThreatenedWhite(board) & board.blackKing) {
+            return WHITE;
+        }
+        return DRAW;
+    } else {
+        if (getThreatenedBlack(board) & board.whiteKing) {
+            return BLACK;
+        }
+        return DRAW;
+    }
+}
+
+
+inline static winner_t checkEnd(bool color, t_gameState *state) {
+    /* Function to check whether one of the game ending conditions is fulfilled and Returns the winner or DRAW. Given is the last moved color
+     * tho check if the last action finished the game.
      * Arguments:
-     *  t_gameOld *gameOld: Pointer to the gameOld representing the state of the gameOld
+     *  t_game *game: Pointer to the game representing the state of the game
      *  bool moved_color: the last moved color with "false" for white and "true" for black
      */
 
 
-    if (isKingOfTheHill<color>(game->board())) {
+    if (isKingOfTheHill(color, state->board)) {
         return color ? BLACK : WHITE;
-    } else if (isCheckmate<!color>(game)) {
+    } else if (isCheckmate(!color, state)) {
         return color ? BLACK : WHITE;
-    } else if (isStalemate<!color>(game)) {
-        return DRAW;
-    } else if (game->positionRepetitions()) {
+    } else if (isStalemate(color, state)) {
         return DRAW;
     }
 

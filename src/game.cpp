@@ -73,12 +73,20 @@ void play(int maxRounds, uint64_t gameTime) {
         // Generate next move
         t_gameState *nextMove;
 
+        if (game.moveCounter == 7) {
+            int test = 0;
+        }
+
         if (game.turn) {
             std::pair<gameState, float> result = getMove<true>(&game, timePerMove);
             nextMove = &result.first;
+
+            printf("Found move with score %e\n", &result.second);
         } else {
             std::pair<gameState, float> result = getMove<false>(&game, timePerMove);
             nextMove = &result.first;
+
+            printf("Found move with score %e\n", &result.second);
         }
 
         game.commitMove(*nextMove);
@@ -100,10 +108,10 @@ void play(int maxRounds, uint64_t gameTime) {
 
         // Check and announce checks
         bool threatened;
-        if (!game.turn) {
-            threatened = game.board().whiteKing & getThreatened<true>(game.board());
+        if (game.turn) {
+            threatened = game.board().blackKing & getThreatenedBlack(game.board());
         } else {
-            threatened = game.board().blackKing & getThreatened<true>(game.board());
+            threatened = game.board().whiteKing & getThreatenedWhite(game.board());
         }
 
         if (threatened) {
@@ -120,4 +128,26 @@ void play(int maxRounds, uint64_t gameTime) {
 
     // Free memory
     delete game.positionHistory;
+}
+
+
+#include <algorithm>
+void printMoveStack(t_game *game) {
+    std::stack<t_gameState> moveStack = game->stateStack;
+
+    std::vector<t_gameState> debugVector = std::vector<t_gameState>();
+    while (!moveStack.empty( ) )
+    {
+        t_gameState t = moveStack.top( );
+        debugVector.push_back(t);
+        moveStack.pop( );
+    }
+
+    // stack, read from top down, is reversed relative to its creation (from bot to top)
+    for (int i = (int )debugVector.size()-1; i >= 0; i--) {
+        t_gameState currentState = debugVector.at(i);
+
+        printMove(currentState);
+        game->stateStack.push(currentState);
+    }
 }

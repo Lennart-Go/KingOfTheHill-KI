@@ -9,13 +9,14 @@
 #include "move.h"
 #include "game.h"
 #include "pieceSquareTable.h"
+#include "end.h"
 
 #define KING_VALUE 20000
-#define QUEEN_VALUE 900
-#define ROOK_VALUE 500
-#define BISHOP_VALUE 330
-#define KNIGHT_VALUE 320
-#define PAWN_VALUE 100
+#define QUEEN_VALUE 9
+#define ROOK_VALUE 5
+#define BISHOP_VALUE 3
+#define KNIGHT_VALUE 3
+#define PAWN_VALUE 1
 
 
 
@@ -43,17 +44,19 @@ inline float evaluate(const t_game* game) {
 
     float score = 0;
 
-//    score += (float )countFigure(game->board().whiteQueen) * QUEEN_VALUE;
-//    score += (float )countFigure(game->board().whiteRook) * ROOK_VALUE;
-//    score += (float )countFigure(game->board().whiteBishop) * BISHOP_VALUE;
-//    score += (float )countFigure(game->board().whiteKnight) * KNIGHT_VALUE;
-//    score += (float )countFigure(game->board().whitePawn) * PAWN_VALUE;
-//
-//    score -= (float )countFigure(game->board().blackQueen) * QUEEN_VALUE;
-//    score -= (float )countFigure(game->board().blackRook) * ROOK_VALUE;
-//    score -= (float )countFigure(game->board().blackBishop) * BISHOP_VALUE;
-//    score -= (float )countFigure(game->board().blackKnight) * KNIGHT_VALUE;
-//    score -= (float )countFigure(game->board().blackPawn ) * PAWN_VALUE;
+    score += (float )countFigure(game->board().whiteQueen) * QUEEN_VALUE;
+    score += (float )countFigure(game->board().whiteRook) * ROOK_VALUE;
+    score += (float )countFigure(game->board().whiteBishop) * BISHOP_VALUE;
+    score += (float )countFigure(game->board().whiteKnight) * KNIGHT_VALUE;
+    score += (float )countFigure(game->board().whitePawn) * PAWN_VALUE;
+
+    score -= (float )countFigure(game->board().blackQueen) * QUEEN_VALUE;
+    score -= (float )countFigure(game->board().blackRook) * ROOK_VALUE;
+    score -= (float )countFigure(game->board().blackBishop) * BISHOP_VALUE;
+    score -= (float )countFigure(game->board().blackKnight) * KNIGHT_VALUE;
+    score -= (float )countFigure(game->board().blackPawn ) * PAWN_VALUE;
+
+    return score;
 
     t_board board = game->board();
 
@@ -74,7 +77,7 @@ inline float evaluate(const t_game* game) {
     }
     
     // Rooks
-    field wRooks = board.whiteQueen;
+    field wRooks = board.whiteRook;
     while (wRooks != 0) {
         short shift = findFirst(wRooks);
         score += ROOK_VALUE + pst_rook_white[shift];
@@ -82,7 +85,7 @@ inline float evaluate(const t_game* game) {
     }
     
     // Bishops
-    field wBishops = board.whiteQueen;
+    field wBishops = board.whiteBishop;
     while (wBishops != 0) {
         short shift = findFirst(wBishops);
         score += BISHOP_VALUE + pst_bishop_white[shift];
@@ -90,7 +93,7 @@ inline float evaluate(const t_game* game) {
     }
     
     // Knight
-    field wKnights = board.whiteQueen;
+    field wKnights = board.whiteKnight;
     while (wKnights != 0) {
         short shift = findFirst(wKnights);
         score += KNIGHT_VALUE + pst_knight_white[shift];
@@ -98,7 +101,7 @@ inline float evaluate(const t_game* game) {
     }
     
     // Pawns
-    field wPawns = board.whiteQueen;
+    field wPawns = board.whitePawn;
     while (wPawns != 0) {
         short shift = findFirst(wPawns);
         score += PAWN_VALUE + pst_pawn_white[shift];
@@ -112,45 +115,45 @@ inline float evaluate(const t_game* game) {
 
     // King
     short bKingShift = findFirst(board.blackKing);
-    score += (float )pst_king_black[bKingShift];
+    score -= (float )pst_king_black[bKingShift];
 
     // Queens
-    field bQueens = board.whiteQueen;
+    field bQueens = board.blackQueen;
     while (bQueens != 0) {
         short shift = findFirst(bQueens);
-        score += QUEEN_VALUE + pst_queen_black[shift];
+        score -= QUEEN_VALUE + pst_queen_black[shift];
         bQueens &= (bQueens - 1);
     }
 
     // Rooks
-    field bRooks = board.whiteQueen;
+    field bRooks = board.blackRook;
     while (bRooks != 0) {
         short shift = findFirst(bRooks);
-        score += ROOK_VALUE + pst_rook_black[shift];
+        score -= ROOK_VALUE + pst_rook_black[shift];
         bRooks &= (bRooks - 1);
     }
 
     // Bishops
-    field bBishops = board.whiteQueen;
+    field bBishops = board.blackBishop;
     while (bBishops != 0) {
         short shift = findFirst(bBishops);
-        score += BISHOP_VALUE + pst_bishop_black[shift];
+        score -= BISHOP_VALUE + pst_bishop_black[shift];
         bBishops &= (bBishops - 1);
     }
 
     // Knight
-    field bKnights = board.whiteQueen;
+    field bKnights = board.blackKnight;
     while (bKnights != 0) {
         short shift = findFirst(bKnights);
-        score += KNIGHT_VALUE + pst_knight_black[shift];
+        score -= KNIGHT_VALUE + pst_knight_black[shift];
         bKnights &= (bKnights - 1);
     }
 
     // Pawns
-    field bPawns = board.whiteQueen;
+    field bPawns = board.blackPawn;
     while (bPawns != 0) {
         short shift = findFirst(bPawns);
-        score += PAWN_VALUE + pst_pawn_black[shift];
+        score -= PAWN_VALUE + pst_pawn_black[shift];
         bPawns &= (bPawns - 1);
     }
     
@@ -180,18 +183,32 @@ static inline float alphaBeta(int depth, float alpha, float beta, t_game *game, 
 
     float score, bestScore;
 
-    if (color) {
+    if constexpr (color) {
         std::vector<t_gameState> moves = generate_moves<true>(*game->state);
-        bestScore = -std::numeric_limits<float>::max();
+        bestScore = std::numeric_limits<float>::max();
 
-        // White's turn -> Maximize score
+        if (moves.empty()) {
+            winner_t endType = checkEndNoMoves(false, game->state);
+
+            game->isOver = true;
+            if (endType == winner_t::WHITE) {
+                game->whiteWon = true;
+            }
+            if (endType == winner_t::BLACK) {
+                game->blackWon = true;
+            }
+
+            return evaluate(game);
+        }
+
+        // Black's turn -> Minimize score
         for (auto currentMove : moves) {
             game->commitMove(currentMove);
             score = alphaBeta<false>(depth-1, alpha, beta, game, timePerMove, startMoveTime);
             game->revertMove();
 
-            bestScore = max(bestScore, score);
-            alpha = max(alpha, bestScore);
+            bestScore = min(bestScore, score);
+            beta = min(alpha, bestScore);
 
             if (beta <= alpha) {
                 // "Opposing" team would always choose one of the already better moves
@@ -202,16 +219,30 @@ static inline float alphaBeta(int depth, float alpha, float beta, t_game *game, 
         return bestScore;
     } else {
         std::vector<t_gameState> moves = generate_moves<false>(*game->state);
-        bestScore = std::numeric_limits<float>::max();
+        bestScore = -std::numeric_limits<float>::max();
 
-        // Black's turn -> Minimize score
+        if (moves.empty()) {
+            winner_t endType = checkEndNoMoves(true, game->state);
+
+            game->isOver = true;
+            if (endType == winner_t::WHITE) {
+                game->whiteWon = true;
+            }
+            if (endType == winner_t::BLACK) {
+                game->blackWon = true;
+            }
+
+            return evaluate(game);
+        }
+
+        // White's turn -> Maximize score
         for (auto currentMove : moves) {
             game->commitMove(currentMove);
             score = alphaBeta<true>(depth-1, alpha, beta, game, timePerMove, startMoveTime);
             game->revertMove();
 
-            bestScore = min(bestScore, score);
-            beta = min(beta, bestScore);
+            bestScore = max(bestScore, score);
+            alpha = max(beta, bestScore);
 
             if (beta <= alpha) {
                 // "Opposing" team would always choose one of the already better moves
@@ -276,7 +307,7 @@ static inline float alphaBeta(int depth, float alpha, float beta, t_game *game, 
 
 
 template<bool color>
-inline std::pair<t_gameState, float> alphaBetaHead(t_game *game, int max_depth, uint64_t timePerMove);
+static inline std::pair<t_gameState, float> alphaBetaHead(t_game *game, int max_depth, uint64_t timePerMove);
 
 
 template<>
@@ -289,26 +320,44 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
 
     float score, bestScore;
     t_gameState zeroMove = t_gameState(game->board(), t_move());
-    t_gameState *bestMove = &zeroMove;
+    t_gameState *bestMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
+    memcpy(bestMove, &zeroMove, sizeof(t_gameState));
 
     std::vector<t_gameState> moves = generate_moves<true>(*game->state);
-    bestScore = -std::numeric_limits<float>::max();
+    bestScore = std::numeric_limits<float>::max();
 
-    // White's turn -> Maximize score
+    if (moves.empty()) {
+        winner_t endType = checkEndNoMoves(false, game->state);
+
+        game->isOver = true;
+        if (endType == winner_t::WHITE) {
+            game->whiteWon = true;
+        }
+        if (endType == winner_t::BLACK) {
+            game->blackWon = true;
+        }
+
+        return {zeroMove, evaluate(game)};
+    }
+
+    // Black's turn -> Minimize score
     for (auto currentMove : moves) {
         game->commitMove(currentMove);
         score = alphaBeta<false>(depth - 1, alpha, beta, game, timePerMove, startMoveTime);
         game->revertMove();
 
-        if (score > bestScore) {
+        if (score <= bestScore) {
             bestScore = score;
-            bestMove = &currentMove;
+            memcpy(bestMove, &currentMove, sizeof(t_gameState));
         }
 
-        alpha = max(alpha, bestScore);
+        beta = min(alpha, bestScore);
     }
 
-    return {*bestMove, bestScore};
+    t_gameState returnMove = t_gameState(*bestMove);
+    free(bestMove);
+
+    return {returnMove, bestScore};
 }
 
 
@@ -322,44 +371,62 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
 
     float score, bestScore;
     t_gameState zeroMove = t_gameState(game->board(), t_move());
-    t_gameState *bestMove = &zeroMove;
+    t_gameState *bestMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
+    memcpy(bestMove, &zeroMove, sizeof(t_gameState));
 
     std::vector<t_gameState> moves = generate_moves<false>(*game->state);
-    bestScore = std::numeric_limits<float>::max();
+    bestScore = -std::numeric_limits<float>::max();
 
-    // Black's turn -> Minimize score
+    if (moves.empty()) {
+        winner_t endType = checkEndNoMoves(true, game->state);
+
+        game->isOver = true;
+        if (endType == winner_t::WHITE) {
+            game->whiteWon = true;
+        }
+        if (endType == winner_t::BLACK) {
+            game->blackWon = true;
+        }
+
+        return {zeroMove, evaluate(game)};
+    }
+
+    // White's turn -> Maximize score
     for (auto currentMove : moves) {
         game->commitMove(currentMove);
         score = alphaBeta<true>(depth-1, alpha, beta, game, timePerMove, startMoveTime);
         game->revertMove();
 
-        if (score < bestScore) {
+        if (score >= bestScore) {
             bestScore = score;
-            bestMove = &currentMove;
+            memcpy(bestMove, &currentMove, sizeof(t_gameState));
         }
 
-        beta = min(beta, bestScore);
+        alpha = max(beta, bestScore);
     }
 
-    return {*bestMove, bestScore};
+    t_gameState returnMove = t_gameState(*bestMove);
+    free(bestMove);
+
+    return {returnMove, bestScore};
 }
 
 
 template<bool color>
 inline std::pair<gameState, float> getMove(t_game *game, uint64_t timePerMove) {
-    return alphaBetaHead<color>(game, 7, timePerMove);
+    return alphaBetaHead<color>(game, 8, timePerMove);
 }
 
 
 template<>
 inline std::pair<gameState, float> getMove<true>(t_game *game, uint64_t timePerMove) {
-    return alphaBetaHead<true>(game, 7, timePerMove);
+    return alphaBetaHead<true>(game, 8, timePerMove);
 }
 
 
 template<>
 inline std::pair<gameState, float> getMove<false>(t_game *game, uint64_t timePerMove) {
-    return alphaBetaHead<false>(game, 7, timePerMove);
+    return alphaBetaHead<false>(game, 8, timePerMove);
 }
 
 #endif //KINGOFTHEHILL_KI_HIKARU_H

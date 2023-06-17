@@ -11,6 +11,7 @@
 #include "move.h"
 #include "transpositionTable.h"
 #include "hash.h"
+#include "end.h"
 
 
 typedef struct gameOld {
@@ -207,8 +208,6 @@ typedef struct game {
         std::map<uint64_t, int> &map = *positionHistory;
 
         if (positionHistory != nullptr) {
-            char *currentFen = FEN();
-
             if (map.find(boardHash) != map.end()) {
                 return map[boardHash];
             }
@@ -227,13 +226,26 @@ typedef struct game {
         turn = !turn;
         moveCounter++;
 
-        // positionTracking();
-        // TODO: Check for game ends?
+        positionTracking();
+        winner_t endType = checkEndLimited(!turn, state);
+        if (endType == winner_t::WHITE) {
+            isOver = true;
+            whiteWon = true;
+        } else if (endType == winner_t::BLACK) {
+            isOver = true;
+            blackWon = true;
+        } else if (endType == winner_t::DRAW) {
+            isOver = true;
+        }
+        if (positionRepetitions() > 2) {
+            isOver = true;
+        }
+
         // TODO: Stuff with move time?
     }
 
     void revertMove() {
-        // positionTrackingUndo();
+        positionTrackingUndo();
 
         free(state);
 
@@ -263,5 +275,6 @@ typedef struct game {
 
 t_gameOld *startGame(uint64_t gameTime);
 void play(int maxRounds, uint64_t gameTime);
+void printMoveStack(t_game game);
 
 #endif //KINGOFTHEHILL_KI_GAME_H
