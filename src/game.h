@@ -11,7 +11,7 @@ typedef struct game {
     unsigned turn:1;  // 0 for white, 1 for black
     uint64_t latestMoveTime;
     bool isOver;
-    std::map<std::string,int> *positionHistory;
+    std::map<Boardc,int> *positionHistory;
 
     unsigned whiteWon:1;
     unsigned whiteCanCastleShort:1;
