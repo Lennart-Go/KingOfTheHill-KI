@@ -4,11 +4,10 @@
 #include "board.h"
 #include "hikaru.h"
 #include "move.h"
-#include "unistd.h"
 
 
-t_game *startGame(field gameTime) {
-    t_game *game = (t_game *) calloc(1, sizeof(t_game));
+t_gameOld *startGame(field gameTime) {
+    t_gameOld *game = (t_gameOld *) calloc(1, sizeof(t_gameOld));
     t_board startBoard = initializeBoard();
 
     game->board = &startBoard;
@@ -43,67 +42,78 @@ int time_limit() {
     return 2 * 60 * 60 / 40;
 }
 
-//void play(int maxRounds, field gameTime) {
-//    if (maxRounds < 0) {
-//        maxRounds = INT32_MAX;
+void play(int maxRounds, field gameTime) {
+    if (maxRounds < 0) {
+        maxRounds = INT32_MAX;
+    }
+
+    // t_game game = t_game((char *)"rnbqkbnr/pppppp2/8/6P1/5Pp1/8/PPPPP3/RNBQKBNR", true, 0b1111, 8, gameTime);
+    t_game game = t_game(gameTime);
+    printBoard(game.state->board);
+
+
+//    std::vector<t_gameState> moves = generate_moves<true>(*game.state);
+//
+//    for (auto move : moves) {
+//        printMove(move);
+//        printBoard(move.board);
+//        debug_printSingleBoard(move.board.occupied);
+//        printf("\n");
 //    }
-//
-//    t_game *game = startGame(gameTime);
-//    // setFen(game->board, (char *)"r2qkbnr/pp1bpppp/2np4/1Bp5/4P3/5N2/PPPP1PPP/RNBQ1RK1");
-//    // game->turn = true;
-//
-//    printBoard(game->board);
-//    // sleep(4);
-//
-//    field timePerMove = gameTime / 40;
-//
-//    while (!game->isOver && (game->blackMoveCounter + 1) <= maxRounds) {
-//        /*  if (game->blackMoveCounter > 0) {
-//              break;
-//          } */
-//
-//        // sleep(1);
-//
-//        // Generate next move_old
-//        t_move_old nextMove = getMove(game, game->turn, timePerMove);
-//        commitMove(game, &nextMove);
-//
-//        // Print next move_old and resulting board state
-//        printf("Next move_old: ");
-//        printMoveOld(nextMove);
-//
-//        printf("\nCurrent board state (Score: %.4f, Round: %d, ", evaluate(game), game->blackMoveCounter + 1);
-//
-//        if (game->turn == 0) {
-//            printf("Turn: White)\n");
-//        } else {
-//            printf("Turn: Black)\n");
-//        }
-//
-//
-//        printBoard(game->board);
-//
-//        // Check and announce checks
-//        Position kingPosition;
-//        if (!game->turn) {
-//            kingPosition = board_value_positions(game->board->whiteKing).at(0);
-//        } else {
-//            kingPosition = board_value_positions(game->board->blackKing).at(0);
-//        }
-//
-//        if (is_threatened(game->board, kingPosition, game->turn)) {
-//            printf("CHECK\n");
-//        }
-//    }
-//
-//    printf("Game over!\n");
-//    printf("Game is over: %d\n", game->isOver);
-//    printf("White won: %d\n", game->whiteWon);
-//    printf("Black won: %d\n", game->blackWon);
-//    printf("Total rounds: %d\n", game->blackMoveCounter + 1);
-//    printf("Turn: %d\n", game->turn);
-//
-//    // Free memory
-//    delete game->positionHistory;
-//    free(game);
-//}
+
+
+    uint64_t timePerMove = gameTime / 40;
+
+    while (!game.isOver && (game.moveCounter/2 + 1) <= maxRounds) {
+
+        // Generate next move
+        t_gameState *nextMove;
+
+        if (game.turn) {
+            std::pair<gameState, float> result = getMove<true>(&game, timePerMove);
+            nextMove = &result.first;
+        } else {
+            std::pair<gameState, float> result = getMove<false>(&game, timePerMove);
+            nextMove = &result.first;
+        }
+
+        game.commitMove(*nextMove);
+
+        // Print next move and resulting board state
+        printf("Next move: ");
+        printMove(*nextMove);
+
+        printf("\nCurrent board state (Score: %.4f, Round: %d, ", evaluate(&game), game.moveCounter/2 + 1);
+
+        if (game.turn == 0) {
+            printf("Turn: White)\n");
+        } else {
+            printf("Turn: Black)\n");
+        }
+
+
+        printBoard(game.board());
+
+        // Check and announce checks
+        bool threatened;
+        if (!game.turn) {
+            threatened = game.board().whiteKing & getThreatened<true>(game.board());
+        } else {
+            threatened = game.board().blackKing & getThreatened<true>(game.board());
+        }
+
+        if (threatened) {
+            printf("CHECK\n");
+        }
+    }
+
+    printf("Game over!\n");
+    printf("Game is over: %d\n", game.isOver);
+    printf("White won: %d\n", game.whiteWon);
+    printf("Black won: %d\n", game.blackWon);
+    printf("Total rounds: %d\n", game.moveCounter/2 + 1);
+    printf("Turn: %d\n", game.turn);
+
+    // Free memory
+    delete game.positionHistory;
+}

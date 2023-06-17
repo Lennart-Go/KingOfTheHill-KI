@@ -1,8 +1,8 @@
+#include <cmath>
+
 #include "util.h"
 #include "board.h"
-#include "game.h"
 #include "moveMaps.h"
-#include <cmath>
 
 #ifndef KINGOFTHEHILL_KI_MOVE_H
 #define KINGOFTHEHILL_KI_MOVE_H
@@ -29,8 +29,8 @@ typedef struct move_old {
     unsigned disable_short_castle: 1 = 0;
     unsigned disable_long_castle: 1 = 0;
 
-    constexpr move_old(short org, short trg, bool col) : origin(org), target(trg), color(col) {}
-    constexpr move_old() : origin(0), target(0), color(0) {}
+    move_old(short org, short trg, bool col) : origin(org), target(trg), color(col) {}
+    move_old() : origin(0), target(0), color(0) {}
 } t_move_old;
 
 
@@ -38,17 +38,10 @@ typedef struct move {
     const field originMap;
     const field targetMap;
 
-    const unsigned enpassant:1;
-    const unsigned promotion:1;
-
-    constexpr move() : originMap(0), targetMap(0), enpassant(0), promotion(0) {}
-    constexpr move(field origin, field target) : originMap(origin), targetMap(target), enpassant(0), promotion(0) {}
-    constexpr move(field origin, field target, unsigned en_passant, unsigned prom) :
-            originMap(origin), targetMap(target), enpassant(en_passant), promotion(prom) {}
-
-    constexpr move(const move &other) = default;
+    move() : originMap(0), targetMap(0) {}
+    move(field origin, field target) : originMap(origin), targetMap(target) {}
+    move(const move &other) = default;
 } t_move;
-
 
 
 typedef struct gameState {
@@ -62,7 +55,7 @@ typedef struct gameState {
 
     const unsigned enpassant: 4;
 
-    constexpr gameState(const t_board &brd, t_move mov,
+    gameState(const t_board &brd, t_move mov,
                         unsigned whiteCastleShort, unsigned whiteCastleLong,
                         unsigned blackCastleShort, unsigned blackCastleLong,
                         short en_passant) :
@@ -70,47 +63,22 @@ typedef struct gameState {
             wCastleShort(whiteCastleShort), wCastleLong(whiteCastleLong),
             bCastleShort(blackCastleShort), bCastleLong(blackCastleLong),
             enpassant(en_passant) {}
+    gameState(const t_board &brd, t_move mov) :
+            board(brd), move(mov),
+            wCastleShort(true), wCastleLong(true),
+            bCastleShort(true), bCastleLong(true),
+            enpassant(0) {}
 
-    constexpr gameState(const gameState &state) = default;
+    gameState(const gameState &state) = default;
 } t_gameState;
 
 
-bool empty_between(t_board *board, t_move_old move);
-
-bool is_move_check(t_board *board, t_move_old move);
-
-bool is_threatened(t_board *board, Position target, bool color);
-
-bool is_move_legal(t_board *board, t_move_old move, field color_filter, field enemy_color_filter, bool checkBetween);
-
-bool
-is_move_legal_nocheck(t_board *board, t_move_old move, field color_filter, field enemy_color_filter, bool checkBetween);
-
-bool is_castle_legal(t_board *board, Position kingPosition, bool color, bool direction);
-
-void printMoveOld(t_move_old move);
-
-bool is_enpassant(t_board *board, t_move_old *move);
-
-bool is_double_pawn_move(t_board *board, t_move_old *move);
-
-bool is_castle(t_board *board, t_move_old *move);
-
-void doMove(t_board *board, t_move_old *move);
-
-void undoMove(t_board *board, t_move_old *move);
-
-void commitMove(t_game *game, t_move_old *move);
-
-void revertMove(t_game *game, t_move_old *move);
-
-
-inline static constexpr uint8_t findFirst(const field pieces) {
+inline static uint8_t findFirst(const field pieces) {
     return static_cast<uint8_t>(log2(static_cast<double>(pieces & -pieces)));
 }
 
 
-inline static constexpr uint16_t occIdentifier(field moveMap, const field occ) {
+inline static uint16_t occIdentifier(field moveMap, const field occ) {
     uint16_t occIdentifier = 0;
     for (long bitNumber = 1; moveMap != 0; bitNumber += bitNumber) {
         if ((occ & moveMap & -moveMap) != 0) {
@@ -124,7 +92,7 @@ inline static constexpr uint16_t occIdentifier(field moveMap, const field occ) {
 
 
 template<piece p, bool color>
-inline static constexpr t_board move(t_board currentBoard, field origin, field target) {
+inline static t_board move(t_board currentBoard, field origin, field target) {
     field wk = currentBoard.whiteKing;
     field wq = currentBoard.whiteQueen;
     field wr = currentBoard.whiteRook;
@@ -141,60 +109,60 @@ inline static constexpr t_board move(t_board currentBoard, field origin, field t
 
     field move = origin | target;
 
-    if constexpr (color) {
+    if (color) {
         // Black is moving
 
-        if constexpr (p == piece::king)
+        if (p == piece::king)
             return {wk & ~target, wq & ~target, wr & ~target, wb & ~target, wn & ~target, wp & ~target,
                     bk ^ move, bq, br, bb, bn, bp};
-        if constexpr (p == piece::queen)
+        if (p == piece::queen)
             return {wk & ~target, wq & ~target, wr & ~target, wb & ~target, wn & ~target, wp & ~target,
                     bk, bq ^ move, br, bb, bn, bp};
-        if constexpr (p == piece::rook)
+        if (p == piece::rook)
             return {wk & ~target, wq & ~target, wr & ~target, wb & ~target, wn & ~target, wp & ~target,
                     bk, bq, br ^ move, bb, bn, bp};
-        if constexpr (p == piece::bishop)
+        if (p == piece::bishop)
             return {wk & ~target, wq & ~target, wr & ~target, wb & ~target, wn & ~target, wp & ~target,
                     bk, bq, br, bb ^ move, bn, bp};
-        if constexpr (p == piece::knight)
+        if (p == piece::knight)
             return {wk & ~target, wq & ~target, wr & ~target, wb & ~target, wn & ~target, wp & ~target,
                     bk, bq, br, bb, bn ^ move, bp};
-        if constexpr (p == piece::pawn)
+        if (p == piece::pawn)
             return {wk & ~target, wq & ~target, wr & ~target, wb & ~target, wn & ~target, wp & ~target,
                     bk, bq, br, bb, bn, bp ^ move};
-        if constexpr (p == piece::none)
+        if (p == piece::none)
             return {wk & ~target, wq & ~target, wr & ~target, wb & ~target, wn & ~target, wp & ~target,
                     bk, bq, br, bb, bn, bp};
     } else {
         // White is moving
 
-        if constexpr (p == piece::king)
-            return {wk ^ move, wq, wr, wb, wk, wp,
+        if (p == piece::king)
+            return {wk ^ move, wq, wr, wb, wn, wp,
                     bk & ~target, bq & ~target, br & ~target, bb & ~target, bn & ~target, bp & ~target};
-        if constexpr (p == piece::queen)
-            return {wk, wq ^ move, wr, wb, wk, wp,
+        if (p == piece::queen)
+            return {wk, wq ^ move, wr, wb, wn, wp,
                     bk & ~target, bq & ~target, br & ~target, bb & ~target, bn & ~target, bp & ~target};
-        if constexpr (p == piece::rook)
-            return {wk, wq, wr ^ move, wb, wk, wp,
+        if (p == piece::rook)
+            return {wk, wq, wr ^ move, wb, wn, wp,
                     bk & ~target, bq & ~target, br & ~target, bb & ~target, bn & ~target, bp & ~target};
-        if constexpr (p == piece::bishop)
-            return {wk, wq, wr, wb ^ move, wk, wp,
+        if (p == piece::bishop)
+            return {wk, wq, wr, wb ^ move, wn, wp,
                     bk & ~target, bq & ~target, br & ~target, bb & ~target, bn & ~target, bp & ~target};
-        if constexpr (p == piece::knight)
-            return {wk, wq, wr, wb, wk ^ move, wp,
+        if (p == piece::knight)
+            return {wk, wq, wr, wb, wn ^ move, wp,
                     bk & ~target, bq & ~target, br & ~target, bb & ~target, bn & ~target, bp & ~target};
-        if constexpr (p == piece::pawn)
-            return {wk, wq, wr, wb, wk, wp ^ move,
+        if (p == piece::pawn)
+            return {wk, wq, wr, wb, wn, wp ^ move,
                     bk & ~target, bq & ~target, br & ~target, bb & ~target, bn & ~target, bp & ~target};
-        if constexpr (p == piece::none)
-            return {wk, wq, wr, wb, wk, wp,
+        if (p == piece::none)
+            return {wk, wq, wr, wb, wn, wp,
                     bk & ~target, bq & ~target, br & ~target, bb & ~target, bn & ~target, bp & ~target};
     }
 }
 
 
 template <piece p, bool color>
-inline static constexpr t_board placePiece(t_board currentBoard, field target) {
+inline static t_board placePiece(t_board currentBoard, field target) {
     field wk = currentBoard.whiteKing;
     field wq = currentBoard.whiteQueen;
     field wr = currentBoard.whiteRook;
@@ -209,52 +177,52 @@ inline static constexpr t_board placePiece(t_board currentBoard, field target) {
     field bn = currentBoard.blackKnight;
     field bp = currentBoard.blackPawn;
 
-    if constexpr (color) {
+    if (color) {
         // Black is moving
 
-        if constexpr (p == piece::king)
+        if (p == piece::king)
             return {wk, wq, wr, wb, wn, wp,
                     bk | target, bq, br, bb, bn, bp};
-        if constexpr (p == piece::queen)
+        if (p == piece::queen)
             return {wk, wq, wr, wb, wn, wp,
                     bk, bq | target, br, bb, bn, bp};
-        if constexpr (p == piece::rook)
+        if (p == piece::rook)
             return {wk, wq, wr, wb, wn, wp,
                     bk, bq, br | target, bb, bn, bp};
-        if constexpr (p == piece::bishop)
+        if (p == piece::bishop)
             return {wk, wq, wr, wb, wn, wp,
                     bk, bq, br, bb | target, bn, bp};
-        if constexpr (p == piece::knight)
+        if (p == piece::knight)
             return {wk, wq, wr, wb, wn, wp,
                     bk, bq, br, bb, bn | target, bp};
-        if constexpr (p == piece::pawn)
+        if (p == piece::pawn)
             return {wk, wq, wr, wb, wn, wp,
                     bk, bq, br, bb, bn, bp | target};
-        if constexpr (p == piece::none)
+        if (p == piece::none)
             return {wk, wq, wr, wb, wn, wp,
                     bk, bq, br, bb, bn, bp};
     } else {
         // White is moving
 
-        if constexpr (p == piece::king)
+        if (p == piece::king)
             return {wk | target, wq, wr, wb, wk, wp,
                     bk, bq, br, bb, bn, bp};
-        if constexpr (p == piece::queen)
+        if (p == piece::queen)
             return {wk, wq | target, wr, wb, wk, wp,
                     bk, bq, br, bb, bn, bp};
-        if constexpr (p == piece::rook)
+        if (p == piece::rook)
             return {wk, wq, wr | target, wb, wk, wp,
                     bk, bq, br, bb, bn, bp};
-        if constexpr (p == piece::bishop)
+        if (p == piece::bishop)
             return {wk, wq, wr, wb | target, wk, wp,
                     bk, bq, br, bb, bn, bp};
-        if constexpr (p == piece::knight)
+        if (p == piece::knight)
             return {wk, wq, wr, wb, wk | target, wp,
                     bk, bq, br, bb, bn, bp};
-        if constexpr (p == piece::pawn)
+        if (p == piece::pawn)
             return {wk, wq, wr, wb, wk, wp | target,
                     bk, bq, br, bb, bn, bp};
-        if constexpr (p == piece::none)
+        if (p == piece::none)
             return {wk, wq, wr, wb, wk, wp,
                     bk, bq, br, bb, bn, bp};
     }
@@ -262,9 +230,9 @@ inline static constexpr t_board placePiece(t_board currentBoard, field target) {
 
 
 template<bool color>
-inline static constexpr void moveKing(std::vector<t_gameState> *moves, t_gameState currentState, field origin, field targets) {
+inline static void moveKing(std::vector<t_gameState> *moves, t_gameState currentState, field origin, field targets) {
     unsigned wCastleShort, wCastleLong, bCastleShort, bCastleLong;
-    if constexpr (color) {
+    if (color) {
         wCastleShort = currentState.wCastleShort;
         wCastleLong = currentState.wCastleLong;
 
@@ -295,9 +263,9 @@ inline static constexpr void moveKing(std::vector<t_gameState> *moves, t_gameSta
 
 
 template<bool color>
-inline static constexpr void moveKingCastleShort(std::vector<t_gameState> *moves, t_gameState currentState) {
+inline static void moveKingCastleShort(std::vector<t_gameState> *moves, t_gameState currentState) {
     unsigned wCastleShort, wCastleLong, bCastleShort, bCastleLong;
-    if constexpr (color) {
+    if (color) {
         wCastleShort = currentState.wCastleShort;
         wCastleLong = currentState.wCastleLong;
 
@@ -342,9 +310,9 @@ inline static constexpr void moveKingCastleShort(std::vector<t_gameState> *moves
 
 
 template<bool color>
-inline static constexpr void moveKingCastleLong(std::vector<t_gameState> *moves, t_gameState currentState) {
+inline static void moveKingCastleLong(std::vector<t_gameState> *moves, t_gameState currentState) {
     unsigned wCastleShort, wCastleLong, bCastleShort, bCastleLong;
-    if constexpr (color) {
+    if (color) {
         wCastleShort = currentState.wCastleShort;
         wCastleLong = currentState.wCastleLong;
 
@@ -389,7 +357,7 @@ inline static constexpr void moveKingCastleLong(std::vector<t_gameState> *moves,
 
 
 template<bool color>
-inline static constexpr void moveQueens(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, field targets) {
+inline static void moveQueens(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, field targets) {
     field origin = (field )1 << originShift;
 
     field currentTarget;
@@ -409,11 +377,11 @@ inline static constexpr void moveQueens(std::vector<t_gameState> *moves, t_gameS
 
 
 template<bool color>
-inline static constexpr void moveRooks(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, field targets) {
+inline static void moveRooks(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, field targets) {
     field origin = (field )1 << originShift;
 
     unsigned wCastleShort, wCastleLong, bCastleShort, bCastleLong;
-    if constexpr (color) {
+    if (color) {
         wCastleShort = currentState.wCastleShort;
         wCastleLong = currentState.wCastleLong;
 
@@ -444,7 +412,7 @@ inline static constexpr void moveRooks(std::vector<t_gameState> *moves, t_gameSt
 
 
 template<bool color>
-inline static constexpr void moveBishops(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, field targets) {
+inline static void moveBishops(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, field targets) {
     field origin = (field )1 << originShift;
 
     field currentTarget;
@@ -464,7 +432,7 @@ inline static constexpr void moveBishops(std::vector<t_gameState> *moves, t_game
 
 
 template<bool color>
-inline static constexpr void moveKnights(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, field targets) {
+inline static void moveKnights(std::vector<t_gameState> *moves, t_gameState currentState, uint8_t originShift, field targets) {
     field origin = (field )1 << originShift;
 
     field currentTarget;
@@ -484,7 +452,7 @@ inline static constexpr void moveKnights(std::vector<t_gameState> *moves, t_game
 
 
 template<bool color>
-inline static constexpr void movePawns(std::vector<t_gameState> *moves, t_gameState currentState, field origins, field targets) {
+inline static void movePawns(std::vector<t_gameState> *moves, t_gameState currentState, field origins, field targets) {
     // TODO: Handle promotions
 
     field currentOrigin, currentTarget;
@@ -506,7 +474,7 @@ inline static constexpr void movePawns(std::vector<t_gameState> *moves, t_gameSt
 
 
 template<bool color>
-inline static constexpr void movePawnsPromotion(std::vector<t_gameState> *moves, t_gameState currentState, field origins, field targets) {
+inline static void movePawnsPromotion(std::vector<t_gameState> *moves, t_gameState currentState, field origins, field targets) {
     field currentOrigin, currentTarget;
     while (targets != 0) {
         currentOrigin = (origins & -origins);
@@ -566,7 +534,7 @@ inline static constexpr void movePawnsPromotion(std::vector<t_gameState> *moves,
 
 
 template <bool color>
-inline static constexpr void movePawnsPush(std::vector<t_gameState> *moves, t_gameState currentState, field origins, field targets) {
+inline static void movePawnsPush(std::vector<t_gameState> *moves, t_gameState currentState, field origins, field targets) {
     uint8_t currentFile;
     field currentOrigin, currentTarget;
     while (targets != 0) {
@@ -589,9 +557,9 @@ inline static constexpr void movePawnsPush(std::vector<t_gameState> *moves, t_ga
 
 
 template <bool color>
-inline static constexpr void movePawnsEnPassant(std::vector<t_gameState> *moves, t_gameState currentState, field origins, field target) {
+inline static void movePawnsEnPassant(std::vector<t_gameState> *moves, t_gameState currentState, field origins, field target) {
     field targetPawn;
-    if constexpr (color) {
+    if (color) {
         targetPawn = target >> 8;
     } else {
         targetPawn = target << 8;
@@ -622,7 +590,7 @@ inline static constexpr void movePawnsEnPassant(std::vector<t_gameState> *moves,
 
 
 template<piece p>
-inline static constexpr field lookupSlider(const uint8_t piecePosition, const field occ) {
+inline static field lookupSlider(const uint8_t piecePosition, const field occ) {
     switch (p) {
         case piece::rook: {
             field moveMap = rookMoves[piecePosition];
@@ -651,7 +619,7 @@ inline static constexpr field lookupSlider(const uint8_t piecePosition, const fi
 }
 
 template<piece p>
-inline static constexpr field lookupPinSlider(const uint8_t piecePosition, const field occ) {
+inline static field lookupPinSlider(const uint8_t piecePosition, const field occ) {
     switch (p) {
         case piece::rook: {
             field moveMap = rookMoves[piecePosition];
@@ -680,7 +648,7 @@ inline static constexpr field lookupPinSlider(const uint8_t piecePosition, const
 }
 
 template<piece p>
-inline static constexpr field lookup(const uint8_t piecePosition) {
+inline static field lookup(const uint8_t piecePosition) {
     switch (p) {
         case piece::king: {
             return kingMoves[piecePosition];
@@ -691,6 +659,91 @@ inline static constexpr field lookup(const uint8_t piecePosition) {
     }
 
     return (field) 0;
+}
+
+
+template<bool color>
+inline field getThreatened(const t_board board) {
+    field occ = board.occupied;
+    field threatened = 0;
+
+    if (color) {
+        // Add fields covered by the king
+        threatened |= lookup<piece::king>(board.whiteKing);
+
+        // Add fields covered by the queens
+        field queens = board.whiteQueen;
+        while (queens != 0) {
+            threatened |= lookupSlider<piece::queen>(findFirst(queens), occ);
+
+            queens &= (queens - 1);
+        }
+
+        // Add fields covered by the rooks
+        field rooks = board.whiteRook;
+        while (rooks != 0) {
+            threatened |= lookupSlider<piece::rook>(findFirst(rooks), occ);
+
+            rooks &= (rooks - 1);
+        }
+
+        // Add fields covered by the bishops
+        field bishops = board.whiteBishop;
+        while (bishops != 0) {
+            threatened |= lookupSlider<piece::bishop>(findFirst(bishops), occ);
+            bishops &= (bishops - 1);
+        }
+
+        // Add fields covered by the knights
+        field knights = board.whiteKnight;
+        while (knights != 0) {
+            threatened |= lookup<piece::knight>(findFirst(knights));
+            knights &= (knights - 1);
+        }
+
+        // Add fields covered by pawns
+        threatened |= (board.whitePawn & ~aFile) >> 9;  // Taking to the left
+        threatened |= (board.whitePawn & ~hFile) >> 7;  // Taking to the right
+    } else {
+        // Add fields covered by the king
+        threatened |= lookup<piece::king>(board.blackKing);
+
+        // Add fields covered by the queens
+        field queens = board.blackQueen;
+        while (queens != 0) {
+            threatened |= lookupSlider<piece::queen>(findFirst(queens), occ);
+
+            queens &= (queens - 1);
+        }
+
+        // Add fields covered by the rooks
+        field rooks = board.blackRook;
+        while (rooks != 0) {
+            threatened |= lookupSlider<piece::rook>(findFirst(rooks), occ);
+
+            rooks &= (rooks - 1);
+        }
+
+        // Add fields covered by the bishops
+        field bishops = board.blackBishop;
+        while (bishops != 0) {
+            threatened |= lookupSlider<piece::bishop>(findFirst(bishops), occ);
+            bishops &= (bishops - 1);
+        }
+
+        // Add fields covered by the knights
+        field knights = board.blackKnight;
+        while (knights != 0) {
+            threatened |= lookup<piece::knight>(findFirst(knights));
+            knights &= (knights - 1);
+        }
+
+        // Add fields covered by pawns
+        threatened |= (board.blackPawn & ~hFile) << 9;  // Taking to the left
+        threatened |= (board.blackPawn & ~aFile) << 7;  // Taking to the right
+    }
+
+    return threatened;
 }
 
 
@@ -708,55 +761,14 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
     field whiteKingMap = board.whiteKing;
     field blackKingMap = board.blackKing;
 
-    if constexpr (color) {
+    if (color) {
         // Black's turn
 
         // --------------------------- //
         // Generate threatened squares //
         // --------------------------- //
 
-        field threatened = 0;
-        {
-            // Add fields covered by the king
-            threatened |= lookup<piece::king>(whiteKingShift);
-
-            // Add fields covered by the queens
-            field queens = board.whiteQueen;
-            while (queens != 0) {
-                threatened |= lookupSlider<piece::queen>(findFirst(queens), occ);
-
-                queens &= (queens - 1);
-            }
-
-            // Add fields covered by the rooks
-            field rooks = board.whiteRook;
-            while (rooks != 0) {
-                threatened |= lookupSlider<piece::rook>(findFirst(rooks), occ);
-
-                rooks &= (rooks - 1);
-            }
-
-            // Add fields covered by the bishops
-            field bishops = board.whiteBishop;
-            while (bishops != 0) {
-                threatened |= lookupSlider<piece::bishop>(findFirst(bishops), occ);
-                bishops &= (bishops - 1);
-            }
-
-            // Add fields covered by the knights
-            field knights = board.whiteKnight;
-            while (knights != 0) {
-                threatened |= lookup<piece::knight>(findFirst(knights));
-                knights &= (knights - 1);
-            }
-
-            // Add fields covered by pawns
-            threatened |= (board.whitePawn & ~aFile) >> 9;  // Taking to the right
-            threatened |= (board.whitePawn & ~hFile) >> 7;  // Taking to the left
-
-            // Remove all fields covered by white pieces
-            threatened &= ~board.white;
-        }
+        field threatened = getThreatened<color>(board);
 
 
         // ----------------------------------------------------------- //
@@ -802,10 +814,11 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
                 // No checks -> Set all fields to 1
                 checks = ~0;
             } else if ((checkOrigins & (checkOrigins - 1)) != 0) {
-                // More than one check -> Only King can move_old
-                checks = 0;
+                // More than one check -> Only King can move
+                field kingTargets = lookup<piece::king>(blackKingShift) & ~threatened & ~board.black;
+                moveKing<true>(&moves, gameState, blackKingMap, kingTargets);
 
-                // TODO: Generate only king moves
+                return moves;
             }
         }
 
@@ -908,7 +921,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate rook moves
         {
             field rookOrigins = board.blackRook & ~pinned;
-            field rookOriginsPinned = board.blackRook & lateralPins;  // Rooks pinned in diagonal pins can't move_old
+            field rookOriginsPinned = board.blackRook & lateralPins;  // Rooks pinned in diagonal pins can't move
 
             short rookShift;
             field rookTargets;
@@ -935,7 +948,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         {
             field bishopOrigins = board.blackBishop & ~pinned;
             field bishopOriginsPinned =
-                    board.blackBishop & diagonalPins;  // Bishops pinned in lateral pins can't move_old
+                    board.blackBishop & diagonalPins;  // Bishops pinned in lateral pins can't move
 
             short bishopShift;
             field bishopTargets;
@@ -1035,6 +1048,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
         // Generate en-passants
         {
+            // TODO: Approaches (left & right) not working for enpassant=8
             field pawnEnPassantRightTarget;  // There can only be one en-passant move per direction
             pawnEnPassantRightTarget =
                     ((board.blackPawn & ~aFile & (aFile << (gameState.enpassant)) & rank4 & ~pinned) << 7) & checks;
@@ -1049,9 +1063,9 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
             field pawnEnPassantLeftTarget;  // There can only be one en-passant move per direction
             pawnEnPassantLeftTarget =
-                    ((((board.blackPawn & ~hFile & ~pinned) << 1) & (hFile >> (8 - gameState.enpassant)) & rank4) << 8) & checks;
+                    ((board.blackPawn & ~hFile & (hFile >> (8 - gameState.enpassant)) & rank4 & ~pinned) << 9) & checks;
             pawnEnPassantLeftTarget |=
-                    ((((board.blackPawn & ~hFile & diagonalPins) << 1) & (hFile >> (8 - gameState.enpassant)) & rank4) << 8) & checks & diagonalPins;
+                    ((board.blackPawn & ~hFile & (hFile >> (8 - gameState.enpassant)) & rank4 & diagonalPins) << 9) & checks & diagonalPins;
             field pawnEnPassantLeftOrigins = pawnEnPassantLeftTarget >> 9;
 
             movePawnsEnPassant<true>(&moves, gameState, pawnEnPassantLeftOrigins, pawnEnPassantLeftTarget);
@@ -1154,10 +1168,11 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
                 // No checks -> Set all fields to 1
                 checks = ~0;
             } else if ((checkOrigins & (checkOrigins - 1)) != 0) {
-                // More than one check -> Only King can move_old
-                checks = 0;
+                // More than one check -> Only King can move
+                field kingTargets = lookup<piece::king>(whiteKingShift) & ~threatened & ~board.white;
+                moveKing<false>(&moves, gameState, whiteKingMap, kingTargets);
 
-                // TODO: Generate only king moves
+                return moves;
             }
         }
 
@@ -1260,7 +1275,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate rook moves
         {
             field rookOrigins = board.whiteRook & ~pinned;
-            field rookOriginsPinned = board.whiteRook & lateralPins;  // Rooks pinned in diagonal pins can't move_old
+            field rookOriginsPinned = board.whiteRook & lateralPins;  // Rooks pinned in diagonal pins can't move
 
             short rookShift;
             field rookTargets;
@@ -1287,7 +1302,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         {
             field bishopOrigins = board.whiteBishop & ~pinned;
             field bishopOriginsPinned =
-                    board.whiteBishop & diagonalPins;  // Bishops pinned in lateral pins can't move_old
+                    board.whiteBishop & diagonalPins;  // Bishops pinned in lateral pins can't move
 
             short bishopShift;
             field bishopTargets;
@@ -1345,7 +1360,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate pawn pushing moves
         {
             field pawnPushTargets =
-                    ((((board.white & rank7 & ~diagonalPins) >> 8) & ~occ) >> 8) & checks & ~occ;
+                    ((((board.white & rank2 & ~diagonalPins) >> 8) & ~occ) >> 8) & checks & ~occ;
             field pawnPushOrigins = pawnPushTargets << 16;
 
             movePawnsPush<false>(&moves, gameState, pawnPushOrigins, pawnPushTargets);
@@ -1414,6 +1429,21 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
     }
 
     return moves;
+}
+
+
+inline void printMove(t_gameState state) {
+    t_move move = state.move;
+
+    uint8_t originShift = (uint8_t )log2((double )move.originMap);
+    uint8_t targetShift = (uint8_t )log2((double )move.targetMap);
+
+    Position originPosition = position_from_shift(originShift);
+    Position targetPosition = position_from_shift(targetShift);
+
+    printf("Move %c%d -> %c%d",
+           columnToLetter(originPosition.x), originPosition.y + 1,
+           columnToLetter(targetPosition.x), targetPosition.y + 1);
 }
 
 

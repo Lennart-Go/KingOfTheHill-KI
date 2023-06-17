@@ -23,13 +23,13 @@
 //    field np = p == piece::knight ? positionMap : 0;
 //
 //    board newBoard = board(kp, qp, rp, bp, np, 0, 0, 0, 0, 0, 0, 0);
-//    t_game *game = startGame(10000000000000000);
-//    game->board = &newBoard;
+//    t_gameOld *gameOld = startGame(10000000000000000);
+//    gameOld->board = &newBoard;
 //
-//    std::vector<move_old> possibleMoves = generate_moves(game, false);
+//    std::vector<move> possibleMoves = generate_moves(gameOld, false);
 //
 //    field targetMap = 0;
-//    for (move_old possibleMove: possibleMoves) {
+//    for (move possibleMove: possibleMoves) {
 //        targetMap |= (field )1 << possibleMove.target;
 //    }
 //

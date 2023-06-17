@@ -14,13 +14,6 @@
  */
 
 typedef struct board {
-    field king;
-    field queen;
-    field rook;
-    field bishop;
-    field knight;
-    field pawn;
-
     const field whiteKing;
     const field whiteQueen;
     const field whiteRook;
@@ -39,17 +32,16 @@ typedef struct board {
     field black;
     const field occupied;
 
-    constexpr board(
+    board(
             field wk, field wq, field wr, field wb, field wn, field wp,
             field bk, field bq, field br, field bb, field bn, field bp) :
             whiteKing(wk), whiteQueen(wq), whiteRook(wr), whiteBishop(wb), whiteKnight(wn), whitePawn(wp),
             blackKing(bk), blackQueen(bq), blackRook(br), blackBishop(bb), blackKnight(bn), blackPawn(bp),
             white(wk | wq | wr | wb | wn | wp),
             black(bk | bq | br | bb | bn | bp),
-            occupied(white | black),
-            king(wk | bk), queen(wq | bq), rook(wr | br), bishop(wb | bb), knight(wn | bn), pawn(wp | bp) {}
+            occupied(white | black) {}
 
-//    constexpr board(const board &other) :
+//    board(const board &other) :
 //            whiteKing(other.whiteKing), whiteQueen(other.whiteQueen), whiteRook(other.whiteRook), whiteBishop(other.whiteBishop), whiteKnight(other.whiteKnight), whitePawn(other.whitePawn),
 //            blackKing(other.blackKing), blackQueen(other.blackQueen), blackRook(other.blackRook), blackBishop(other.blackBishop), blackKnight(other.blackKnight), blackPawn(other.blackPawn),
 //            white(other.white),
@@ -58,7 +50,7 @@ typedef struct board {
 //            king(other.king), queen(other.queen), rook(other.rook), bishop(other.bishop), knight(other.knight), pawn(other.pawn) {}
 
 
-    constexpr board(const board &other) = default;
+    board(const board &other) = default;
 //    }
 } t_board;
 
@@ -122,6 +114,7 @@ t_board setFen(char fen[]);
 char *getFen(t_board *board);
 
 void printBoard(const t_board *board);
+void printBoard(t_board board);
 
 char *shortenFen(char *fen);
 

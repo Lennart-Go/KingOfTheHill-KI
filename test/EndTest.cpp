@@ -8,7 +8,7 @@ class EndTest : public ::testing::Test {
 protected:
     virtual void SetUp()
     {
-        game = (t_game *) calloc(1, sizeof(t_game));
+        game = (t_gameOld *) calloc(1, sizeof(t_gameOld));
         t_board board = initializeBoard();
 
         game->board = board;
@@ -38,7 +38,7 @@ protected:
         free(game);
     }
 
-    t_game *game;
+    t_gameOld *game;
 };
 
 

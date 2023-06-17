@@ -220,7 +220,102 @@ void printBoard(const t_board *board) {
         printf("|\n");
     }
     printf("\n");
+}
 
+
+void printBoard(const t_board board) {
+    wchar_t boardChar[64] = {};
+
+    //KING
+    for (int i = 0; i < 64; i++) {
+        if ((board.whiteKing & ((field) 1 << i)) >> i) {
+            boardChar[i] = UNICODE_WHITE_KING;
+        }
+    }
+    for (int i = 0; i < 64; i++) {
+        if ((board.blackKing & ((field) 1 << i)) >> i) {
+            boardChar[i] = UNICODE_BLACK_KING;
+        }
+    }
+
+    //QUEEN
+    for (int i = 0; i < 64; i++) {
+        if ((board.whiteQueen & ((field) 1 << i)) >> i) {
+            boardChar[i] = UNICODE_WHITE_QUEEN;
+        }
+    }
+    for (int i = 0; i < 64; i++) {
+        if ((board.blackQueen & ((field) 1 << i)) >> i) {
+            boardChar[i] = UNICODE_BLACK_QUEEN;
+        }
+    }
+
+    //ROOK
+    for (int i = 0; i < 64; i++) {
+        if ((board.whiteRook & ((field) 1 << i)) >> i) {
+            boardChar[i] = UNICODE_WHITE_ROOK;
+        }
+    }
+    for (int i = 0; i < 64; i++) {
+        if ((board.blackRook & ((field) 1 << i)) >> i) {
+            boardChar[i] = UNICODE_BLACK_ROOK;
+        }
+    }
+
+    //BISHOP
+    for (int i = 0; i < 64; i++) {
+        if ((board.whiteBishop & ((field) 1 << i)) >> i) {
+            boardChar[i] = UNICODE_WHITE_BISHOP;
+        }
+    }
+    for (int i = 0; i < 64; i++) {
+        if ((board.blackBishop & ((field) 1 << i)) >> i) {
+            boardChar[i] = UNICODE_BLACK_BISHOP;
+        }
+    }
+
+    //KNIGHT
+    for (int i = 0; i < 64; i++) {
+        if ((board.whiteKnight & ((field) 1 << i)) >> i) {
+            boardChar[i] = UNICODE_WHITE_KNIGHT;
+        }
+    }
+    for (int i = 0; i < 64; i++) {
+        if ((board.blackKnight & ((field) 1 << i)) >> i) {
+            boardChar[i] = UNICODE_BLACK_KNIGHT;
+        }
+    }
+
+    //PAWN
+    for (int i = 0; i < 64; i++) {
+        if ((board.whitePawn & ((field) 1 << i)) >> i) {
+            boardChar[i] = UNICODE_WHITE_PAWN;
+        }
+    }
+    for (int i = 0; i < 64; i++) {
+        if ((board.blackPawn & ((field) 1 << i)) >> i) {
+            boardChar[i] = UNICODE_BLACK_PAWN;
+        }
+    }
+
+    //SQUARE
+    for (wchar_t & i : boardChar) {
+        if (i == L'\000') {
+            i = UNICODE_SQUARE;
+        }
+    }
+
+    setlocale(LC_ALL, "en_US.UTF-8");
+
+    printf("\n");
+    for (int i = 0; i < 8; i++) {
+        printf("|");
+        for (int j = 0; j < 8; ++j) {
+            printf("%lc ", boardChar[i * 8 + j]);
+        }
+        printf("|\n");
+    }
+    printf("\n");
 }
 
 void debug_printSingleBoard(field singleBoard) {

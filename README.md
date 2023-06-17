@@ -1,4 +1,4 @@
-# KingOfTheHill-KI
+# isKingOfTheHill-KI
 
 1 - 2:  Orga & Intro
 

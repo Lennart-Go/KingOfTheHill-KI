@@ -171,7 +171,7 @@ Position position_from_shift(int shift) {
     int x = 7 - (val - (y * 8));
     // int x = val - (y * 8);
 
-    return Position(x, y);
+    return {x, y};
 }
 
 
@@ -239,4 +239,15 @@ int countFigure(field singleBoard) {
         }
     }
     return count;
+}
+
+
+int randn(int start, int stop) {
+    // Initialize rng
+    timespec ts{};
+    clock_gettime(CLOCK_REALTIME, &ts);
+    srand((unsigned ) ts.tv_nsec);
+
+    // Generate and return random number within specified bounds
+    return (int )((rand() % (stop - start)) + start);
 }

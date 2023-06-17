@@ -69,5 +69,6 @@ template <typename I> std::string num2hex(I w, size_t hex_len = sizeof(I)<<1) {
 }
 
 int countFigure(field singleBoard);
+int randn(int start, int stop);
 
 #endif
