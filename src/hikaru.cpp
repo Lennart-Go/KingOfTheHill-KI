@@ -6,6 +6,7 @@
 #include <ctime>
 #include "hikaru.h"
 #include "end.h"
+#include "pieceSquareTable.h"
 #include <limits>
 #include <time.h>
 
@@ -72,24 +73,89 @@ float evaluate(const t_game* game) {
     uint64_t whiteColorFilter = game->board->white;
     uint64_t blackColorFilter = game->board->black;
 
-    score += (float )countFigure(game->board->queen & whiteColorFilter) * QUEEN_VALUE;
-    score += (float )countFigure(game->board->rook & whiteColorFilter) * ROOK_VALUE;
-    score += (float )countFigure(game->board->bishop & whiteColorFilter) * BISHOP_VALUE;
-    score += (float )countFigure(game->board->knight & whiteColorFilter) * KNIGHT_VALUE;
-    score += (float )countFigure(game->board->pawn & whiteColorFilter) * PAWN_VALUE;
+    // evaluate move according to piece square table
 
-    score -= (float )countFigure(game->board->queen & blackColorFilter) * QUEEN_VALUE;
-    score -= (float )countFigure(game->board->rook & blackColorFilter) * ROOK_VALUE;
-    score -= (float )countFigure(game->board->bishop & blackColorFilter) * BISHOP_VALUE;
-    score -= (float )countFigure(game->board->knight & blackColorFilter) * KNIGHT_VALUE;
-    score -= (float )countFigure(game->board->pawn & blackColorFilter) * PAWN_VALUE;
+    // WHITE
+
+    // King
+    std::vector<Position> kingPositions = board_value_positions(game->board->king & whiteColorFilter);
+    Position kingPosition = kingPositions.at(0);
+    score += KING_VALUE + pst_king_white[shift_from_position(kingPosition)];
+
+    // Queen
+    std::vector<Position> queenPositions = board_value_positions(game->board->queen & whiteColorFilter);
+    for (auto queenPosition : queenPositions) {
+        score += QUEEN_VALUE + pst_queen_white[shift_from_position(queenPosition)];
+    }
+
+    // Rook
+    std::vector<Position> rookPositions = board_value_positions(game->board->rook & whiteColorFilter);
+    for (auto rookPosition : rookPositions) {
+        score += ROOK_VALUE + pst_rook_white[shift_from_position(rookPosition)];
+    }
+
+    // Bishop
+    std::vector<Position> bishopPositions = board_value_positions(game->board->bishop & whiteColorFilter);
+    for (auto bishopPosition : bishopPositions) {
+        score += BISHOP_VALUE + pst_bishop_white[shift_from_position(bishopPosition)];
+    }
+
+    // Knight
+    std::vector<Position> knightPositions = board_value_positions(game->board->knight & whiteColorFilter);
+    for (auto knightPosition : knightPositions) {
+        score += KNIGHT_VALUE + pst_knight_white[shift_from_position(knightPosition)];
+    }
+
+    // Pawn
+    std::vector<Position> pawnPositions = board_value_positions(game->board->pawn & whiteColorFilter);
+    for (auto pawnPosition : pawnPositions) {
+        score += PAWN_VALUE + pst_pawn_white[shift_from_position(pawnPosition)];
+    }
+
+
+    // BLACK
+
+    // King
+    std::vector<Position> kingPositionsBlack = board_value_positions(game->board->king & blackColorFilter);
+    Position kingPositionBlack = kingPositionsBlack.at(0);
+    score -= KING_VALUE - pst_king_black[shift_from_position(kingPositionBlack)];
+
+    // Queen
+    std::vector<Position> queenPositionsBlack = board_value_positions(game->board->queen & blackColorFilter);
+    for (auto queenPositionBlack : queenPositionsBlack) {
+        score -= QUEEN_VALUE - pst_queen_black[shift_from_position(queenPositionBlack)];
+    }
+
+    // Rook
+    std::vector<Position> rookPositionsBlack = board_value_positions(game->board->rook & blackColorFilter);
+    for (auto rookPositionBlack : rookPositionsBlack) {
+        score -= ROOK_VALUE - pst_rook_black[shift_from_position(rookPositionBlack)];
+    }
+
+    // Bishop
+    std::vector<Position> bishopPositionsBlack = board_value_positions(game->board->bishop & blackColorFilter);
+    for (auto bishopPositionBlack : bishopPositionsBlack) {
+        score -= BISHOP_VALUE - pst_bishop_black[shift_from_position(bishopPositionBlack)];
+    }
+
+    // Knight
+    std::vector<Position> knightPositionsBlack = board_value_positions(game->board->knight & blackColorFilter);
+    for (auto knightPositionBlack : knightPositionsBlack) {
+        score -= KNIGHT_VALUE - pst_knight_black[shift_from_position(knightPositionBlack)];
+    }
+
+    // Pawn
+    std::vector<Position> pawnPositionsBlack = board_value_positions(game->board->pawn & blackColorFilter);
+    for (auto pawnPositionBlack : pawnPositionsBlack) {
+        score -= PAWN_VALUE - pst_pawn_black[shift_from_position(pawnPositionBlack)];
+    }
 
     return score;
 }
 
-float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t timePerMove, time_t startMoveTime) {
+float alphaBeta(int depth, float alpha, float beta, t_game *game, uint64_t timePerMove, time_t startMoveTime) {
 
-    if (depth == 0 || game->isOver || timeLeft(timePerMove, startMoveTime) <= 0) {
+    if (depth == 0 || game->isOver) { // || timeLeft(timePerMove, startMoveTime) <= 0
         return evaluate(game);
     }
 
@@ -101,6 +167,7 @@ float alphaBeta(int depth, float alpha, float beta, t_game *game,  uint64_t time
     }
     // printf("Found %zu moves\n", moves.size());
 
+    // maximising
     if (!game->turn) {
         bestScore = -std::numeric_limits<float>::max();
 

@@ -51,7 +51,7 @@ void play(int maxRounds, uint64_t gameTime) {
     }
 
     t_game *game = startGame(gameTime);
-    setFen(game->board, (char *)"r2qkbnr/pp1bpppp/2np4/1Bp5/4P3/5N2/PPPP1PPP/RNBQ1RK1");
+   // setFen(game->board, (char *)"r2qkbnr/pp1bpppp/2np4/1Bp5/4P3/5N2/PPPP1PPP/RNBQ1RK1");
     // game->turn = true;
 
     printBoard(game->board);
