@@ -8,8 +8,8 @@ class EndTest : public ::testing::Test {
 protected:
     virtual void SetUp()
     {
-        game = (t_game *) calloc(1, sizeof(t_game));
-        t_board *board = initializeBoard();
+        game = (t_gameOld *) calloc(1, sizeof(t_gameOld));
+        t_board board = initializeBoard();
 
         game->board = board;
         game->turn = 0;  // White's turn
@@ -38,7 +38,7 @@ protected:
         free(game);
     }
 
-    t_game *game;
+    t_gameOld *game;
 };
 
 
@@ -78,22 +78,22 @@ TEST_F(EndTest, checkEndKingOfTheKillBLACK) {
 }
 
 TEST_F(EndTest, checkEndPositionRepetition) {
-    t_move fw_w;
+    t_move_old fw_w;
     fw_w.origin = shift_from_position(Position(7,0));
     fw_w.target = shift_from_position(Position(7,1));
     fw_w.taken_figure = 0;
     fw_w.color = false;
-    t_move bw_w;
+    t_move_old bw_w;
     bw_w.origin = shift_from_position(Position(7,1));
     bw_w.target = shift_from_position(Position(7,0));
     bw_w.taken_figure = 0;
     bw_w.color = false;
-    t_move fw_b;
+    t_move_old fw_b;
     fw_b.origin = shift_from_position(Position(0,7));
     fw_b.target = shift_from_position(Position(0,6));
     fw_b.taken_figure = 0;
     fw_b.color = true;
-    t_move bw_b;
+    t_move_old bw_b;
     bw_b.origin = shift_from_position(Position(0,6));
     bw_b.target = shift_from_position(Position(0,7));
     bw_b.taken_figure = 0;

@@ -1,16 +1,18 @@
-#include <cstdlib>
+#include <cstdint>
+#include <cstdio>
+#include <utility>
+
+#include "board.h"
 #include "game.h"
+#include "hash.h"
 #include "hikaru.h"
-#include "end.h"
-#include "move.h"
-#include "unistd.h"
 
 
-t_game *startGame(uint64_t gameTime) {
-    t_game *game = (t_game *) calloc(1, sizeof(t_game));
-    t_board *board = initializeBoard();
+t_gameOld *startGame(uint64_t gameTime) {
+    t_gameOld *game = (t_gameOld *) calloc(1, sizeof(t_gameOld));
+    t_board startBoard = initializeBoard();
 
-    game->board = board;
+    game->board = &startBoard;
     game->gameTime = gameTime;
     game->turn = 0;  // White's turn
     game->latestMoveTime = 0;  // TODO: Set latestMoveTime to current time in ms
@@ -33,6 +35,8 @@ t_game *startGame(uint64_t gameTime) {
 
     game->enpassants = 0;
 
+    game->random = init_hash();
+
     return game;
 }
 
@@ -47,62 +51,103 @@ void play(int maxRounds, uint64_t gameTime) {
         maxRounds = INT32_MAX;
     }
 
-    t_game *game = startGame(gameTime);
-   // setFen(game->board, (char *)"r2qkbnr/pp1bpppp/2np4/1Bp5/4P3/5N2/PPPP1PPP/RNBQ1RK1");
-    // game->turn = true;
+    // t_game game = t_game((char *)"rnbqkbnr/pppppp2/8/6P1/5Pp1/8/PPPPP3/RNBQKBNR", true, 0b1111, 8, gameTime);
+    t_game game = t_game(gameTime);
+    printBoard(game.state->board);
 
-    printBoard(game->board);
-    // sleep(4);
+
+//    std::vector<t_gameState> moves = generate_moves<true>(*game.state);
+//
+//    for (auto move : moves) {
+//        printMove(move);
+//        printBoard(move.board);
+//        debug_printSingleBoard(move.board.occupied);
+//        printf("\n");
+//    }
+
 
     uint64_t timePerMove = gameTime / 40;
 
-    while (!game->isOver && (game->blackMoveCounter + 1) <= maxRounds) {
-        /*  if (game->blackMoveCounter > 0) {
-              break;
-          } */
-
-        // sleep(1);
+    while (!game.isOver && (game.moveCounter/2 + 1) <= maxRounds) {
 
         // Generate next move
-        t_move nextMove = getMove(game, game->turn, timePerMove);
-        commitMove(game, &nextMove);
+        t_gameState *nextMove;
+
+        if (game.moveCounter == 7) {
+            int test = 0;
+        }
+
+        if (game.turn) {
+            std::pair<gameState, float> result = getMove<true>(&game, timePerMove);
+            nextMove = &result.first;
+
+            printf("Found move with score %e\n", &result.second);
+        } else {
+            std::pair<gameState, float> result = getMove<false>(&game, timePerMove);
+            nextMove = &result.first;
+
+            printf("Found move with score %e\n", &result.second);
+        }
+
+        game.commitMove(*nextMove);
 
         // Print next move and resulting board state
         printf("Next move: ");
-        printMove(nextMove);
+        printMove(*nextMove);
 
-        printf("\nCurrent board state (Score: %.4f, Round: %d, ", evaluate(game), game->blackMoveCounter + 1);
+        printf("\nCurrent board state (Score: %.4f, Round: %d, ", evaluate(&game), game.moveCounter/2 + 1);
 
-        if (game->turn == 0) {
+        if (game.turn == 0) {
             printf("Turn: White)\n");
         } else {
             printf("Turn: Black)\n");
         }
 
 
-        printBoard(game->board);
+        printBoard(game.board());
 
         // Check and announce checks
-        Position kingPosition;
-        if (!game->turn) {
-            kingPosition = board_value_positions(game->board->white & game->board->king).at(0);
+        bool threatened;
+        if (game.turn) {
+            threatened = game.board().blackKing & getThreatenedBlack(game.board());
         } else {
-            kingPosition = board_value_positions(game->board->black & game->board->king).at(0);
+            threatened = game.board().whiteKing & getThreatenedWhite(game.board());
         }
 
-        if (is_threatened(game->board, kingPosition, game->turn)) {
+        if (threatened) {
             printf("CHECK\n");
         }
     }
 
     printf("Game over!\n");
-    printf("Game is over: %d\n", game->isOver);
-    printf("White won: %d\n", game->whiteWon);
-    printf("Black won: %d\n", game->blackWon);
-    printf("Total rounds: %d\n", game->blackMoveCounter + 1);
-    printf("Turn: %d\n", game->turn);
+    printf("Game is over: %d\n", game.isOver);
+    printf("White won: %d\n", game.whiteWon);
+    printf("Black won: %d\n", game.blackWon);
+    printf("Total rounds: %d\n", game.moveCounter/2 + 1);
+    printf("Turn: %d\n", game.turn);
 
     // Free memory
-    delete game->positionHistory;
-    free(game);
+    delete game.positionHistory;
+}
+
+
+#include <algorithm>
+void printMoveStack(t_game *game) {
+    std::stack<t_gameState> moveStack = game->stateStack;
+
+    std::vector<t_gameState> debugVector = std::vector<t_gameState>();
+    while (!moveStack.empty( ) )
+    {
+        t_gameState t = moveStack.top( );
+        debugVector.push_back(t);
+        moveStack.pop( );
+    }
+
+    // stack, read from top down, is reversed relative to its creation (from bot to top)
+    for (int i = (int )debugVector.size()-1; i >= 0; i--) {
+        t_gameState currentState = debugVector.at(i);
+
+        printMove(currentState);
+        game->stateStack.push(currentState);
+    }
 }

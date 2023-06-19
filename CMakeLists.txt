@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(KingOfTheHill_KI)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 
 include_directories(.)
 include_directories(src)
@@ -11,36 +11,33 @@ find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
 add_executable(KingOfTheHill_KI
+        src/main.cpp
+        src/util.h
+        src/util.cpp
+        src/hash.cpp
+        src/hash.h
         src/board.cpp
         src/board.h
-        src/end.cpp
+        src/move.h
         src/end.h
+        src/hikaru.h
         src/game.cpp
         src/game.h
-        src/gameserver.cpp
-        src/gameserver.h
-        src/hikaru.cpp
-        src/hikaru.h
-        src/main.cpp
-        src/move.cpp
-        src/move.h
-        src/util.cpp
-        src/util.h
-        src/pieceSquareTable.h)
+        src/moveMaps.h
+        src/pieceSquareTable.h
+        src/transpositionTable.cpp
+        src/transpositionTable.h)
 target_link_libraries(KingOfTheHill_KI ${GTEST_LIBRARIES} pthread)
 
 add_executable(Tests
         src/board.cpp
         src/board.h
-        src/end.cpp
         src/end.h
         src/game.cpp
         src/game.h
         src/gameserver.cpp
         src/gameserver.h
-        src/hikaru.cpp
         src/hikaru.h
-        src/move.cpp
         src/move.h
         src/util.cpp
         src/util.h

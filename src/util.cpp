@@ -1,5 +1,7 @@
-#include "util.h"
 #include <stdexcept>
+
+#include "util.h"
+
 
 
 /* #############################################################################
@@ -75,12 +77,6 @@ Offset::Offset() {
 }
 
 Offset::Offset(int val1, int val2) {
-    if (val1 < -7 || val1 > 7) {
-        throw std::invalid_argument("Argument 1 outside bounds [-7,7]");
-    }
-    if (val2 < -7 || val2 > 7) {
-        throw std::invalid_argument("Argument 2 outside bounds [-7,7]");
-    }
     this->x = val1;
     this->y = val2;
 }
@@ -169,39 +165,6 @@ int shift_from_position(Position position) {
     // return 63 - (position.y * 8 + position.x);
 }
 
-Boardc::Boardc(t_board* board){
-    _board = board;
-    uint64_t _boardValue = _board->pawn+_board->knight+_board->bishop+_board->rook+_board->king+_board->queen;
-}
-
-bool Boardc::operator<(const Boardc& a) const {
-    uint64_t aBoardValue = a._board->pawn+a._board->knight+a._board->bishop+a._board->rook+a._board->king+a._board->queen;
-    if(_boardValue < aBoardValue){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-bool Boardc::operator>(const Boardc& a) const {
-    uint64_t aBoardValue = a._board->pawn+a._board->knight+a._board->bishop+a._board->rook+a._board->king+a._board->queen;
-    if(_boardValue > aBoardValue){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-bool Boardc::operator==(const Boardc& a) const {
-    uint64_t aBoardValue = a._board->pawn+a._board->knight+a._board->bishop+a._board->rook+a._board->king+a._board->queen;
-    if(_boardValue == aBoardValue){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-
 Position position_from_shift(int shift) {
     int val = 63 - shift;
 
@@ -209,12 +172,12 @@ Position position_from_shift(int shift) {
     int x = 7 - (val - (y * 8));
     // int x = val - (y * 8);
 
-    return Position {x, y};
+    return {x, y};
 }
 
 
 bool board_value_from_shift(uint64_t board, int shift) {
-    if ((board & ((uint64_t) 1 << shift)) != 0)
+    if ((board & ((uint64_t )1 << shift)) != 0)
         return true;
     return false;
 }
@@ -266,4 +229,26 @@ float min(float num1, float num2) {
         return num1;
     }
     return num2;
+}
+
+
+int countFigure(uint64_t singleBoard) {
+    int count = 0;
+    for (int i = 0; i < 64; i++) {
+        if (singleBoard & ((uint64_t) 1 << i)) {
+            count++;
+        }
+    }
+    return count;
+}
+
+
+int randn(int start, int stop) {
+    // Initialize rng
+    timespec ts{};
+    clock_gettime(CLOCK_REALTIME, &ts);
+    srand((unsigned ) ts.tv_nsec);
+
+    // Generate and return random number within specified bounds
+    return (int )((rand() % (stop - start)) + start);
 }
