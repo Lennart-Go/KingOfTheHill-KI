@@ -26,7 +26,30 @@ static uint64_t timeLeft(uint64_t timePerMove, time_t startMoveTime) {
     return currentTime - timePerMove - startMoveTime;
 }
 
-inline float evaluate(const t_game* game) {
+#include <algorithm>
+void printMoveStack(t_game *game, int depth) {
+    std::stack<t_gameState> moveStack = game->stateStack;
+
+    std::vector<t_gameState> debugVector = std::vector<t_gameState>();
+    while (!moveStack.empty() && debugVector.size() < depth - 1) {
+        t_gameState t = moveStack.top();
+        debugVector.push_back(t);
+        moveStack.pop();
+    }
+
+    // stack, read from top down, is reversed relative to its creation (from bot to top)
+    for (int i = (int )debugVector.size()-1; i >= 0; i--) {
+        t_gameState currentState = debugVector.at(i);
+
+        printMove(currentState, '\t');
+        game->stateStack.push(currentState);
+    }
+
+    printMove(*game->state, '\t');
+}
+
+
+inline float evaluate(t_game* game) {
     // Simple approach to evaluating positions by taking a look at the available material
     if (game->isOver) {
         if (game->whiteWon) {
@@ -56,7 +79,6 @@ inline float evaluate(const t_game* game) {
     score -= (float )countFigure(game->board().blackKnight) * KNIGHT_VALUE;
     score -= (float )countFigure(game->board().blackPawn ) * PAWN_VALUE;
 
-    return score;
 
     t_board board = game->board();
 
@@ -156,7 +178,11 @@ inline float evaluate(const t_game* game) {
         score -= PAWN_VALUE + pst_pawn_black[shift];
         bPawns &= (bPawns - 1);
     }
-    
+
+
+//    printMoveStack(game, 2);
+//    printf("=> %6.4f\n", score);
+
     return score;
 }
 
@@ -208,10 +234,10 @@ static inline float alphaBeta(int depth, float alpha, float beta, t_game *game, 
             game->revertMove();
 
             bestScore = min(bestScore, score);
-            beta = min(alpha, bestScore);
+            beta = min(beta, bestScore);
 
             if (beta <= alpha) {
-                // "Opposing" team would always choose one of the already better moves
+                // BETA CUTOFF: "Opposing" team would always choose one of the already better moves
                 break;
             }
         }
@@ -242,10 +268,10 @@ static inline float alphaBeta(int depth, float alpha, float beta, t_game *game, 
             game->revertMove();
 
             bestScore = max(bestScore, score);
-            alpha = max(beta, bestScore);
+            alpha = max(alpha, bestScore);
 
             if (beta <= alpha) {
-                // "Opposing" team would always choose one of the already better moves
+                // ALPHA CUTOFF: "Opposing" team would always choose one of the already better moves
                 break;
             }
         }
@@ -351,7 +377,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
             memcpy(bestMove, &currentMove, sizeof(t_gameState));
         }
 
-        beta = min(alpha, bestScore);
+        beta = min(beta, bestScore);
     }
 
     t_gameState returnMove = t_gameState(*bestMove);
@@ -402,7 +428,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
             memcpy(bestMove, &currentMove, sizeof(t_gameState));
         }
 
-        alpha = max(beta, bestScore);
+        alpha = max(alpha, bestScore);
     }
 
     t_gameState returnMove = t_gameState(*bestMove);
@@ -414,19 +440,19 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
 
 template<bool color>
 inline std::pair<gameState, float> getMove(t_game *game, uint64_t timePerMove) {
-    return alphaBetaHead<color>(game, 8, timePerMove);
+    return alphaBetaHead<color>(game, 3, timePerMove);
 }
 
 
 template<>
 inline std::pair<gameState, float> getMove<true>(t_game *game, uint64_t timePerMove) {
-    return alphaBetaHead<true>(game, 8, timePerMove);
+    return alphaBetaHead<true>(game, 3, timePerMove);
 }
 
 
 template<>
 inline std::pair<gameState, float> getMove<false>(t_game *game, uint64_t timePerMove) {
-    return alphaBetaHead<false>(game, 8, timePerMove);
+    return alphaBetaHead<false>(game, 3, timePerMove);
 }
 
 #endif //KINGOFTHEHILL_KI_HIKARU_H

@@ -219,9 +219,7 @@ typedef struct game {
     void commitMove(t_gameState move) {
         stateStack.push(*state);
 
-        t_gameState *moveMem = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
-        memcpy(moveMem, &move, sizeof(t_gameState));
-        state = moveMem;
+        memcpy(state, &move, sizeof(t_gameState));
 
         turn = !turn;
         moveCounter++;
@@ -247,11 +245,7 @@ typedef struct game {
     void revertMove() {
         positionTrackingUndo();
 
-        free(state);
-
-        t_gameState *stateMem = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
-        memcpy(stateMem, &stateStack.top(), sizeof(t_gameState));  // Reset game state to last state
-        state = stateMem;
+        memcpy(state, &stateStack.top(), sizeof(t_gameState));  // Reset game state to last state
 
         stateStack.pop();  // Remove the (now) current move from the stack
 

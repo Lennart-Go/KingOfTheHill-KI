@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <utility>
+#include <chrono>
 
 #include "board.h"
 #include "game.h"
@@ -68,43 +69,56 @@ void play(int maxRounds, uint64_t gameTime) {
 
     uint64_t timePerMove = gameTime / 40;
 
+    int numberOfIterations = 1000;
+    std::chrono::steady_clock::time_point tmp = std::chrono::steady_clock::now();
+    std::chrono::nanoseconds zeroTime = std::chrono::duration_cast<std::chrono::nanoseconds>(tmp - tmp);
+
+    // Generate next move
+    t_gameState *nextMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
     while (!game.isOver && (game.moveCounter/2 + 1) <= maxRounds) {
 
-        // Generate next move
-        t_gameState *nextMove;
-
-        if (game.moveCounter == 7) {
+        if (game.moveCounter == 12) {
             int test = 0;
         }
 
+
+        std::chrono::nanoseconds diff;
         if (game.turn) {
+            // Black's turn
+            std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
             std::pair<gameState, float> result = getMove<true>(&game, timePerMove);
-            nextMove = &result.first;
+            std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+            diff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
-            printf("Found move with score %e\n", &result.second);
+            memcpy(nextMove, &result.first, sizeof(t_gameState));
+
+            printf("Found move ");
+            printMove(*nextMove, ' ');
+            printf("with score %f for black [%fs]\n", result.second, (double )diff.count() / 1e9);
         } else {
+            // White's turn
+            std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
             std::pair<gameState, float> result = getMove<false>(&game, timePerMove);
-            nextMove = &result.first;
+            std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+            diff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
-            printf("Found move with score %e\n", &result.second);
+            memcpy(nextMove, &result.first, sizeof(t_gameState));
+
+            printf("Found move ");
+            printMove(*nextMove, ' ');
+            printf("with score %f [%fs]\n", result.second, (double )diff.count() / 1e9);
         }
 
         game.commitMove(*nextMove);
 
-        // Print next move and resulting board state
-        printf("Next move: ");
-        printMove(*nextMove);
-
-        printf("\nCurrent board state (Score: %.4f, Round: %d, ", evaluate(&game), game.moveCounter/2 + 1);
+        // Print game state information
+        printf("Current board state (Score: %.4f, Round: %d, ", evaluate(&game), game.moveCounter/2 + 1);
 
         if (game.turn == 0) {
             printf("Turn: White)\n");
         } else {
             printf("Turn: Black)\n");
         }
-
-
-        printBoard(game.board());
 
         // Check and announce checks
         bool threatened;
@@ -117,7 +131,13 @@ void play(int maxRounds, uint64_t gameTime) {
         if (threatened) {
             printf("CHECK\n");
         }
+
+        // Print board
+        printBoard(game.board());
+
+
     }
+    free(nextMove);
 
     printf("Game over!\n");
     printf("Game is over: %d\n", game.isOver);
@@ -128,26 +148,6 @@ void play(int maxRounds, uint64_t gameTime) {
 
     // Free memory
     delete game.positionHistory;
-}
-
-
-#include <algorithm>
-void printMoveStack(t_game *game) {
-    std::stack<t_gameState> moveStack = game->stateStack;
-
-    std::vector<t_gameState> debugVector = std::vector<t_gameState>();
-    while (!moveStack.empty( ) )
-    {
-        t_gameState t = moveStack.top( );
-        debugVector.push_back(t);
-        moveStack.pop( );
-    }
-
-    // stack, read from top down, is reversed relative to its creation (from bot to top)
-    for (int i = (int )debugVector.size()-1; i >= 0; i--) {
-        t_gameState currentState = debugVector.at(i);
-
-        printMove(currentState);
-        game->stateStack.push(currentState);
-    }
+    free(game.random);
+    free(game.state);
 }

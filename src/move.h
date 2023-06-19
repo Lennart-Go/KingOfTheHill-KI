@@ -1395,9 +1395,9 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 
             uint64_t pawnEnPassantRightTarget;  // There can only be one en-passant move per direction
             pawnEnPassantRightTarget =
-                    ((((board.blackPawn & ~hFile & ~pinned) << 1) & (hFile >> (8 - gameState.enpassant)) & rank5) >> 8) & checks;
+                    ((((board.whitePawn & ~hFile & ~pinned) << 1) & (hFile >> (8 - gameState.enpassant)) & rank5) >> 8) & checks;
             pawnEnPassantRightTarget |=
-                    ((((board.blackPawn & ~hFile & diagonalPins) << 1) & (hFile >> (8 - gameState.enpassant)) & rank5) >> 8) & checks & diagonalPins;
+                    ((((board.whitePawn & ~hFile & diagonalPins) << 1) & (hFile >> (8 - gameState.enpassant)) & rank5) >> 8) & checks & diagonalPins;
             uint64_t pawnEnPassantRightOrigins = pawnEnPassantRightTarget << 7;
 
             movePawnsEnPassant<false>(&moves, gameState, pawnEnPassantRightOrigins, pawnEnPassantRightTarget);
@@ -1411,7 +1411,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
 }
 
 
-inline void printMove(t_gameState state) {
+inline void printMove(t_gameState state, char end = '\n') {
     t_move move = state.move;
 
     uint8_t originShift = (uint8_t )log2((double )move.originMap);
@@ -1420,9 +1420,10 @@ inline void printMove(t_gameState state) {
     Position originPosition = position_from_shift(originShift);
     Position targetPosition = position_from_shift(targetShift);
 
-    printf("Move %c%d -> %c%d\n",
+    printf("Move %c%d -> %c%d%c",
            columnToLetter(originPosition.x), originPosition.y + 1,
-           columnToLetter(targetPosition.x), targetPosition.y + 1);
+           columnToLetter(targetPosition.x), targetPosition.y + 1,
+           end);
 }
 
 
