@@ -9,39 +9,6 @@
 #include "hikaru.h"
 
 
-t_gameOld *startGame(uint64_t gameTime) {
-    t_gameOld *game = (t_gameOld *) calloc(1, sizeof(t_gameOld));
-    t_board startBoard = initializeBoard();
-
-    game->board = &startBoard;
-    game->gameTime = gameTime;
-    game->turn = 0;  // White's turn
-    game->latestMoveTime = 0;  // TODO: Set latestMoveTime to current time in ms
-    game->isOver = false;
-    game->positionHistory = nullptr;
-
-    game->whiteWon = false;
-    game->whiteCanCastleShort = true;
-    game->whiteCanCastleLong = true;
-    game->whiteCastled = false;
-    game->whiteMoveCounter = 0;
-    game->whiteMoveTime = 0;
-
-    game->blackWon = false;
-    game->blackCanCastleShort = true;
-    game->blackCanCastleLong = true;
-    game->blackCastled = false;
-    game->blackMoveCounter = 0;
-    game->blackMoveTime = 0;
-
-    game->enpassants = 0;
-
-    game->random = init_hash();
-
-    return game;
-}
-
-
 // 2 h = 2 * 60 * 60s / 40 moves
 int time_limit() {
     return 2 * 60 * 60 / 40;
@@ -66,13 +33,6 @@ void play(int maxRounds, uint64_t gameTime) {
 //        printf("\n");
 //    }
 
-
-    uint64_t timePerMove = gameTime / 40;
-
-    int numberOfIterations = 1000;
-    std::chrono::steady_clock::time_point tmp = std::chrono::steady_clock::now();
-    std::chrono::nanoseconds zeroTime = std::chrono::duration_cast<std::chrono::nanoseconds>(tmp - tmp);
-
     // Generate next move
     t_gameState *nextMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
     while (!game.isOver && (game.moveCounter/2 + 1) <= maxRounds) {
@@ -86,7 +46,7 @@ void play(int maxRounds, uint64_t gameTime) {
         if (game.turn) {
             // Black's turn
             std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-            std::pair<gameState, float> result = getMove<true>(&game, timePerMove);
+            std::pair<gameState, float> result = getMove<true>(&game);
             std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
             diff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
@@ -98,7 +58,7 @@ void play(int maxRounds, uint64_t gameTime) {
         } else {
             // White's turn
             std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-            std::pair<gameState, float> result = getMove<false>(&game, timePerMove);
+            std::pair<gameState, float> result = getMove<false>(&game);
             std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
             diff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
@@ -109,7 +69,7 @@ void play(int maxRounds, uint64_t gameTime) {
             printf("with score %f [%fs]\n", result.second, (double )diff.count() / 1e9);
         }
 
-        game.commitMove(*nextMove);
+        game.commitMoveTimed(*nextMove);
 
         // Print game state information
         printf("Current board state (Score: %.4f, Round: %d, ", evaluate(&game), game.moveCounter/2 + 1);

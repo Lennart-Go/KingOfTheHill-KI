@@ -6,6 +6,7 @@
 #include <stack>
 #include <string>
 #include <cstring>
+#include <chrono>
 
 #include "board.h"
 #include "move.h"
@@ -13,36 +14,6 @@
 #include "hash.h"
 #include "end.h"
 
-
-typedef struct gameOld {
-    t_board *board;
-
-    uint64_t gameTime;
-    unsigned turn:1;  // 0 for white, 1 for black
-    uint64_t latestMoveTime;
-    bool isOver;
-    std::map<std::string, int> *positionHistory;
-
-    unsigned whiteWon:1;
-    unsigned whiteCanCastleShort:1;
-    unsigned whiteCanCastleLong:1;
-    unsigned whiteCastled:1;
-    uint32_t whiteMoveCounter;
-    uint32_t whiteMoveTime;  // Cumulative move time of white team in ms
-
-    unsigned blackWon:1;
-    unsigned blackCanCastleShort:1;
-    unsigned blackCanCastleLong:1;
-    unsigned blackCastled:1;
-    uint32_t blackMoveCounter;
-    uint32_t blackMoveTime;  // Cumulative move time of black team in ms
-
-    uint64_t* random;
-
-    TranspositionTable* transpostionTable;
-
-    unsigned enpassants:4;  // 0 for no enpassant, otherwise the number of the file (1 -> A, 2 -> B, ...)
-} t_gameOld;
 
 typedef struct game {
     t_gameState *state;
@@ -52,7 +23,17 @@ typedef struct game {
     std::map<uint64_t, int> *positionHistory = nullptr;
 
     bool turn;
-    uint64_t gameTime;
+
+    double gameTime;
+
+    double whiteMoveTime;
+    std::chrono::steady_clock::time_point whiteLastMoveTime;
+    short whiteMovesRemaining = 40;
+
+    double blackMoveTime;
+    std::chrono::steady_clock::time_point blackLastMoveTime;
+    short blackMovesRemaining = 40;
+
 
     bool isOver;
     bool whiteWon;
@@ -72,9 +53,13 @@ typedef struct game {
         state = startStateMem;
 
         random = init_hash();
-
         turn = false;
-        gameTime = time;
+
+        gameTime = (double )time;
+        whiteMoveTime = (double )time;
+        blackMoveTime = (double )time;
+        whiteLastMoveTime = std::chrono::steady_clock::now();
+        blackLastMoveTime = std::chrono::steady_clock::now();
 
         isOver = false;
         whiteWon = false;
@@ -94,9 +79,13 @@ typedef struct game {
         state = startStateMem;
 
         random = init_hash();
-
         turn = color;
-        gameTime = time;
+
+        gameTime = (double )time;
+        whiteMoveTime = (double )time;
+        blackMoveTime = (double )time;
+        whiteLastMoveTime = std::chrono::steady_clock::now();
+        blackLastMoveTime = std::chrono::steady_clock::now();
 
         isOver = false;
         whiteWon = false;
@@ -124,9 +113,13 @@ typedef struct game {
         state = startStateMem;
 
         random = init_hash();
-
         turn = color;
-        gameTime = time;
+
+        gameTime = (double )time;
+        whiteMoveTime = (double )time;
+        blackMoveTime = (double )time;
+        whiteLastMoveTime = std::chrono::steady_clock::now();
+        blackLastMoveTime = std::chrono::steady_clock::now();
 
         isOver = false;
         whiteWon = false;
@@ -154,9 +147,13 @@ typedef struct game {
         state = startStateMem;
 
         random = init_hash();
-
         turn = color;
-        gameTime = time;
+
+        gameTime = (double )time;
+        whiteMoveTime = (double )time;
+        blackMoveTime = (double )time;
+        whiteLastMoveTime = std::chrono::steady_clock::now();
+        blackLastMoveTime = std::chrono::steady_clock::now();
 
         isOver = false;
         whiteWon = false;
@@ -242,6 +239,49 @@ typedef struct game {
         // TODO: Stuff with move time?
     }
 
+    void commitMoveTimed(t_gameState move) {
+        std::chrono::time_point currentTime = std::chrono::steady_clock::now();
+        if (turn) {
+            // Black is moving
+            std::chrono::nanoseconds moveTime = std::chrono::duration_cast<std::chrono::nanoseconds>(currentTime - whiteLastMoveTime);
+            blackMoveTime -= (double )moveTime.count() / 1e9;
+
+            blackLastMoveTime = currentTime;
+            blackMovesRemaining--;
+
+            if (blackMoveTime < 0) {
+                isOver = true;
+                whiteWon = true;
+            }
+
+            printf("Move time remaining for black %ds/%d\n", (int )blackMoveTime, blackMovesRemaining);
+        } else {
+            // White is moving
+            std::chrono::nanoseconds moveTime = std::chrono::duration_cast<std::chrono::nanoseconds>(currentTime - blackLastMoveTime);
+            whiteMoveTime -= (double )moveTime.count() / 1e9;
+
+            whiteLastMoveTime = currentTime;
+            whiteMovesRemaining--;
+
+            if (whiteMoveTime < 0) {
+                isOver = true;
+                blackWon = true;
+            }
+
+            printf("Move time remaining for white %ds/%d\n", (int )whiteMoveTime, whiteMovesRemaining);
+        }
+
+        if (moveCounter >= 80) {
+            blackMoveTime = gameTime;
+            whiteMoveTime = gameTime;
+
+            blackMovesRemaining = 40;
+            whiteMovesRemaining = 40;
+        }
+
+        commitMove(move);
+    }
+
     void revertMove() {
         positionTrackingUndo();
 
@@ -267,7 +307,6 @@ typedef struct game {
     }
 } t_game;
 
-t_gameOld *startGame(uint64_t gameTime);
 void play(int maxRounds, uint64_t gameTime);
 void printMoveStack(t_game game);
 
