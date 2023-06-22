@@ -19,6 +19,9 @@
 #define PAWN_VALUE 1
 
 
+#define LAYER_SIZE_CORRECTION 0.7
+
+
 
 // calculates the time left finding a move
 static uint64_t timeLeft(uint64_t timePerMove, time_t startMoveTime) {
@@ -201,9 +204,9 @@ static inline t_gameState getMoveRandom(t_game *game) {
 }
 
 template<bool color>
-static inline float alphaBeta(int depth, float alpha, float beta, t_game *game, uint64_t timePerMove, time_t startMoveTime) {
+static inline float alphaBeta(int depth, float alpha, float beta, t_game *game) {
 
-    if (depth == 0 || game->isOver || timeLeft(timePerMove, startMoveTime) <= 0) {
+    if (depth <= 0 || game->isOver) {
         return evaluate(game);
     }
 
@@ -230,7 +233,7 @@ static inline float alphaBeta(int depth, float alpha, float beta, t_game *game, 
         // Black's turn -> Minimize score
         for (auto currentMove : moves) {
             game->commitMove(currentMove);
-            score = alphaBeta<false>(depth-1, alpha, beta, game, timePerMove, startMoveTime);
+            score = alphaBeta<false>(depth-1, alpha, beta, game);
             game->revertMove();
 
             bestScore = min(bestScore, score);
@@ -264,7 +267,7 @@ static inline float alphaBeta(int depth, float alpha, float beta, t_game *game, 
         // White's turn -> Maximize score
         for (auto currentMove : moves) {
             game->commitMove(currentMove);
-            score = alphaBeta<true>(depth-1, alpha, beta, game, timePerMove, startMoveTime);
+            score = alphaBeta<true>(depth-1, alpha, beta, game);
             game->revertMove();
 
             bestScore = max(bestScore, score);
@@ -333,23 +336,39 @@ static inline float alphaBeta(int depth, float alpha, float beta, t_game *game, 
 
 
 template<bool color>
-static inline std::pair<t_gameState, float> alphaBetaHead(t_game *game, int max_depth, uint64_t timePerMove);
+static inline std::pair<t_gameState, float> alphaBetaHead(t_game *game, int max_depth);
 
 
 template<>
-inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_depth, uint64_t timePerMove) {
-    int depth = max_depth;  // NOTE: Always use one less than actually wanted
+inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_depth) {
+    double timePerMove = game->blackMoveTime / game->blackMovesRemaining;
 
     float alpha = -std::numeric_limits<float>::max();
     float beta = std::numeric_limits<float>::max();
-    time_t startMoveTime = time(nullptr);
 
     float score, bestScore;
     t_gameState zeroMove = t_gameState(game->board(), t_move());
     t_gameState *bestMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
     memcpy(bestMove, &zeroMove, sizeof(t_gameState));
 
+    std::chrono::steady_clock::time_point generateStart = std::chrono::steady_clock::now();
     std::vector<t_gameState> moves = generate_moves<true>(*game->state);
+    std::chrono::steady_clock::time_point generateStop = std::chrono::steady_clock::now();
+    std::chrono::nanoseconds diff = std::chrono::duration_cast<std::chrono::nanoseconds>(generateStop - generateStart);
+    double diffSeconds = (double )diff.count() / 1e9f;
+
+    short moveSize = (short )moves.size();
+    if (abs(game->averageMoveCount - moveSize) > (game->averageMoveCount * 0.3)) {
+        moveSize = game->averageMoveCount;
+    } else {
+        game->updateAverageMoves(moveSize);
+    }
+
+    int depthEstimate = (int )(log((double )timePerMove / diffSeconds) / log((double )moveSize * LAYER_SIZE_CORRECTION));
+    depthEstimate = min(depthEstimate, max_depth);
+
+    printf("Generating moves for black with depth %d (%d, %d)\n", depthEstimate, game->averageMoveCount, moveSize);
+
     bestScore = std::numeric_limits<float>::max();
 
     if (moves.empty()) {
@@ -369,7 +388,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
     // Black's turn -> Minimize score
     for (auto currentMove : moves) {
         game->commitMove(currentMove);
-        score = alphaBeta<false>(depth - 1, alpha, beta, game, timePerMove, startMoveTime);
+        score = alphaBeta<false>(depthEstimate - 1, alpha, beta, game);
         game->revertMove();
 
         if (score <= bestScore) {
@@ -388,19 +407,34 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
 
 
 template<>
-inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_depth, uint64_t timePerMove) {
-    int depth = max_depth;  // NOTE: Always use one less than actually wanted
+inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_depth) {
+    double timePerMove = game->whiteMoveTime / game->whiteMovesRemaining;
 
     float alpha = -std::numeric_limits<float>::max();
     float beta = std::numeric_limits<float>::max();
-    time_t startMoveTime = time(nullptr);
-
     float score, bestScore;
     t_gameState zeroMove = t_gameState(game->board(), t_move());
     t_gameState *bestMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
     memcpy(bestMove, &zeroMove, sizeof(t_gameState));
 
+    std::chrono::steady_clock::time_point generateStart = std::chrono::steady_clock::now();
     std::vector<t_gameState> moves = generate_moves<false>(*game->state);
+    std::chrono::steady_clock::time_point generateStop = std::chrono::steady_clock::now();
+    std::chrono::nanoseconds diff = std::chrono::duration_cast<std::chrono::nanoseconds>(generateStop - generateStart);
+    double diffSeconds = (double )diff.count() / 1e9f;
+
+    short moveSize = (short )moves.size();
+    if (abs(game->averageMoveCount - moveSize) > (game->averageMoveCount * 0.3)) {
+        moveSize = game->averageMoveCount;
+    } else {
+        game->updateAverageMoves(moveSize);
+    }
+
+    int depthEstimate = (int )(log((double )timePerMove / diffSeconds) / log((double )moveSize * LAYER_SIZE_CORRECTION));
+    depthEstimate = min(depthEstimate, max_depth);
+
+    printf("Generating moves for white with depth %d (%d, %d)\n", depthEstimate, game->averageMoveCount, moveSize);
+
     bestScore = -std::numeric_limits<float>::max();
 
     if (moves.empty()) {
@@ -420,7 +454,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
     // White's turn -> Maximize score
     for (auto currentMove : moves) {
         game->commitMove(currentMove);
-        score = alphaBeta<true>(depth-1, alpha, beta, game, timePerMove, startMoveTime);
+        score = alphaBeta<true>(depthEstimate - 1, alpha, beta, game);
         game->revertMove();
 
         if (score >= bestScore) {
@@ -439,20 +473,20 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
 
 
 template<bool color>
-inline std::pair<gameState, float> getMove(t_game *game, uint64_t timePerMove) {
-    return alphaBetaHead<color>(game, 3, timePerMove);
+inline std::pair<gameState, float> getMove(t_game *game) {
+    return alphaBetaHead<color>(game, 100);
 }
 
 
 template<>
-inline std::pair<gameState, float> getMove<true>(t_game *game, uint64_t timePerMove) {
-    return alphaBetaHead<true>(game, 3, timePerMove);
+inline std::pair<gameState, float> getMove<true>(t_game *game) {
+    return alphaBetaHead<true>(game, 100);
 }
 
 
 template<>
-inline std::pair<gameState, float> getMove<false>(t_game *game, uint64_t timePerMove) {
-    return alphaBetaHead<false>(game, 3, timePerMove);
+inline std::pair<gameState, float> getMove<false>(t_game *game) {
+    return alphaBetaHead<false>(game, 100);
 }
 
 #endif //KINGOFTHEHILL_KI_HIKARU_H
