@@ -204,10 +204,10 @@ static inline t_gameState getMoveRandom(t_game *game) {
 }
 
 template<bool color>
-static inline float alphaBeta(int depth, float alpha, float beta, t_game *game) {
+static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float beta, t_game *game) {
 
     if (depth <= 0 || game->isOver) {
-        return evaluate(game);
+        return std::tuple<float, short>(evaluate(game), 0);
     }
 
     float score, bestScore;
@@ -227,25 +227,43 @@ static inline float alphaBeta(int depth, float alpha, float beta, t_game *game) 
                 game->blackWon = true;
             }
 
-            return evaluate(game);
+            return std::tuple<float, short>(evaluate(game), 0);
         }
 
         // Black's turn -> Minimize score
-        for (auto currentMove : moves) {
-            game->commitMove(currentMove);
-            score = alphaBeta<false>(depth-1, alpha, beta, game);
-            game->revertMove();
+        uint64_t boardHash = hash(game->random, game->state);
+        TableEntry* entry = game->tableBlack.getEntry(boardHash);
+        if (entry == nullptr) {
+            t_gameState *bestMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
+            std::tuple<float, short> score;
+            for (auto currentMove : moves) {
+                game->commitMove(currentMove);
+                score = alphaBeta<false>(depth-1, alpha, beta, game);
+                game->revertMove();
 
-            bestScore = min(bestScore, score);
-            beta = min(beta, bestScore);
+                if (std::get<0>(score) <= bestScore) {
+                    bestScore = std::get<0>(score);
+                    memcpy(bestMove, &currentMove, sizeof(t_gameState));
+                }
 
-            if (beta <= alpha) {
-                // BETA CUTOFF: "Opposing" team would always choose one of the already better moves
-                break;
+                beta = min(beta, bestScore);
+
+                if (beta <= alpha) {
+                    // BETA CUTOFF: "Opposing" team would always choose one of the already better moves
+                    break;
+                }
             }
+
+            TableEntry newEntry = TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score));
+            game->tableBlack.setEntry(&newEntry);
+
+            return std::tuple<float, short>(bestScore, std::get<1>(score) + 1);
+        }
+        else {
+            //printf("Found entry in Blacklist of %i entrys.\n", game->tableBlack.getSize());
+            return std::tuple<float, short>(entry->getScore(), entry->getVision() + 1);
         }
 
-        return bestScore;
     } else {
         std::vector<t_gameState> moves = generate_moves<false>(*game->state);
         bestScore = -std::numeric_limits<float>::max();
@@ -261,26 +279,42 @@ static inline float alphaBeta(int depth, float alpha, float beta, t_game *game) 
                 game->blackWon = true;
             }
 
-            return evaluate(game);
+            return std::tuple<float, short>(evaluate(game), 0);
         }
 
         // White's turn -> Maximize score
-        for (auto currentMove : moves) {
-            game->commitMove(currentMove);
-            score = alphaBeta<true>(depth-1, alpha, beta, game);
-            game->revertMove();
+        uint64_t boardHash = hash(game->random, game->state);
+        TableEntry* entry = game->tableWhite.getEntry(boardHash);
+        if (entry == nullptr) {
+            t_gameState *bestMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
+            std::tuple<float, short> score;
+            for (auto currentMove: moves) {
+                game->commitMove(currentMove);
+                score = alphaBeta<true>(depth - 1, alpha, beta, game);
+                game->revertMove();
 
-            bestScore = max(bestScore, score);
-            alpha = max(alpha, bestScore);
+                if (std::get<0>(score) >= bestScore) {
+                    bestScore = std::get<0>(score);
+                    memcpy(bestMove, &currentMove, sizeof(t_gameState));
+                }
 
-            if (beta <= alpha) {
-                // ALPHA CUTOFF: "Opposing" team would always choose one of the already better moves
-                break;
+                alpha = max(alpha, bestScore);
+
+                if (beta <= alpha) {
+                    // ALPHA CUTOFF: "Opposing" team would always choose one of the already better moves
+                    break;
+                }
             }
+            TableEntry newEntry = TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score) + 1);
+            game->tableWhite.setEntry(&newEntry);
+
+            return std::tuple<float, short>(bestScore, std::get<1>(score) + 1);
+        }
+        else {
+            //printf("Found entry in Whitelist of %i entrys.\n", game->tableWhite.getSize());
+            return std::tuple<float, short>(entry->getScore(), entry->getVision() + 1);
         }
     }
-
-    return bestScore;
 }
 
 //template<float color>
@@ -346,7 +380,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
     float alpha = -std::numeric_limits<float>::max();
     float beta = std::numeric_limits<float>::max();
 
-    float score, bestScore;
+    float bestScore;
     t_gameState zeroMove = t_gameState(game->board(), t_move());
     t_gameState *bestMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
     memcpy(bestMove, &zeroMove, sizeof(t_gameState));
@@ -386,13 +420,14 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
     }
 
     // Black's turn -> Minimize score
+    std::tuple<float, short> score;
     for (auto currentMove : moves) {
         game->commitMove(currentMove);
         score = alphaBeta<false>(depthEstimate - 1, alpha, beta, game);
         game->revertMove();
 
-        if (score <= bestScore) {
-            bestScore = score;
+        if (std::get<0>(score) <= bestScore) {
+            bestScore = std::get<0>(score);
             memcpy(bestMove, &currentMove, sizeof(t_gameState));
         }
 
@@ -412,7 +447,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
 
     float alpha = -std::numeric_limits<float>::max();
     float beta = std::numeric_limits<float>::max();
-    float score, bestScore;
+    float bestScore;
     t_gameState zeroMove = t_gameState(game->board(), t_move());
     t_gameState *bestMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
     memcpy(bestMove, &zeroMove, sizeof(t_gameState));
@@ -452,13 +487,14 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
     }
 
     // White's turn -> Maximize score
+    std::tuple<float, short> score;
     for (auto currentMove : moves) {
         game->commitMove(currentMove);
         score = alphaBeta<true>(depthEstimate - 1, alpha, beta, game);
         game->revertMove();
 
-        if (score >= bestScore) {
-            bestScore = score;
+        if (std::get<0>(score) >= bestScore) {
+            bestScore = std::get<0>(score);
             memcpy(bestMove, &currentMove, sizeof(t_gameState));
         }
 

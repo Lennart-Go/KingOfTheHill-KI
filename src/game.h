@@ -42,6 +42,9 @@ typedef struct game {
 
     short moveCounter;
 
+    TranspositionTable tableWhite;
+    TranspositionTable tableBlack;
+
     explicit game(uint64_t time) {
         // Default game constructor
         t_board startBoard = setFen((char *)"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
@@ -67,6 +70,9 @@ typedef struct game {
         blackWon = false;
 
         moveCounter = 0;
+
+        TranspositionTable tableWhite = TranspositionTable();
+        TranspositionTable tableBlack = TranspositionTable();
     }
     game(char *startFen, bool color, uint64_t time) {
         // Game constructor from FEN and side to move
@@ -93,6 +99,9 @@ typedef struct game {
         blackWon = false;
 
         moveCounter = 0;
+
+        TranspositionTable tableWhite = TranspositionTable();
+        TranspositionTable tableBlack = TranspositionTable();
     }
     game(char *startFen, bool color, uint8_t castleCode, uint64_t time) {
         // Game constructor from FEN, side to move and castling code
@@ -127,6 +136,9 @@ typedef struct game {
         blackWon = false;
 
         moveCounter = 0;
+
+        TranspositionTable tableWhite = TranspositionTable();
+        TranspositionTable tableBlack = TranspositionTable();
     }
     game(char *startFen, bool color, uint8_t castleCode, uint8_t ep, uint64_t time) {
         // Game constructor from FEN, side to move and castling code
@@ -161,6 +173,9 @@ typedef struct game {
         blackWon = false;
 
         moveCounter = 0;
+
+        TranspositionTable tableWhite = TranspositionTable();
+        TranspositionTable tableBlack = TranspositionTable();
     }
 
     void updateAverageMoves(short moveCount) {
