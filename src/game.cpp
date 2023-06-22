@@ -37,7 +37,7 @@ void play(int maxRounds, uint64_t gameTime) {
     t_gameState *nextMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
     while (!game.isOver && (game.moveCounter/2 + 1) <= maxRounds) {
 
-        if (game.moveCounter == 12) {
+        if (game.moveCounter == 72) {
             int test = 0;
         }
 

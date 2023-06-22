@@ -25,6 +25,7 @@ typedef struct game {
     bool turn;
 
     double gameTime;
+    short averageMoveCount = 20;
 
     double whiteMoveTime;
     std::chrono::steady_clock::time_point whiteLastMoveTime;
@@ -162,6 +163,10 @@ typedef struct game {
         moveCounter = 0;
     }
 
+    void updateAverageMoves(short moveCount) {
+        averageMoveCount = (short )((3 * averageMoveCount + moveCount) / 4);
+    }
+
     void positionTracking() {
         /* Function to check if same position occurred for the third time
         * Arguments:
@@ -254,7 +259,7 @@ typedef struct game {
                 whiteWon = true;
             }
 
-            printf("Move time remaining for black %ds/%d\n", (int )blackMoveTime, blackMovesRemaining);
+            printf("Move time remaining for black %.4fs/%d\n", blackMoveTime, blackMovesRemaining);
         } else {
             // White is moving
             std::chrono::nanoseconds moveTime = std::chrono::duration_cast<std::chrono::nanoseconds>(currentTime - blackLastMoveTime);
@@ -268,10 +273,10 @@ typedef struct game {
                 blackWon = true;
             }
 
-            printf("Move time remaining for white %ds/%d\n", (int )whiteMoveTime, whiteMovesRemaining);
+            printf("Move time remaining for white %.4fs/%d\n", whiteMoveTime, whiteMovesRemaining);
         }
 
-        if (moveCounter >= 80) {
+        if (moveCounter >= 79) {
             blackMoveTime = gameTime;
             whiteMoveTime = gameTime;
 

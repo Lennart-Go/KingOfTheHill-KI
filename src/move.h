@@ -291,8 +291,8 @@ inline static void moveKingCastleShort(std::vector<t_gameState> *moves, t_gameSt
         uint64_t kingOrigin = currentState.board.blackKing;
         uint64_t kingTarget = kingOrigin << 2;
 
-        uint64_t rookOrigin = 0b00000000000000000000000000000000000000000000000010000000;
-        uint64_t rookTarget = 0b00000000000000000000000000000000000000000000000000100000;
+        uint64_t rookOrigin = 0b0000000000000000000000000000000000000000000000000000000010000000;
+        uint64_t rookTarget = 0b0000000000000000000000000000000000000000000000000000000000100000;
 
         t_board targetBoardKingMoved = move<piece::king, color>(currentState.board, kingOrigin, kingTarget);
         t_board targetBoard = move<piece::rook, color>(targetBoardKingMoved, rookOrigin, rookTarget);
@@ -308,11 +308,11 @@ inline static void moveKingCastleShort(std::vector<t_gameState> *moves, t_gameSt
         bCastleShort = currentState.bCastleShort;
         bCastleLong = currentState.bCastleLong;
 
-        uint64_t kingOrigin = currentState.board.blackKing;
+        uint64_t kingOrigin = currentState.board.whiteKing;
         uint64_t kingTarget = kingOrigin << 2;
 
-        uint64_t rookOrigin = 0b10000000000000000000000000000000000000000000000000000000;
-        uint64_t rookTarget = 0b00100000000000000000000000000000000000000000000000000000;
+        uint64_t rookOrigin = 0b1000000000000000000000000000000000000000000000000000000000000000;
+        uint64_t rookTarget = 0b0010000000000000000000000000000000000000000000000000000000000000;
 
         t_board targetBoardKingMoved = move<piece::king, color>(currentState.board, kingOrigin, kingTarget);
         t_board targetBoard = move<piece::rook, color>(targetBoardKingMoved, rookOrigin, rookTarget);
@@ -338,8 +338,8 @@ inline static void moveKingCastleLong(std::vector<t_gameState> *moves, t_gameSta
         uint64_t kingOrigin = currentState.board.blackKing;
         uint64_t kingTarget = kingOrigin >> 2;
 
-        uint64_t rookOrigin = 0b00000000000000000000000000000000000000000000000000000001;
-        uint64_t rookTarget = 0b00000000000000000000000000000000000000000000000000001000;
+        uint64_t rookOrigin = 0b0000000000000000000000000000000000000000000000000000000000000001;
+        uint64_t rookTarget = 0b0000000000000000000000000000000000000000000000000000000000001000;
 
         t_board targetBoardKingMoved = move<piece::king, color>(currentState.board, kingOrigin, kingTarget);
         t_board targetBoard = move<piece::rook, color>(targetBoardKingMoved, rookOrigin, rookTarget);
@@ -355,11 +355,11 @@ inline static void moveKingCastleLong(std::vector<t_gameState> *moves, t_gameSta
         bCastleShort = currentState.bCastleShort;
         bCastleLong = currentState.bCastleLong;
 
-        uint64_t kingOrigin = currentState.board.blackKing;
+        uint64_t kingOrigin = currentState.board.whiteKing;
         uint64_t kingTarget = kingOrigin >> 2;
 
-        uint64_t rookOrigin = 0b00000001000000000000000000000000000000000000000000000000;
-        uint64_t rookTarget = 0b00001000000000000000000000000000000000000000000000000000;
+        uint64_t rookOrigin = 0b0000000100000000000000000000000000000000000000000000000000000000;
+        uint64_t rookTarget = 0b0000100000000000000000000000000000000000000000000000000000000000;
 
         t_board targetBoardKingMoved = move<piece::king, color>(currentState.board, kingOrigin, kingTarget);
         t_board targetBoard = move<piece::rook, color>(targetBoardKingMoved, rookOrigin, rookTarget);
@@ -500,7 +500,7 @@ inline static void movePawnsPromotion(std::vector<t_gameState> *moves, t_gameSta
 
         {
             // Promote to queen
-            t_board targetBoardPieceRemoved = move<piece::none, color>(targetBoardPrePromotion, 0, currentTarget);
+            t_board targetBoardPieceRemoved = move<piece::none, !color>(targetBoardPrePromotion, 0, currentTarget);
             t_board targetBoard = placePiece<piece::queen, color>(targetBoardPieceRemoved, currentTarget);
 
             t_move mov = t_move(currentOrigin, currentTarget);
@@ -511,7 +511,7 @@ inline static void movePawnsPromotion(std::vector<t_gameState> *moves, t_gameSta
         }
         {
             // Promote to rook
-            t_board targetBoardPieceRemoved = move<piece::none, color>(targetBoardPrePromotion, 0, currentTarget);
+            t_board targetBoardPieceRemoved = move<piece::none, !color>(targetBoardPrePromotion, 0, currentTarget);
             t_board targetBoard = placePiece<piece::rook, color>(targetBoardPieceRemoved, currentTarget);
 
             t_move mov = t_move(currentOrigin, currentTarget);
@@ -522,7 +522,7 @@ inline static void movePawnsPromotion(std::vector<t_gameState> *moves, t_gameSta
         }
         {
             // Promote to bishop
-            t_board targetBoardPieceRemoved = move<piece::none, color>(targetBoardPrePromotion, 0, currentTarget);
+            t_board targetBoardPieceRemoved = move<piece::none, !color>(targetBoardPrePromotion, 0, currentTarget);
             t_board targetBoard = placePiece<piece::bishop, color>(targetBoardPieceRemoved, currentTarget);
 
             t_move mov = t_move(currentOrigin, currentTarget);
@@ -533,7 +533,7 @@ inline static void movePawnsPromotion(std::vector<t_gameState> *moves, t_gameSta
         }
         {
             // Promote to knight
-            t_board targetBoardPieceRemoved = move<piece::none, color>(targetBoardPrePromotion, 0, currentTarget);
+            t_board targetBoardPieceRemoved = move<piece::none, !color>(targetBoardPrePromotion, 0, currentTarget);
             t_board targetBoard = placePiece<piece::knight, color>(targetBoardPieceRemoved, currentTarget);
 
             t_move mov = t_move(currentOrigin, currentTarget);
@@ -892,12 +892,12 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate castles
         {
             if (gameState.bCastleShort && (board.blackRook & hFile & rank8)) {
-                if ((xray[453] & (occ | threatened | ~checks)) == 0) {  // Offset 453 = 64 * 7 + 5
+                if ((blackShortCastleCheckMask & ((occ ^ board.blackKing) | threatened | ~checks)) == 0) {
                     moveKingCastleShort<true>(&moves, gameState);
                 }
             }
             if (gameState.bCastleLong && (board.blackRook & aFile & rank8)) {
-                if ((xray[3] & (occ | threatened | ~checks)) == 0) {  // Offset 3 = 64 * 0 + 3
+                if ((blackLongCastleCheckMask & ((occ ^ board.blackKing) | threatened | ~checks)) == 0) {
                     moveKingCastleLong<true>(&moves, gameState);
                 }
             }
@@ -1204,12 +1204,12 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate castles
         {
             if (gameState.wCastleShort && (board.whiteRook & hFile & rank1)) {
-                if ((xray[453] & (occ | threatened | ~checks)) == 0) {  // Offset 453 = 64 * 7 + 5
+                if ((whiteShortCastleCheckMask & ((occ ^ board.whiteKing) | threatened | ~checks)) == 0) {
                     moveKingCastleShort<false>(&moves, gameState);
                 }
             }
             if (gameState.wCastleLong && (board.whiteRook & aFile & rank1)) {
-                if ((xray[3] & (occ | threatened | ~checks)) == 0) {  // Offset 3 = 64 * 0 + 3
+                if ((whiteLongCastleCheckMask & ((occ ^ board.whiteKing) | threatened | ~checks)) == 0) {
                     moveKingCastleLong<false>(&moves, gameState);
                 }
             }
@@ -1339,7 +1339,7 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
         // Generate pawn pushing moves
         {
             uint64_t pawnPushTargets =
-                    ((((board.white & rank2 & ~diagonalPins) >> 8) & ~occ) >> 8) & checks & ~occ;
+                    ((((board.whitePawn & rank2 & ~diagonalPins) >> 8) & ~occ) >> 8) & checks & ~occ;
             uint64_t pawnPushOrigins = pawnPushTargets << 16;
 
             movePawnsPush<false>(&moves, gameState, pawnPushOrigins, pawnPushTargets);

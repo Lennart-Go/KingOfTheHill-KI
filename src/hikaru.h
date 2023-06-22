@@ -19,7 +19,7 @@
 #define PAWN_VALUE 1
 
 
-#define LAYER_SIZE_CORRECTION 0.9
+#define LAYER_SIZE_CORRECTION 0.7
 
 
 
@@ -206,7 +206,7 @@ static inline t_gameState getMoveRandom(t_game *game) {
 template<bool color>
 static inline float alphaBeta(int depth, float alpha, float beta, t_game *game) {
 
-    if (depth == 0 || game->isOver) {
+    if (depth <= 0 || game->isOver) {
         return evaluate(game);
     }
 
@@ -357,10 +357,17 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
     std::chrono::nanoseconds diff = std::chrono::duration_cast<std::chrono::nanoseconds>(generateStop - generateStart);
     double diffSeconds = (double )diff.count() / 1e9f;
 
-    int depthEstimate = (int )(log((double )timePerMove / diffSeconds) / log((double )moves.size() * LAYER_SIZE_CORRECTION));
+    short moveSize = (short )moves.size();
+    if (abs(game->averageMoveCount - moveSize) > (game->averageMoveCount * 0.3)) {
+        moveSize = game->averageMoveCount;
+    } else {
+        game->updateAverageMoves(moveSize);
+    }
+
+    int depthEstimate = (int )(log((double )timePerMove / diffSeconds) / log((double )moveSize * LAYER_SIZE_CORRECTION));
     depthEstimate = min(depthEstimate, max_depth);
 
-    printf("Generating moves for black with depth %d\n", depthEstimate);
+    printf("Generating moves for black with depth %d (%d, %d)\n", depthEstimate, game->averageMoveCount, moveSize);
 
     bestScore = std::numeric_limits<float>::max();
 
@@ -381,7 +388,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
     // Black's turn -> Minimize score
     for (auto currentMove : moves) {
         game->commitMove(currentMove);
-        score = alphaBeta<false>(depthEstimate, alpha, beta, game);
+        score = alphaBeta<false>(depthEstimate - 1, alpha, beta, game);
         game->revertMove();
 
         if (score <= bestScore) {
@@ -416,10 +423,17 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
     std::chrono::nanoseconds diff = std::chrono::duration_cast<std::chrono::nanoseconds>(generateStop - generateStart);
     double diffSeconds = (double )diff.count() / 1e9f;
 
-    int depthEstimate = (int )(log((double )timePerMove / diffSeconds) / log((double )moves.size() * LAYER_SIZE_CORRECTION));
+    short moveSize = (short )moves.size();
+    if (abs(game->averageMoveCount - moveSize) > (game->averageMoveCount * 0.3)) {
+        moveSize = game->averageMoveCount;
+    } else {
+        game->updateAverageMoves(moveSize);
+    }
+
+    int depthEstimate = (int )(log((double )timePerMove / diffSeconds) / log((double )moveSize * LAYER_SIZE_CORRECTION));
     depthEstimate = min(depthEstimate, max_depth);
 
-    printf("Generating moves for white with depth %d\n", depthEstimate);
+    printf("Generating moves for white with depth %d (%d, %d)\n", depthEstimate, game->averageMoveCount, moveSize);
 
     bestScore = -std::numeric_limits<float>::max();
 
@@ -440,7 +454,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
     // White's turn -> Maximize score
     for (auto currentMove : moves) {
         game->commitMove(currentMove);
-        score = alphaBeta<true>(depthEstimate, alpha, beta, game);
+        score = alphaBeta<true>(depthEstimate - 1, alpha, beta, game);
         game->revertMove();
 
         if (score >= bestScore) {
