@@ -107,8 +107,9 @@ TableEntry::TableEntry(uint64_t hash, t_move bestMove, float score, uint8_t visi
     _bestMove = static_cast<t_move *>(calloc(1, sizeof(t_move)));
     memcpy(_bestMove, &bestMove, sizeof(t_move));
 
-    _score = static_cast<float *>(calloc(1, sizeof(float)));
-    memcpy(_score, &score, sizeof(float));
+    //_score = static_cast<float *>(calloc(1, sizeof(float)));
+    //memcpy(_score, &score, sizeof(float));
+    _score = score;
     _vision = vision;
 }
 
@@ -129,11 +130,12 @@ void TableEntry::setBestMove(const t_move &bestMove) {
 }
 
 float TableEntry::getScore() const {
-    return *_score;
+    return _score;
 }
 
 void TableEntry::setScore(float score) {
-    memcpy(_score, &score, sizeof(float));
+    _score = score;
+    //memcpy(_score, &score, sizeof(float));
 }
 
 uint8_t TableEntry::getVision() const {

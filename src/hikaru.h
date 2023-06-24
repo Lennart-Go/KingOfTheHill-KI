@@ -254,8 +254,8 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
                 }
             }
 
-            TableEntry newEntry = TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score));
-            game->tableBlack.setEntry(&newEntry);
+            TableEntry* newEntry = new TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score));
+            game->tableBlack.setEntry(newEntry);
 
             return std::tuple<float, short>(bestScore, std::get<1>(score) + 1);
         }
@@ -305,8 +305,8 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
                     break;
                 }
             }
-            TableEntry newEntry = TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score) + 1);
-            game->tableWhite.setEntry(&newEntry);
+            TableEntry* newEntry = new TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score) + 1);
+            game->tableWhite.setEntry(newEntry);
 
             return std::tuple<float, short>(bestScore, std::get<1>(score) + 1);
         }

@@ -47,7 +47,7 @@ class TableEntry{
     private:
         uint64_t _hash;
         t_move *_bestMove;
-        float * _score;
+        float _score;
         uint8_t _vision;
 };
 
