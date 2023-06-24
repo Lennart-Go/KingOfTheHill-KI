@@ -149,7 +149,7 @@ void TableEntry::setVision(uint8_t vision) {
 TranspositionTable::TranspositionTable() {
     _entryCounter = 0;
     _currentAge = 0;
-    _hashTable = new std::map<uint64_t,TableEntry*>();
+    _hashTable = new std::map<uint64_t,TableEntry>();
 }
 
 TranspositionTable::~TranspositionTable() {
@@ -158,26 +158,26 @@ TranspositionTable::~TranspositionTable() {
 
 
 
-void TranspositionTable::removeEntry(TableEntry* entry) {
-    (*_hashTable).erase(entry->getHash());
+void TranspositionTable::removeEntry(TableEntry entry) {
+    (*_hashTable).erase(entry.getHash());
     _entryCounter -= 1;
 }
 
 //return pointer to TableEntry if exists. If not returns NULL
 TableEntry* TranspositionTable::getEntry(uint64_t hash) {
     if((*_hashTable).find(hash) != (*_hashTable).end()){
-        return (*_hashTable)[hash];
+        return &(*_hashTable).find(hash)->second;
     }else{
         return nullptr;
     }
 }
 
-void TranspositionTable::setEntry(TableEntry* te) {
-    if((*_hashTable).find(te->getHash()) == (*_hashTable).end()) {
-        (*_hashTable).insert(std::pair<uint64_t, TableEntry *>(te->getHash(), te));
+void TranspositionTable::setEntry(TableEntry te) {
+    if((*_hashTable).find(te.getHash()) == (*_hashTable).end()) {
+        (*_hashTable).insert(std::pair<uint64_t, TableEntry>(te.getHash(), te));
         _entryCounter++;
     }else {
-        (*_hashTable)[te->getHash()] = te;
+        (*_hashTable).find(te.getHash())->second = te;
     }
 }
 

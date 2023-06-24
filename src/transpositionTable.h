@@ -55,10 +55,10 @@ class TranspositionTable{
     public:
         TranspositionTable();
         ~TranspositionTable();
-        void print_entry(TableEntry* entry);
-        void removeEntry(TableEntry* entry);
+        void print_entry(TableEntry entry);
+        void removeEntry(TableEntry entry);
         TableEntry* getEntry(uint64_t hash);
-        void setEntry(TableEntry* te);
+        void setEntry(TableEntry te);
         int getSize() const;
         long int getAge() const;
         void setAge(long int age);
@@ -66,7 +66,7 @@ class TranspositionTable{
     private:
         long int _entryCounter;
         int _currentAge;
-        std::map<uint64_t,TableEntry*>* _hashTable;
+        std::map<uint64_t,TableEntry>* _hashTable;
 };
 
 
