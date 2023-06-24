@@ -204,7 +204,7 @@ static inline t_gameState getMoveRandom(t_game *game) {
 }
 
 template<bool color>
-static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float beta, t_game *game) {
+static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float beta, t_game *game, long int* searchedMoves) {
 
     if (depth <= 0 || game->isOver) {
         return std::tuple<float, short>(evaluate(game), 0);
@@ -233,12 +233,13 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
         // Black's turn -> Minimize score
         uint64_t boardHash = hash(game->random, game->state);
         TableEntry* entry = game->tableBlack.getEntry(boardHash);
-        if (entry == nullptr) {
+        if (entry == nullptr || entry->getVision() < depth / 2) {
             t_gameState *bestMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
             std::tuple<float, short> score;
             for (auto currentMove : moves) {
                 game->commitMove(currentMove);
-                score = alphaBeta<false>(depth-1, alpha, beta, game);
+                *searchedMoves += 1;
+                score = alphaBeta<false>(depth-1, alpha, beta, game, searchedMoves);
                 game->revertMove();
 
                 if (std::get<0>(score) <= bestScore) {
@@ -255,7 +256,7 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
             }
 
             TableEntry* newEntry = new TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score));
-            game->tableBlack.setEntry(newEntry);
+            game->tableBlack.setEntry(*newEntry);
 
             return std::tuple<float, short>(bestScore, std::get<1>(score) + 1);
         }
@@ -285,12 +286,13 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
         // White's turn -> Maximize score
         uint64_t boardHash = hash(game->random, game->state);
         TableEntry* entry = game->tableWhite.getEntry(boardHash);
-        if (entry == nullptr) {
+        if (entry == nullptr || entry->getVision() < depth / 2) {
             t_gameState *bestMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
             std::tuple<float, short> score;
             for (auto currentMove: moves) {
                 game->commitMove(currentMove);
-                score = alphaBeta<true>(depth - 1, alpha, beta, game);
+                *searchedMoves += 1;
+                score = alphaBeta<true>(depth - 1, alpha, beta, game, searchedMoves);
                 game->revertMove();
 
                 if (std::get<0>(score) >= bestScore) {
@@ -306,7 +308,7 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
                 }
             }
             TableEntry* newEntry = new TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score) + 1);
-            game->tableWhite.setEntry(newEntry);
+            game->tableWhite.setEntry(*newEntry);
 
             return std::tuple<float, short>(bestScore, std::get<1>(score) + 1);
         }
@@ -370,11 +372,11 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
 
 
 template<bool color>
-static inline std::pair<t_gameState, float> alphaBetaHead(t_game *game, int max_depth);
+static inline std::pair<t_gameState, float> alphaBetaHead(t_game *game, int max_depth, long int* searchedMoves);
 
 
 template<>
-inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_depth) {
+inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_depth, long int* searchedMoves) {
     double timePerMove = game->blackMoveTime / game->blackMovesRemaining;
 
     float alpha = -std::numeric_limits<float>::max();
@@ -399,7 +401,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
     }
 
     int depthEstimate = (int )(log((double )timePerMove / diffSeconds) / log((double )moveSize * LAYER_SIZE_CORRECTION));
-    depthEstimate = min(depthEstimate, max_depth);
+    depthEstimate = max_depth; //min(depthEstimate, max_depth);
 
     printf("Generating moves for black with depth %d (%d, %d)\n", depthEstimate, game->averageMoveCount, moveSize);
 
@@ -423,7 +425,8 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
     std::tuple<float, short> score;
     for (auto currentMove : moves) {
         game->commitMove(currentMove);
-        score = alphaBeta<false>(depthEstimate - 1, alpha, beta, game);
+        *searchedMoves += 1;
+        score = alphaBeta<false>(depthEstimate - 1, alpha, beta, game, searchedMoves);
         game->revertMove();
 
         if (std::get<0>(score) <= bestScore) {
@@ -442,7 +445,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
 
 
 template<>
-inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_depth) {
+inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_depth, long int* searchedMoves) {
     double timePerMove = game->whiteMoveTime / game->whiteMovesRemaining;
 
     float alpha = -std::numeric_limits<float>::max();
@@ -466,7 +469,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
     }
 
     int depthEstimate = (int )(log((double )timePerMove / diffSeconds) / log((double )moveSize * LAYER_SIZE_CORRECTION));
-    depthEstimate = min(depthEstimate, max_depth);
+    depthEstimate = max_depth; // min(depthEstimate, max_depth);
 
     printf("Generating moves for white with depth %d (%d, %d)\n", depthEstimate, game->averageMoveCount, moveSize);
 
@@ -490,7 +493,8 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
     std::tuple<float, short> score;
     for (auto currentMove : moves) {
         game->commitMove(currentMove);
-        score = alphaBeta<true>(depthEstimate - 1, alpha, beta, game);
+        *searchedMoves += 1;
+        score = alphaBeta<true>(depthEstimate - 1, alpha, beta, game, searchedMoves);
         game->revertMove();
 
         if (std::get<0>(score) >= bestScore) {
@@ -510,19 +514,19 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
 
 template<bool color>
 inline std::pair<gameState, float> getMove(t_game *game) {
-    return alphaBetaHead<color>(game, 100);
+    return alphaBetaHead<color>(game, 100, nullptr);
 }
 
 
 template<>
 inline std::pair<gameState, float> getMove<true>(t_game *game) {
-    return alphaBetaHead<true>(game, 100);
+    return alphaBetaHead<true>(game, 100, nullptr);
 }
 
 
 template<>
 inline std::pair<gameState, float> getMove<false>(t_game *game) {
-    return alphaBetaHead<false>(game, 100);
+    return alphaBetaHead<false>(game, 100, nullptr);
 }
 
 #endif //KINGOFTHEHILL_KI_HIKARU_H

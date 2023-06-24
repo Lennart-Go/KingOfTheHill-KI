@@ -329,5 +329,7 @@ typedef struct game {
 
 void play(int maxRounds, uint64_t gameTime);
 void printMoveStack(t_game game);
+std::pair<t_gameState , float> alphaBetaHead2(t_game *, int, long int*);
+float evaluate2(t_game*);
 
 #endif //KINGOFTHEHILL_KI_GAME_H
