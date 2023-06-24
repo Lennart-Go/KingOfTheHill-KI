@@ -4,7 +4,8 @@
 
 scoredMove::scoredMove(float score, t_gameState* move) {
     _score = score;
-    _move = move;
+    _move = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
+    memcpy(_move, move, sizeof(t_gameState));
 }
 
 bool scoredMove::operator <(const scoredMove& a){
