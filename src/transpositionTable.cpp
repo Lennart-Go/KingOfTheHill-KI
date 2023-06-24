@@ -111,6 +111,7 @@ TableEntry::TableEntry(uint64_t hash, t_move bestMove, float score, uint8_t visi
     //memcpy(_score, &score, sizeof(float));
     _score = score;
     _vision = vision;
+    //_age = age;
 }
 
 uint64_t TableEntry::getHash() const {
@@ -144,6 +145,10 @@ uint8_t TableEntry::getVision() const {
 
 void TableEntry::setVision(uint8_t vision) {
     _vision = vision;
+}
+
+long int TableEntry::getAge() const {
+    return _age;
 }
 
 TranspositionTable::TranspositionTable() {
@@ -196,8 +201,6 @@ void TranspositionTable::setAge(long int age) {
 void TranspositionTable::ageingTable(){
     _currentAge++;
 }
-
-
 
 
 

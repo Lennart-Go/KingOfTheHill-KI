@@ -10,6 +10,7 @@
 #include "game.h"
 #include "pieceSquareTable.h"
 #include "end.h"
+#include "scoredMove.h"
 
 #define KING_VALUE 20000
 #define QUEEN_VALUE 9
@@ -22,6 +23,16 @@
 #define LAYER_SIZE_CORRECTION 0.7
 
 
+//calculate score fore moves from transposition table from vision*score
+static inline scoredMove* scoreMove(t_gameState gameState, TranspositionTable* t, t_game* game){
+    float score;
+    if(t->_hashTable->find(hash(game->random,&gameState)) != t->_hashTable->end()){
+        score = t->_hashTable->find(hash(game->random,&gameState))->second.getScore()*t->_hashTable->find(hash(game->random,&gameState))->second.getVision();
+    }else{
+        score=0;
+    }
+    return new scoredMove(score,&gameState);
+}
 
 // calculates the time left finding a move
 static uint64_t timeLeft(uint64_t timePerMove, time_t startMoveTime) {
@@ -88,7 +99,7 @@ inline float evaluate(t_game* game) {
     // ------------ //
     // White pieces //
     // ------------ //
-    
+
     // King
     short wKingShift = findFirst(board.whiteKing);
     score += (float )pst_king_white[wKingShift];
@@ -100,7 +111,7 @@ inline float evaluate(t_game* game) {
         score += QUEEN_VALUE + pst_queen_white[shift];
         wQueens &= (wQueens - 1);
     }
-    
+
     // Rooks
     field wRooks = board.whiteRook;
     while (wRooks != 0) {
@@ -108,7 +119,7 @@ inline float evaluate(t_game* game) {
         score += ROOK_VALUE + pst_rook_white[shift];
         wRooks &= (wRooks - 1);
     }
-    
+
     // Bishops
     field wBishops = board.whiteBishop;
     while (wBishops != 0) {
@@ -116,7 +127,7 @@ inline float evaluate(t_game* game) {
         score += BISHOP_VALUE + pst_bishop_white[shift];
         wBishops &= (wBishops - 1);
     }
-    
+
     // Knight
     field wKnights = board.whiteKnight;
     while (wKnights != 0) {
@@ -124,7 +135,7 @@ inline float evaluate(t_game* game) {
         score += KNIGHT_VALUE + pst_knight_white[shift];
         wKnights &= (wKnights - 1);
     }
-    
+
     // Pawns
     field wPawns = board.whitePawn;
     while (wPawns != 0) {
@@ -132,8 +143,8 @@ inline float evaluate(t_game* game) {
         score += PAWN_VALUE + pst_pawn_white[shift];
         wPawns &= (wPawns - 1);
     }
-    
-    
+
+
     // ------------ //
     // Black pieces //
     // ------------ //
@@ -214,6 +225,19 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
 
     if constexpr (color) {
         std::vector<t_gameState> moves = generate_moves<true>(*game->state);
+        //attempt to implement move ordering by scoring moves like vision*score
+        std::vector<scoredMove*> sortedMoves;
+        for(t_gameState x : moves){
+            sortedMoves.push_back(scoreMove( x, color ? &game->tableWhite : &game->tableBlack, game));
+        }
+        std::sort(sortedMoves.begin(),sortedMoves.end(),[](auto a, auto b){return a > b;});
+        moves.clear();
+        for(int i=sortedMoves.size()-1; i >= 0;i--){
+            moves.push_back((*sortedMoves[i]->_move));
+            //moves.data()[i] = sortedMoves.data()[i]->_move;
+            delete sortedMoves[i];
+        }
+
         bestScore = std::numeric_limits<float>::max();
 
         if (moves.empty()) {
@@ -233,11 +257,12 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
         // Black's turn -> Minimize score
         uint64_t boardHash = hash(game->random, game->state);
         TableEntry* entry = game->tableBlack.getEntry(boardHash);
-        if (entry == nullptr) {
+        if (entry == nullptr || entry->getVision() < depth / 2) {
             t_gameState *bestMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
             std::tuple<float, short> score;
             for (auto currentMove : moves) {
                 game->commitMove(currentMove);
+
                 score = alphaBeta<false>(depth-1, alpha, beta, game);
                 game->revertMove();
 
@@ -255,7 +280,7 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
             }
 
             TableEntry* newEntry = new TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score));
-            game->tableBlack.setEntry(newEntry);
+            game->tableBlack.setEntry(*newEntry);
 
             return std::tuple<float, short>(bestScore, std::get<1>(score) + 1);
         }
@@ -285,7 +310,7 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
         // White's turn -> Maximize score
         uint64_t boardHash = hash(game->random, game->state);
         TableEntry* entry = game->tableWhite.getEntry(boardHash);
-        if (entry == nullptr) {
+        if (entry == nullptr || entry->getVision() < depth / 2) {
             t_gameState *bestMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
             std::tuple<float, short> score;
             for (auto currentMove: moves) {
@@ -306,7 +331,7 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
                 }
             }
             TableEntry* newEntry = new TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score) + 1);
-            game->tableWhite.setEntry(newEntry);
+            game->tableWhite.setEntry(*newEntry);
 
             return std::tuple<float, short>(bestScore, std::get<1>(score) + 1);
         }
