@@ -69,9 +69,6 @@ public:
 private:
     long int _entryCounter;
     int _currentAge;
-
 };
-
-
 
 #endif //KINGOFTHEHILL_KI_TRANSPOSITIONTABLE_H

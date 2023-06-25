@@ -291,7 +291,7 @@ typedef struct game {
             printf("Move time remaining for white %.4fs/%d\n", whiteMoveTime, whiteMovesRemaining);
         }
 
-        if (moveCounter >= 79) {
+        if (moveCounter % 80 == 79) {
             blackMoveTime = gameTime;
             whiteMoveTime = gameTime;
 
