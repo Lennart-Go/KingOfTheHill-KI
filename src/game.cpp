@@ -14,6 +14,14 @@ int time_limit() {
     return 2 * 60 * 60 / 40;
 }
 
+std::pair<t_gameState , float> alphaBetaHead2(t_game *game, int max_depth, long int* searchedMoves) {
+    return alphaBetaHead<false>(game, max_depth, searchedMoves);
+}
+
+float evaluate2(t_game* game) {
+    return evaluate(game);
+}
+
 void play(int maxRounds, uint64_t gameTime) {
     if (maxRounds < 0) {
         maxRounds = INT32_MAX;
