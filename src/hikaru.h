@@ -289,6 +289,8 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
             TableEntry* newEntry = new TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score));
             game->tableBlack.setEntry(*newEntry);
 
+            free(bestMove);
+
             return {bestScore, std::get<1>(score) + 1};
         } else {
             //printf("Found entry in Blacklist of %i entries.\n", game->tableBlack.getSize());
@@ -345,6 +347,8 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
             TableEntry* newEntry = new TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score) + 1);
             game->tableWhite.setEntry(*newEntry);
 
+            free(bestMove);
+
             return {bestScore, std::get<1>(score) + 1};
         } else {
             //printf("Found entry in Whitelist of %i entries.\n", game->tableWhite.getSize());
@@ -378,7 +382,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
     double diffSeconds = (double) diff.count() / 1e9f;
 
     short moveSize = (short) moves.size();
-    if (abs(game->averageMoveCount - moveSize) > (game->averageMoveCount * 0.3)) {
+    if (abs(game->averageMoveCount - moveSize) > (game->averageMoveCount * LAYER_SIZE_CORRECTION)) {
         moveSize = game->averageMoveCount;
     } else {
         game->updateAverageMoves(moveSize);
@@ -387,7 +391,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
     int depthEstimate = (int )(log((double )timePerMove / diffSeconds) / log((double )moveSize * LAYER_SIZE_CORRECTION));
     depthEstimate = max_depth; //min(depthEstimate, max_depth);
 
-    printf("Generating moves for black with depth %d (%d, %d)\n", depthEstimate, game->averageMoveCount, moveSize);
+    // printf("Generating moves for black with depth %d (%d, %d)\n", depthEstimate, game->averageMoveCount, moveSize);
 
 
     // Apply move ordering by scoring moves as vision*score
@@ -463,7 +467,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
     double diffSeconds = (double) diff.count() / 1e9f;
 
     short moveSize = (short) moves.size();
-    if (abs(game->averageMoveCount - moveSize) > (game->averageMoveCount * 0.3)) {
+    if (abs(game->averageMoveCount - moveSize) > (game->averageMoveCount * LAYER_SIZE_CORRECTION)) {
         moveSize = game->averageMoveCount;
     } else {
         game->updateAverageMoves(moveSize);
@@ -472,7 +476,7 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
     int depthEstimate = (int )(log((double )timePerMove / diffSeconds) / log((double )moveSize * LAYER_SIZE_CORRECTION));
     depthEstimate = max_depth; // min(depthEstimate, max_depth);
 
-    printf("Generating moves for white with depth %d (%d, %d)\n", depthEstimate, game->averageMoveCount, moveSize);
+    // printf("Generating moves for white with depth %d (%d, %d)\n", depthEstimate, game->averageMoveCount, moveSize);
 
 
     // Apply move ordering by scoring moves as vision*score
