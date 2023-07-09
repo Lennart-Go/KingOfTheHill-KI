@@ -14,14 +14,6 @@ int time_limit() {
     return 2 * 60 * 60 / 40;
 }
 
-std::pair<t_gameState , float> alphaBetaHead2(t_game *game, int max_depth, long int* searchedMoves) {
-    return alphaBetaHead<false>(game, max_depth, searchedMoves);
-}
-
-float evaluate2(t_game* game) {
-    return evaluate(game);
-}
-
 void play(int maxRounds, uint64_t gameTime) {
     if (maxRounds < 0) {
         maxRounds = INT32_MAX;
@@ -44,12 +36,6 @@ void play(int maxRounds, uint64_t gameTime) {
     // Generate next move
     t_gameState *nextMove = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
     while (!game.isOver && (game.moveCounter/2 + 1) <= maxRounds) {
-
-        if (game.moveCounter == 72) {
-            int test = 0;
-        }
-
-
         std::chrono::nanoseconds diff;
         if (game.turn) {
             // Black's turn
