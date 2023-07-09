@@ -45,6 +45,30 @@ typedef struct game {
     TranspositionTable tableWhite;
     TranspositionTable tableBlack;
 
+    game(game const &other) {
+        state = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
+        memcpy(state, other.state, sizeof(t_gameState));
+
+        stateStack = std::stack<t_gameState>(other.stateStack);
+        random = other.random;
+        turn = other.turn;
+
+        gameTime = other.gameTime;
+        whiteMoveTime = other.whiteMoveTime;
+        blackMoveTime = other.blackMoveTime;
+        whiteLastMoveTime = other.whiteLastMoveTime;
+        blackLastMoveTime = other.blackLastMoveTime;
+
+        isOver = other.isOver;
+        whiteWon = other.whiteWon;
+        blackWon = other.blackWon;
+
+        moveCounter = other.moveCounter;
+
+        tableWhite = TranspositionTable(other.tableWhite);
+        tableBlack = TranspositionTable(other.tableBlack);
+    }
+
     explicit game(uint64_t time) {
         // Default game constructor
         t_board startBoard = setFen((char *)"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
