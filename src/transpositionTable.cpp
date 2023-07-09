@@ -158,7 +158,7 @@ TranspositionTable::TranspositionTable() {
 }
 
 TranspositionTable::~TranspositionTable() {
-    delete _hashTable;
+    // delete _hashTable;
 };
 
 

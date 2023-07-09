@@ -16,6 +16,7 @@ public:
     bool operator <(const scoredMove& a);
     bool operator >(const scoredMove& a);
     bool operator ==(const scoredMove& a);
+    virtual ~scoredMove();
 };
 
 #endif //KINGOFTHEHILL_KI_SCOREDMOVE_H

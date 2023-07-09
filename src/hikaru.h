@@ -288,6 +288,8 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
             TableEntry* newEntry = new TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score));
             game->tableBlack.setEntry(*newEntry);
 
+            free(bestMove);
+
             return {bestScore, std::get<1>(score) + 1};
         } else {
             //printf("Found entry in Blacklist of %i entries.\n", game->tableBlack.getSize());
@@ -340,8 +342,10 @@ static inline std::tuple<float, short> alphaBeta(int depth, float alpha, float b
                     break;
                 }
             }
-            TableEntry* newEntry = new TableEntry(boardHash,bestMove->move, bestScore, std::get<1>(score) + 1);
+            TableEntry* newEntry = new TableEntry(boardHash, bestMove->move, bestScore, std::get<1>(score) + 1);
             game->tableWhite.setEntry(*newEntry);
+
+            free(bestMove);
 
             return {bestScore, std::get<1>(score) + 1};
         } else {
@@ -386,7 +390,6 @@ inline std::pair<t_gameState, float> alphaBetaHead<true>(t_game *game, int max_d
     depthEstimate = max(depthEstimate, max_depth); //min(depthEstimate, max_depth);
 
     printf("Generating moves for black with depth %d (%d, %d)\n", depthEstimate, game->averageMoveCount, moveSize);
-
 
     // Apply move ordering by scoring moves as vision*score
     std::vector<scoredMove *> sortedMoves = std::vector<scoredMove *>();

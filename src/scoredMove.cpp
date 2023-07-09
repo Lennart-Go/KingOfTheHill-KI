@@ -20,3 +20,7 @@ bool scoredMove::operator ==(const scoredMove& a){
     return _score == a._score;
 }
 
+scoredMove::~scoredMove() {
+    free(_move);
+}
+
