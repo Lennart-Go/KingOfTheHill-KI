@@ -23,6 +23,8 @@ add_executable(KingOfTheHill_KI
         src/hikaru.h
         src/game.cpp
         src/game.h
+        src/scoredMove.cpp
+        src/scoredMove.h
         src/moveMaps.h
         src/pieceSquareTable.h
         src/transpositionTable.cpp
