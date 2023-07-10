@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <ctime>
+#include <thread>
 
 #include "util.h"
 #include "move.h"
@@ -11,6 +12,7 @@
 #include "pieceSquareTable.h"
 #include "end.h"
 #include "scoredMove.h"
+#include "monteCarloTree.h"
 
 #define QUEEN_VALUE 9
 #define ROOK_VALUE 5
@@ -525,6 +527,66 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
     free(bestMove);
 
     return {returnMove, bestScore};
+}
+
+
+void monteCarloSimulate(MonteCarloTree *tree, Node *originNode) {
+    // TODO: Traverse node
+    Node *leafNode = tree->traverse(originNode);
+
+    // TODO: Simulate (rollout) node
+    std::pair<Node *, int> sim_result = tree->rollout(leafNode);
+
+    // TODO: Propagate result
+    MonteCarloTree::propagate(sim_result);
+}
+
+
+std::pair<t_gameState, float> monteCarlo(MonteCarloTree *tree, int simulation_iterations, int max_parallel_simulations) {
+    // TODO: Create (?) Monte Carlo Tree and expand root
+    std::vector<Node *> targetNodes = std::vector<Node *>();
+    if (tree->root()->isLeaf()) {
+        // Root is the only node in the tree -> Add child nodes
+        MonteCarloTree::expand(tree->root());
+
+        // TODO: Return error state if there are no children
+
+        std::vector<Node *> childrenCopy = std::vector<Node *>(tree->root()->children());  // Create copy of children vector
+        for (int i = 0; i < min((int )childrenCopy.size(), max_parallel_simulations); ++i) {
+            // Select random element from childrenCopy vector and add it to the targets
+            int select_index = randn(0, (int )childrenCopy.size());
+
+            targetNodes.push_back(childrenCopy.at(select_index));
+            childrenCopy.erase(childrenCopy.begin() + select_index);
+        }
+    } else {
+        std::vector<Node *> childrenCopy = std::vector<Node *>(tree->root()->children());  // Create copy of children vector
+        for (int i = 0; i < min((int )childrenCopy.size(), max_parallel_simulations); ++i) {
+            // Select best element from childrenCopy vector and add it to the targets
+            Node *bestChild = tree->select(tree->root());
+            targetNodes.push_back(bestChild);
+
+            // Remove "best" child from childrenCopy vector
+            auto node_index = std::find(childrenCopy.begin(), childrenCopy.end(), bestChild);
+            childrenCopy.erase(node_index);
+        }
+    }
+
+    // TODO: Run monteCarloSimulate on all of them
+    std::vector<std::thread *> active_threads = std::vector<std::thread *>();
+    for (Node *targetNode : targetNodes) {
+        std::thread *newThread = new std::thread(monteCarloSimulate, tree, targetNode);
+        active_threads.push_back(newThread);
+    }
+
+    // Wait for all threads to finish
+    for (std::thread *currentThread : active_threads) {
+        currentThread->join();
+    }
+
+    // TODO: Select best result after simulations
+    Node *bestNode = tree->select(tree->root());
+    return {*bestNode->game()->state, tree->ucb(bestNode)};
 }
 
 

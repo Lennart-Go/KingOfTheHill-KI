@@ -110,6 +110,10 @@ public:
         return _root;
     }
 
+    float ucb(Node *node) const {
+        return node->ucb(_color);
+    }
+
     Node *select(Node *node) const {
         if (node->isLeaf()) {
             return nullptr;
@@ -158,6 +162,26 @@ public:
         return traverse(nextNode);
     }
 
+    static void expand(Node *node) {
+        // Generate all possible moves for the current player
+        std::vector<t_gameState> possibleMoves;
+        if (node->game()->turn) {
+            possibleMoves = generate_moves<true>(*node->game()->state);
+        } else {
+            possibleMoves = generate_moves<false>(*node->game()->state);
+        }
+
+        // Generate child node for each move
+        for (auto move : possibleMoves) {
+            // Create child node with copy of current game, then commit the move on the new node
+            Node *newNode = new Node(node, *node->game());
+            newNode->game()->commitMove(move);
+
+            // Append new node to the current leafNode as child
+            node->children().push_back(newNode);
+        }
+    }
+
     std::pair<Node *, int> rollout(Node *leafNode) {
         /// NOTE: Parameter leafNode must be a leaf. The program will not exit if not, but may cause unexpected behaviour
         // Check for winner for move-independent cases
@@ -171,16 +195,10 @@ public:
             return {leafNode, -1};
         }
 
-        // Generate all possible moves for the current player
-        std::vector<t_gameState> possibleMoves;
-        if (leafNode->game()->turn) {
-            possibleMoves = generate_moves<true>(*leafNode->game()->state);
-        } else {
-            possibleMoves = generate_moves<false>(*leafNode->game()->state);
-        }
+        MonteCarloTree::expand(leafNode);
 
         // Check for winner if no moves are available
-        if (possibleMoves.empty()) {
+        if (leafNode->children().empty()) {
             winner = checkEndNoMoves(leafNode->game()->turn, leafNode->game()->state);
 
             if (winner == winner_t::DRAW) {
@@ -190,16 +208,6 @@ public:
             } else if (winner == winner_t::BLACK) {
                 return {leafNode, -1};
             }
-        }
-
-        // Generate child node for each move
-        for (auto move : possibleMoves) {
-            // Create child node with copy of current game, then commit the move on the new node
-            Node *newNode = new Node(leafNode, *leafNode->game());
-            newNode->game()->commitMove(move);
-
-            // Append new node to the current leafNode as child
-            leafNode->children().push_back(newNode);
         }
 
         int nextNodeIndex = randn(0, (int )leafNode->children().size());
@@ -215,6 +223,10 @@ public:
             currentNode->timesVisited++;
             currentNode->timesWon += result;
         }
+    }
+
+    static void propagate(std::pair<Node *, int> values) {
+        propagate(values.first, values.second);
     }
 };
 
