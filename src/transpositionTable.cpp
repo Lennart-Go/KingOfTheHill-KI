@@ -107,8 +107,11 @@ TableEntry::TableEntry(uint64_t hash, t_move bestMove, float score, uint8_t visi
     _bestMove = static_cast<t_move *>(calloc(1, sizeof(t_move)));
     memcpy(_bestMove, &bestMove, sizeof(t_move));
 
-    _score  = score;
+    //_score = static_cast<float *>(calloc(1, sizeof(float)));
+    //memcpy(_score, &score, sizeof(float));
+    _score = score;
     _vision = vision;
+    //_age = age;
 }
 
 uint64_t TableEntry::getHash() const {
@@ -133,6 +136,7 @@ float TableEntry::getScore() const {
 
 void TableEntry::setScore(float score) {
     _score = score;
+    //memcpy(_score, &score, sizeof(float));
 }
 
 uint8_t TableEntry::getVision() const {
@@ -143,38 +147,42 @@ void TableEntry::setVision(uint8_t vision) {
     _vision = vision;
 }
 
+long int TableEntry::getAge() const {
+    return _age;
+}
+
 TranspositionTable::TranspositionTable() {
     _entryCounter = 0;
     _currentAge = 0;
-    _hashTable = new std::map<uint64_t,TableEntry*>();
+    _hashTable = new std::map<uint64_t,TableEntry>();
 }
 
 TranspositionTable::~TranspositionTable() {
-    delete _hashTable;
+    // delete _hashTable;
 };
 
 
 
-void TranspositionTable::removeEntry(TableEntry* entry) {
-    (*_hashTable).erase(entry->getHash());
+void TranspositionTable::removeEntry(TableEntry entry) {
+    (*_hashTable).erase(entry.getHash());
     _entryCounter -= 1;
 }
 
 //return pointer to TableEntry if exists. If not returns NULL
 TableEntry* TranspositionTable::getEntry(uint64_t hash) {
     if((*_hashTable).find(hash) != (*_hashTable).end()){
-        return (*_hashTable)[hash];
+        return &(*_hashTable).find(hash)->second;
     }else{
         return nullptr;
     }
 }
 
-void TranspositionTable::setEntry(TableEntry* te) {
-    if((*_hashTable).find(te->getHash()) == (*_hashTable).end()) {
-        (*_hashTable).insert(std::pair<uint64_t, TableEntry *>(te->getHash(), te));
+void TranspositionTable::setEntry(TableEntry te) {
+    if((*_hashTable).find(te.getHash()) == (*_hashTable).end()) {
+        (*_hashTable).insert(std::pair<uint64_t, TableEntry>(te.getHash(), te));
         _entryCounter++;
     }else {
-        (*_hashTable)[te->getHash()] = te;
+        (*_hashTable).find(te.getHash())->second = te;
     }
 }
 
@@ -193,8 +201,6 @@ void TranspositionTable::setAge(long int age) {
 void TranspositionTable::ageingTable(){
     _currentAge++;
 }
-
-
 
 
 

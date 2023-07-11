@@ -23,10 +23,12 @@ add_executable(KingOfTheHill_KI
         src/hikaru.h
         src/game.cpp
         src/game.h
+        src/scoredMove.cpp
+        src/scoredMove.h
         src/moveMaps.h
         src/pieceSquareTable.h
         src/transpositionTable.cpp
-        src/transpositionTable.h)
+        src/transpositionTable.h src/monteCarloTree.cpp src/monteCarloTree.h)
 target_link_libraries(KingOfTheHill_KI ${GTEST_LIBRARIES} pthread)
 
 add_executable(Tests
