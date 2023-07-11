@@ -169,7 +169,7 @@ private:
     t_game _game;
 public:
     int timesVisited = 0;
-    int score = 0;
+    float score = 0;
 
     explicit Node(const t_game& game) : _game(game) {
         _parent = nullptr;
@@ -280,7 +280,7 @@ public:
 
             for (auto currentNode : node->children()) {
                 current_ucb = currentNode->ucb(_color);
-                if (current_ucb > best_ucb) {
+                if (current_ucb >= best_ucb) {
                     bestNode = currentNode;
                     best_ucb = current_ucb;
                 }
@@ -295,7 +295,7 @@ public:
 
             for (auto currentNode : node->children()) {
                 current_ucb = currentNode->ucb(_color);
-                if (current_ucb < best_ucb) {
+                if (current_ucb <= best_ucb) {
                     bestNode = currentNode;
                     best_ucb = current_ucb;
                 }
@@ -358,9 +358,9 @@ public:
         node->addChild(newNode);
     }
 
-    std::pair<Node *, int> rollout(Node *leafNode, int depth) {
+    float rollout(Node *leafNode, int depth) {
         if (depth == 0) {
-            return {leafNode, evaluateMonteCarlo(leafNode->game())};
+            return evaluateMonteCarlo(leafNode->game());
         }
 
         /// NOTE: Parameter leafNode must be a leaf. The program will not exit if not, but may cause unexpected behaviour
@@ -375,7 +375,7 @@ public:
 //            return {leafNode, -1};
 //        }
         if (winner) {
-            return {leafNode, evaluateMonteCarlo(leafNode->game())};
+            return evaluateMonteCarlo(leafNode->game());
         }
 
         MonteCarloTree::addRandom(leafNode);
@@ -392,7 +392,7 @@ public:
 //                return {leafNode, -1};
 //            }
             if (winner) {
-                return {leafNode, evaluateMonteCarlo(leafNode->game())};
+                return evaluateMonteCarlo(leafNode->game());
             }
         }
 
@@ -402,7 +402,7 @@ public:
         return rollout(nextNode, depth - 1);
     }
 
-    static void propagate(Node *finalNode, int result) {
+    static void propagate(Node *finalNode, float result) {
         /// Propagate the move sequence from the final (leaf) node up to the root and update the UCBs
         Node *currentNode = finalNode;
         while (currentNode->parent() != nullptr) {
@@ -411,10 +411,6 @@ public:
 
             currentNode = currentNode->parent();
         }
-    }
-
-    static void propagate(std::pair<Node *, int> values) {
-        propagate(values.first, values.second);
     }
 
     // TODO: Write save function and load constructor

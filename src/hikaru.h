@@ -535,7 +535,7 @@ void monteCarloSimulate(MonteCarloTree *tree, Node *originNode, int max_depth) {
     Node *leafNode = tree->traverse(originNode);
 
     /// Simulate (rollout) node
-    std::pair<Node *, int> sim_result;
+    float sim_result;
     if (leafNode->timesVisited == 0) {
         sim_result = tree->rollout(leafNode, max_depth);
     } else {
@@ -543,10 +543,7 @@ void monteCarloSimulate(MonteCarloTree *tree, Node *originNode, int max_depth) {
 
         if (leafNode->isLeaf()) {
             // No more moves possible -> Evaluate current leaf node
-            winner_t winner = checkEndNoMoves(leafNode->game()->turn, leafNode->game()->state);
-            if (winner) {
-                sim_result = {leafNode, evaluateMonteCarlo(leafNode->game())};
-            }
+            sim_result = evaluateMonteCarlo(leafNode->game());
         } else {
             // Start rollout from "best" (here: first, because no evaluations yet) leaf node
             leafNode = leafNode->children().at(0);
@@ -556,7 +553,7 @@ void monteCarloSimulate(MonteCarloTree *tree, Node *originNode, int max_depth) {
     }
 
     /// Propagate result
-    MonteCarloTree::propagate(sim_result);
+    MonteCarloTree::propagate(leafNode, sim_result);
 
     /// Remove simulated nodes
     if (!leafNode->children().empty()) {
@@ -649,7 +646,7 @@ inline std::pair<gameState, float> getMoveAlphaBeta<false>(t_game *game) {
 
 
 std::pair<gameState, MonteCarloTree *> getMoveMonteCarlo(MonteCarloTree *tree) {
-    return monteCarlo(tree, 100, 16, 10);
+    return monteCarlo(tree, 100, 16, 20);
 }
 
 #endif //KINGOFTHEHILL_KI_HIKARU_H
