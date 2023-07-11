@@ -530,27 +530,55 @@ inline std::pair<t_gameState, float> alphaBetaHead<false>(t_game *game, int max_
 }
 
 
-void monteCarloSimulate(MonteCarloTree *tree, Node *originNode) {
-    // TODO: Traverse node
+void monteCarloSimulate(MonteCarloTree *tree, Node *originNode, int max_depth) {
+    /// Traverse nodes
     Node *leafNode = tree->traverse(originNode);
 
-    // TODO: Simulate (rollout) node
-    std::pair<Node *, int> sim_result = tree->rollout(leafNode);
+    /// Simulate (rollout) node
+    std::pair<Node *, int> sim_result;
+    if (leafNode->timesVisited == 0) {
+        sim_result = tree->rollout(leafNode, max_depth);
+    } else {
+        MonteCarloTree::expand(leafNode);
 
-    // TODO: Propagate result
+        if (leafNode->isLeaf()) {
+            // No more moves possible -> Evaluate current leaf node
+            winner_t winner = checkEndNoMoves(leafNode->game()->turn, leafNode->game()->state);
+            if (winner) {
+                sim_result = {leafNode, evaluateMonteCarlo(leafNode->game())};
+            }
+        } else {
+            // Start rollout from "best" (here: first, because no evaluations yet) leaf node
+            leafNode = leafNode->children().at(0);
+
+            sim_result = tree->rollout(leafNode, max_depth);
+        }
+    }
+
+    /// Propagate result
     MonteCarloTree::propagate(sim_result);
+
+    /// Remove simulated nodes
+    if (!leafNode->children().empty()) {
+        delete leafNode->children().at(0);
+    }
 }
 
 
-std::pair<t_gameState, float> monteCarlo(MonteCarloTree *tree, int simulation_iterations, int max_parallel_simulations) {
-    // TODO: Create (?) Monte Carlo Tree and expand root
+std::pair<t_gameState, MonteCarloTree *> monteCarlo(MonteCarloTree *tree, int simulation_iterations, int max_parallel_simulations, int max_depth) {
     std::vector<Node *> targetNodes = std::vector<Node *>();
     if (tree->root()->isLeaf()) {
-        // Root is the only node in the tree -> Add child nodes
+        /// Root is the only node in the tree -> Expand root node
         MonteCarloTree::expand(tree->root());
 
-        // TODO: Return error state if there are no children
+        // Return error state if there are no children
+        if (tree->root()->isLeaf()) {
+            t_gameState zeroMove = t_gameState(tree->root()->game()->board(), t_move());
 
+            return {zeroMove, tree};
+        }
+
+        /// Select "best" child nodes at random, as no evaluations are available yet
         std::vector<Node *> childrenCopy = std::vector<Node *>(tree->root()->children());  // Create copy of children vector
         for (int i = 0; i < min((int )childrenCopy.size(), max_parallel_simulations); ++i) {
             // Select random element from childrenCopy vector and add it to the targets
@@ -560,51 +588,68 @@ std::pair<t_gameState, float> monteCarlo(MonteCarloTree *tree, int simulation_it
             childrenCopy.erase(childrenCopy.begin() + select_index);
         }
     } else {
-        std::vector<Node *> childrenCopy = std::vector<Node *>(tree->root()->children());  // Create copy of children vector
-        for (int i = 0; i < min((int )childrenCopy.size(), max_parallel_simulations); ++i) {
-            // Select best element from childrenCopy vector and add it to the targets
-            Node *bestChild = tree->select(tree->root());
+        /// Root was already expanded -> Select best child nodes by UCB
+        Node *copyNode = new Node(*tree->root());
+        for (int i = 0; i < min((int )copyNode->children().size(), max_parallel_simulations); ++i) {
+            // Select best element from copyNode's children and add it to the targets
+            Node *bestChild = tree->select(copyNode);
             targetNodes.push_back(bestChild);
 
             // Remove "best" child from childrenCopy vector
-            auto node_index = std::find(childrenCopy.begin(), childrenCopy.end(), bestChild);
-            childrenCopy.erase(node_index);
+            copyNode->removeChild(bestChild);
+        }
+        free(copyNode);  // NOTE: Can't use 'delete' here, otherwise all children would be deleted during deconstruction
+    }
+
+    /// Run n amount of simulation iterations to approximate optimal behaviour
+    for (int i = 0; i < simulation_iterations; ++i) {
+        if (max_parallel_simulations == 0) {
+            /// Run monteCarloSimulate on the single best targetNode, without using threads (for debugging)
+            Node *targetNode = tree->select(tree->root());
+            monteCarloSimulate(tree, targetNode, max_depth);
+        } else {
+            /// Run monteCarloSimulate on every selected targetNode in parallel
+            std::vector<std::thread *> active_threads = std::vector<std::thread *>();
+            for (Node *targetNode: targetNodes) {
+//                printf("Starting thread\n");
+                std::thread *newThread = new std::thread(monteCarloSimulate, tree, targetNode, max_depth);
+                active_threads.push_back(newThread);
+            }
+
+            // Wait for all threads to finish
+            for (std::thread *currentThread: active_threads) {
+//                printf("Finished thread\n");
+                currentThread->join();
+            }
         }
     }
 
-    // TODO: Run monteCarloSimulate on all of them
-    std::vector<std::thread *> active_threads = std::vector<std::thread *>();
-    for (Node *targetNode : targetNodes) {
-        std::thread *newThread = new std::thread(monteCarloSimulate, tree, targetNode);
-        active_threads.push_back(newThread);
-    }
-
-    // Wait for all threads to finish
-    for (std::thread *currentThread : active_threads) {
-        currentThread->join();
-    }
-
-    // TODO: Select best result after simulations
+    /// Select best child of the root after running simulations. This node contains the current best move
     Node *bestNode = tree->select(tree->root());
-    return {*bestNode->game()->state, tree->ucb(bestNode)};
+    return {*bestNode->game()->state, new MonteCarloTree(bestNode)};
 }
 
 
 template<bool color>
-inline std::pair<gameState, float> getMove(t_game *game) {
+inline std::pair<gameState, float> getMoveAlphaBeta(t_game *game) {
     return alphaBetaHead<color>(game, 100);
 }
 
 
 template<>
-inline std::pair<gameState, float> getMove<true>(t_game *game) {
+inline std::pair<gameState, float> getMoveAlphaBeta<true>(t_game *game) {
     return alphaBetaHead<true>(game, 100);
 }
 
 
 template<>
-inline std::pair<gameState, float> getMove<false>(t_game *game) {
+inline std::pair<gameState, float> getMoveAlphaBeta<false>(t_game *game) {
     return alphaBetaHead<false>(game, 100);
+}
+
+
+std::pair<gameState, MonteCarloTree *> getMoveMonteCarlo(MonteCarloTree *tree) {
+    return monteCarlo(tree, 100, 16, 10);
 }
 
 #endif //KINGOFTHEHILL_KI_HIKARU_H

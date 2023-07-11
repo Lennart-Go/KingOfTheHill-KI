@@ -351,7 +351,8 @@ typedef struct game {
     }
 } t_game;
 
-void play(int maxRounds, uint64_t gameTime);
+void playAlphaBeta(int maxRounds, uint64_t gameTime);
+void playMonteCarlo(int maxRounds, uint64_t gameTime);
 void printMoveStack(t_game game);
 
 #endif //KINGOFTHEHILL_KI_GAME_H
