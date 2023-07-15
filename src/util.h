@@ -52,6 +52,7 @@ bool board_value_from_shift(uint64_t board, int shift);
 std::vector<Position> board_value_positions(uint64_t board);
 
 char columnToLetter(int column);
+int columnFromLetter(char letter);
 void printPosition(Position pos);
 
 int max(int num1, int num2);

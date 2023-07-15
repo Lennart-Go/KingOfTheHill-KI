@@ -44,6 +44,10 @@ typedef struct move {
     move() : originMap(0), targetMap(0) {}
     move(uint64_t origin, uint64_t target) : originMap(origin), targetMap(target) {}
     move(const move &other) = default;
+
+    bool operator==(const move& other) {
+        return (this->originMap == other.originMap) && (this->targetMap == other.targetMap);
+    }
 } t_move;
 
 

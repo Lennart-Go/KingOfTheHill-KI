@@ -351,6 +351,101 @@ typedef struct game {
     }
 } t_game;
 
+
+inline std::string stringMove(t_gameState state) {
+    t_move move = state.move;
+
+    uint8_t originShift = (uint8_t )log2((double )move.originMap);
+    uint8_t targetShift = (uint8_t )log2((double )move.targetMap);
+
+    Position originPosition = position_from_shift(originShift);
+    Position targetPosition = position_from_shift(targetShift);
+
+    // TODO: Promotions?
+    return columnToLetter(originPosition.x) + std::to_string(originPosition.y) +
+           columnToLetter(targetPosition.x) + std::to_string(targetPosition.y);
+}
+
+
+inline t_gameState moveFromString(const std::string& moveString, const t_game& game) {
+    const char *moveStringC = moveString.c_str();
+
+    int originColumn = columnFromLetter(moveStringC[0]);
+    int originRow = moveStringC[1] - '0';
+    Position originPosition = Position(originColumn, originRow);
+
+    int targetColumn = columnFromLetter(moveStringC[2]);
+    int targetRow = moveStringC[3] - '0';
+    Position targetPosition = Position(targetColumn, targetRow);
+
+    uint64_t originMap = (uint64_t )1 << shift_from_position(originPosition);
+    uint64_t targetMap = (uint64_t )1 << shift_from_position(targetPosition);
+
+    t_move move = t_move(originMap, targetMap);
+
+//    t_board currentBoard = game.state->board;
+//    t_board *nextBoard = static_cast<t_board *>(calloc(1, sizeof(t_board)));
+//    if (game.turn) {
+//        if (((currentBoard.blackKing) & originMap) != 0) {
+//            t_board brd = move<piece::king, true>(currentBoard, originMap, targetMap);
+//            memcpy(nextBoard, &brd, sizeof(t_board));
+//        } else if (((currentBoard.blackQueen) & originMap) != 0) {
+//            t_board brd = move<piece::queen, true>(currentBoard, originMap, targetMap);
+//            memcpy(nextBoard, &brd, sizeof(t_board));
+//        } else if (((currentBoard.blackRook) & originMap) != 0) {
+//            t_board brd = move<piece::rook, true>(currentBoard, originMap, targetMap);
+//            memcpy(nextBoard, &brd, sizeof(t_board));
+//        } else if (((currentBoard.blackBishop) & originMap) != 0) {
+//            t_board brd = move<piece::bishop, true>(currentBoard, originMap, targetMap);
+//            memcpy(nextBoard, &brd, sizeof(t_board));
+//        } else if (((currentBoard.blackKnight) & originMap) != 0) {
+//            t_board brd = move<piece::knight, true>(currentBoard, originMap, targetMap);
+//            memcpy(nextBoard, &brd, sizeof(t_board));
+//        } else if (((currentBoard.blackPawn) & originMap) != 0) {
+//            t_board brd = move<piece::pawn, true>(currentBoard, originMap, targetMap);
+//            memcpy(nextBoard, &brd, sizeof(t_board));
+//        }
+//    } else {
+//        if (((currentBoard.whiteKing) & originMap) != 0) {
+//            t_board brd = move<piece::king, false>(currentBoard, originMap, targetMap);
+//            memcpy(nextBoard, &brd, sizeof(t_board));
+//        } else if (((currentBoard.whiteQueen) & originMap) != 0) {
+//            t_board brd = move<piece::queen, false>(currentBoard, originMap, targetMap);
+//            memcpy(nextBoard, &brd, sizeof(t_board));
+//        } else if (((currentBoard.whiteRook) & originMap) != 0) {
+//            t_board brd = move<piece::rook, false>(currentBoard, originMap, targetMap);
+//            memcpy(nextBoard, &brd, sizeof(t_board));
+//        } else if (((currentBoard.whiteBishop) & originMap) != 0) {
+//            t_board brd = move<piece::bishop, false>(currentBoard, originMap, targetMap);
+//            memcpy(nextBoard, &brd, sizeof(t_board));
+//        } else if (((currentBoard.whiteKnight) & originMap) != 0) {
+//            t_board brd = move<piece::knight, false>(currentBoard, originMap, targetMap);
+//            memcpy(nextBoard, &brd, sizeof(t_board));
+//        } else if (((currentBoard.whitePawn) & originMap) != 0) {
+//            t_board brd = move<piece::pawn, false>(currentBoard, originMap, targetMap);
+//            memcpy(nextBoard, &brd, sizeof(t_board));
+//        }
+//    }
+
+    std::vector<t_gameState> possibleMoves;
+    if (game.turn) {
+        possibleMoves = generate_moves<true>(*game.state);
+    } else {
+        possibleMoves = generate_moves<false>(*game.state);
+    }
+
+    // Select matching move
+    for (auto mov : possibleMoves) {
+        if (mov.move == move) {
+            return mov;
+        }
+    }
+
+    // No matching move found?!
+    printf("No matching move found!\n");
+    return *game.state;
+}
+
 void playAlphaBeta(int maxRounds, uint64_t gameTime);
 void playMonteCarlo(int maxRounds, uint64_t gameTime);
 void printMoveStack(t_game game);

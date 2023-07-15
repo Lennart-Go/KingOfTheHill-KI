@@ -196,7 +196,11 @@ std::vector<Position> board_value_positions(uint64_t board) {
 }
 
 char columnToLetter(int column) {
-    return (char ) ('A' + column);
+    return (char ) ('a' + column);
+}
+
+int columnFromLetter(char letter) {
+    return letter - 'a';
 }
 
 void printPosition(Position pos) {
