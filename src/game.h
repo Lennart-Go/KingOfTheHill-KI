@@ -383,50 +383,6 @@ inline t_gameState moveFromString(const std::string& moveString, const t_game& g
 
     t_move move = t_move(originMap, targetMap);
 
-//    t_board currentBoard = game.state->board;
-//    t_board *nextBoard = static_cast<t_board *>(calloc(1, sizeof(t_board)));
-//    if (game.turn) {
-//        if (((currentBoard.blackKing) & originMap) != 0) {
-//            t_board brd = move<piece::king, true>(currentBoard, originMap, targetMap);
-//            memcpy(nextBoard, &brd, sizeof(t_board));
-//        } else if (((currentBoard.blackQueen) & originMap) != 0) {
-//            t_board brd = move<piece::queen, true>(currentBoard, originMap, targetMap);
-//            memcpy(nextBoard, &brd, sizeof(t_board));
-//        } else if (((currentBoard.blackRook) & originMap) != 0) {
-//            t_board brd = move<piece::rook, true>(currentBoard, originMap, targetMap);
-//            memcpy(nextBoard, &brd, sizeof(t_board));
-//        } else if (((currentBoard.blackBishop) & originMap) != 0) {
-//            t_board brd = move<piece::bishop, true>(currentBoard, originMap, targetMap);
-//            memcpy(nextBoard, &brd, sizeof(t_board));
-//        } else if (((currentBoard.blackKnight) & originMap) != 0) {
-//            t_board brd = move<piece::knight, true>(currentBoard, originMap, targetMap);
-//            memcpy(nextBoard, &brd, sizeof(t_board));
-//        } else if (((currentBoard.blackPawn) & originMap) != 0) {
-//            t_board brd = move<piece::pawn, true>(currentBoard, originMap, targetMap);
-//            memcpy(nextBoard, &brd, sizeof(t_board));
-//        }
-//    } else {
-//        if (((currentBoard.whiteKing) & originMap) != 0) {
-//            t_board brd = move<piece::king, false>(currentBoard, originMap, targetMap);
-//            memcpy(nextBoard, &brd, sizeof(t_board));
-//        } else if (((currentBoard.whiteQueen) & originMap) != 0) {
-//            t_board brd = move<piece::queen, false>(currentBoard, originMap, targetMap);
-//            memcpy(nextBoard, &brd, sizeof(t_board));
-//        } else if (((currentBoard.whiteRook) & originMap) != 0) {
-//            t_board brd = move<piece::rook, false>(currentBoard, originMap, targetMap);
-//            memcpy(nextBoard, &brd, sizeof(t_board));
-//        } else if (((currentBoard.whiteBishop) & originMap) != 0) {
-//            t_board brd = move<piece::bishop, false>(currentBoard, originMap, targetMap);
-//            memcpy(nextBoard, &brd, sizeof(t_board));
-//        } else if (((currentBoard.whiteKnight) & originMap) != 0) {
-//            t_board brd = move<piece::knight, false>(currentBoard, originMap, targetMap);
-//            memcpy(nextBoard, &brd, sizeof(t_board));
-//        } else if (((currentBoard.whitePawn) & originMap) != 0) {
-//            t_board brd = move<piece::pawn, false>(currentBoard, originMap, targetMap);
-//            memcpy(nextBoard, &brd, sizeof(t_board));
-//        }
-//    }
-
     std::vector<t_gameState> possibleMoves;
     if (game.turn) {
         possibleMoves = generate_moves<true>(*game.state);
