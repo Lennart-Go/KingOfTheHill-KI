@@ -28,7 +28,10 @@ add_executable(KingOfTheHill_KI
         src/moveMaps.h
         src/pieceSquareTable.h
         src/transpositionTable.cpp
-        src/transpositionTable.h src/monteCarloTree.cpp src/monteCarloTree.h)
+        src/transpositionTable.h
+        src/monteCarloTree.cpp
+        src/monteCarloTree.h
+        lib/json.hpp)
 target_link_libraries(KingOfTheHill_KI ${GTEST_LIBRARIES} pthread)
 
 add_executable(Tests
