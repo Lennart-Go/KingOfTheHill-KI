@@ -343,5 +343,6 @@ typedef Response GameStartedResponse;
 
 int setup_connection(const std::string& address, int port);
 void sendRequest(int fd, Request *request);
+Response *awaitReceive(int fd);
 
 #endif //KINGOFTHEHILL_KI_GAMESERVER_H
