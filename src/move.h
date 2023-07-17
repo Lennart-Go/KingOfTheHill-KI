@@ -1431,5 +1431,26 @@ inline void printMove(t_gameState state, char end = '\n') {
            end);
 }
 
+inline std::string moveToString(t_gameState state) {
+    t_move move = state.move;
+
+    uint8_t originShift = (uint8_t )log2((double )move.originMap);
+    uint8_t targetShift = (uint8_t )log2((double )move.targetMap);
+
+    Position originPosition = position_from_shift(originShift);
+    Position targetPosition = position_from_shift(targetShift);
+
+    std::string mv = "";
+    mv += columnToLetter(originPosition.x);
+    mv += std::to_string(originPosition.y + 1);
+    mv += "-";
+    mv += columnToLetter(targetPosition.x);
+    mv += std::to_string(targetPosition.y + 1);
+
+
+
+    return mv;
+}
+
 
 #endif //KINGOFTHEHILL_KI_MOVE_H

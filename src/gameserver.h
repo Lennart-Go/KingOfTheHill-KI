@@ -5,6 +5,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <board.h>
+#include <game.h>
 #include "lib/json.hpp"
 using json = nlohmann::json;
 
@@ -188,6 +190,7 @@ typedef Player LoginResponse;
 
 
 class GetGamesRequest: public Request {
+public:
     RequestType type = RequestType::GET_GAMES;
     int messageStamp = 0;
 
@@ -214,6 +217,7 @@ public:
 
 
 class CreateGameRequest: public Request{
+public:
     RequestType type = RequestType::CREATE_GAME;
     int messageStamp = 0;
 
@@ -245,6 +249,7 @@ enum JoinType {
     PLAYER = 1
 };
 class JoinGameRequest: public Request {
+public:
     RequestType type = RequestType::JOIN_GAME;
     int messageStamp = 0;
 
@@ -277,6 +282,7 @@ typedef GameInfo JoinGameResponse;
 
 
 class MoveRequest: public Request {
+public:
     RequestType type = RequestType::MOVE;
     int messageStamp = 0;
 
@@ -309,6 +315,7 @@ typedef GameInfo MoveResponse;
 
 
 class StartTournamentRequest: public Request {
+public:
     RequestType type = RequestType::START_TOURNAMENT;
     int messageStamp = 0;
 
@@ -344,5 +351,6 @@ typedef Response GameStartedResponse;
 int setup_connection(const std::string& address, int port);
 void sendRequest(int fd, Request *request);
 Response *awaitReceive(int fd);
-
+int updateGame(GameInfo* gameInfo, t_game* game, Player* player,bool color);
+void playGameserver(uint64_t gameTime);
 #endif //KINGOFTHEHILL_KI_GAMESERVER_H
