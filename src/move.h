@@ -825,8 +825,8 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
                 checks |= kingKnightLookup & board.whiteKnight;
 
                 // Check from pawns
-                checks |= ((board.blackKing & ~aFile) >> 7) & board.whitePawn;  // Pawns threatening to the right
-                checks |= ((board.blackKing & ~hFile) >> 9) & board.whitePawn;  // Pawns threatening to the left
+                checks |= ((board.blackKing & ~aFile) << 7) & board.whitePawn;  // Pawns threatening to the right
+                checks |= ((board.blackKing & ~hFile) << 9) & board.whitePawn;  // Pawns threatening to the left
             }
 
             // Handle different amounts of checking pieces
@@ -1138,15 +1138,16 @@ std::vector<t_gameState> generate_moves(t_gameState gameState) {
                 checks |= kingKnightLookup & board.blackKnight;
 
                 // Check from pawns
-                checks |= ((board.whiteKing & ~aFile) << 7) & board.blackPawn;  // Pawns threatening to the left
-                checks |= ((board.whiteKing & ~hFile) << 9) & board.blackPawn;  // Pawns threatening to the right
+                checks |= ((board.whiteKing & ~aFile) >> 7) & board.blackPawn;  // Pawns threatening to the left
+                checks |= ((board.whiteKing & ~hFile) >> 9) & board.blackPawn;  // Pawns threatening to the right
             }
 
             // Handle different amounts of checking pieces
-            if (checkSliderPieces == 0) {
+            uint64_t checkPieces = checks & board.black;
+            if (checkPieces == 0) {
                 // No checks -> Set all uint64_ts to 1
                 checks = ~0;
-            } else if ((checkSliderPieces & (checkSliderPieces - 1)) != 0) {
+            } else if ((checkPieces & (checkPieces - 1)) != 0) {
                 // More than one check -> Only King can move
                 uint64_t kingTargets = lookup<piece::king>(whiteKingShift) & ~threatened & ~board.white;
                 moveKing<false>(&moves, gameState, whiteKingMap, kingTargets);
