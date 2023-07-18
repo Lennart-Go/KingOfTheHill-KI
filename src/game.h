@@ -17,7 +17,7 @@
 
 typedef struct game {
     t_gameState *state;
-    std::stack<t_gameState> stateStack;
+    std::stack<t_gameState *> stateStack;
 
     uint64_t *random;
     std::map<uint64_t, int> *positionHistory = nullptr;
@@ -49,7 +49,7 @@ typedef struct game {
         state = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
         memcpy(state, other.state, sizeof(t_gameState));
 
-        stateStack = std::stack<t_gameState>(other.stateStack);
+        stateStack = std::stack<t_gameState *>(other.stateStack);
         random = other.random;
         turn = other.turn;
 
@@ -77,7 +77,7 @@ typedef struct game {
         t_gameState *startStateMem = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
         memcpy(startStateMem, &startState, sizeof(t_gameState));
 
-        stateStack = std::stack<t_gameState>();
+        stateStack = std::stack<t_gameState *>();
         state = startStateMem;
 
         random = init_hash();
@@ -106,7 +106,7 @@ typedef struct game {
         t_gameState *startStateMem = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
         memcpy(startStateMem, &startState, sizeof(t_gameState));
 
-        stateStack = std::stack<t_gameState>();
+        stateStack = std::stack<t_gameState *>();
         state = startStateMem;
 
         random = init_hash();
@@ -143,7 +143,7 @@ typedef struct game {
         t_gameState *startStateMem = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
         memcpy(startStateMem, &startState, sizeof(t_gameState));
 
-        stateStack = std::stack<t_gameState>();
+        stateStack = std::stack<t_gameState *>();
         state = startStateMem;
 
         random = init_hash();
@@ -180,7 +180,7 @@ typedef struct game {
         t_gameState *startStateMem = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
         memcpy(startStateMem, &startState, sizeof(t_gameState));
 
-        stateStack = std::stack<t_gameState>();
+        stateStack = std::stack<t_gameState *>();
         state = startStateMem;
 
         random = init_hash();
@@ -258,7 +258,9 @@ typedef struct game {
     }
 
     void commitMove(t_gameState move) {
-        stateStack.push(*state);
+        t_gameState *stateCopy = static_cast<t_gameState *>(calloc(1, sizeof(t_gameState)));
+        memcpy(stateCopy, state, sizeof(t_gameState));
+        stateStack.push(stateCopy);
 
         memcpy(state, &move, sizeof(t_gameState));
 
@@ -329,7 +331,8 @@ typedef struct game {
     void revertMove() {
         positionTrackingUndo();
 
-        memcpy(state, &stateStack.top(), sizeof(t_gameState));  // Reset game state to last state
+        memcpy(state, stateStack.top(), sizeof(t_gameState));  // Reset game state to last state
+        free(stateStack.top());
 
         stateStack.pop();  // Remove the (now) current move from the stack
 
@@ -349,6 +352,8 @@ typedef struct game {
         t_board board = state->board;
         return getFen(&board);
     }
+
+
 } t_game;
 
 void playAlphaBeta(int maxRounds, uint64_t gameTime);

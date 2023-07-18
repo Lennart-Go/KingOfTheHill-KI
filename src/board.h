@@ -51,6 +51,28 @@ typedef struct board {
 
 
     board(const board &other) = default;
+
+    board& operator=(const board& other) {
+        memcpy((void *)&whiteKing, &other.whiteKing, sizeof(field));
+        memcpy((void *)&whiteQueen, &other.whiteQueen, sizeof(field));
+        memcpy((void *)&whiteRook, &other.whiteRook, sizeof(field));
+        memcpy((void *)&whiteBishop, &other.whiteBishop, sizeof(field));
+        memcpy((void *)&whiteKnight, &other.whiteKnight, sizeof(field));
+        memcpy((void *)&whitePawn, &other.whitePawn, sizeof(field));
+
+        memcpy((void *)&blackKing, &other.blackKing, sizeof(field));
+        memcpy((void *)&blackQueen, &other.blackQueen, sizeof(field));
+        memcpy((void *)&blackRook, &other.blackRook, sizeof(field));
+        memcpy((void *)&blackBishop, &other.blackBishop, sizeof(field));
+        memcpy((void *)&blackKnight, &other.blackKnight, sizeof(field));
+        memcpy((void *)&blackPawn, &other.blackPawn, sizeof(field));
+
+        memcpy((void *)&white, &other.white, sizeof(field));
+        memcpy((void *)&black, &other.black, sizeof(field));
+        memcpy((void *)&occupied, &other.occupied, sizeof(field));
+
+        return *this;
+    }
 //    }
 } t_board;
 

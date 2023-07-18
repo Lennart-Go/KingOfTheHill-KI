@@ -45,12 +45,12 @@ static uint64_t timeLeft(uint64_t timePerMove, time_t startMoveTime) {
 #include <algorithm>
 
 void printMoveStack(t_game *game, int depth) {
-    std::stack<t_gameState> moveStack = game->stateStack;
+    std::stack<t_gameState *> moveStack = game->stateStack;
 
     std::vector<t_gameState> debugVector = std::vector<t_gameState>();
     while (!moveStack.empty() && debugVector.size() < depth - 1) {
-        t_gameState t = moveStack.top();
-        debugVector.push_back(t);
+        t_gameState *t = moveStack.top();
+        debugVector.push_back(*t);
         moveStack.pop();
     }
 
@@ -59,7 +59,7 @@ void printMoveStack(t_game *game, int depth) {
         t_gameState currentState = debugVector.at(i);
 
         printMove(currentState, '\t');
-        game->stateStack.push(currentState);
+        game->stateStack.push(&currentState);
     }
 
     printMove(*game->state, '\t');
