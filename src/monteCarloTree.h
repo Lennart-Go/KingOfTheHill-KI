@@ -14,6 +14,7 @@
 
 #define EXPLORATION_CONSTANT 2
 
+#define KING_VALUE 200000
 #define QUEEN_VALUE 9
 #define ROOK_VALUE 5
 #define BISHOP_VALUE 3
@@ -38,18 +39,21 @@ inline float evaluateMonteCarlo(t_game *game) {
 
     float score = 0;
 
+    score += (float) countFigure(game->board().whiteKing) * KING_VALUE;
     score += (float) countFigure(game->board().whiteQueen) * QUEEN_VALUE;
     score += (float) countFigure(game->board().whiteRook) * ROOK_VALUE;
     score += (float) countFigure(game->board().whiteBishop) * BISHOP_VALUE;
     score += (float) countFigure(game->board().whiteKnight) * KNIGHT_VALUE;
     score += (float) countFigure(game->board().whitePawn) * PAWN_VALUE;
 
+    score -= (float) countFigure(game->board().blackKing) * KING_VALUE;
     score -= (float) countFigure(game->board().blackQueen) * QUEEN_VALUE;
     score -= (float) countFigure(game->board().blackRook) * ROOK_VALUE;
     score -= (float) countFigure(game->board().blackBishop) * BISHOP_VALUE;
     score -= (float) countFigure(game->board().blackKnight) * KNIGHT_VALUE;
     score -= (float) countFigure(game->board().blackPawn) * PAWN_VALUE;
 
+    score *= 50;
 
     t_board board = game->board();
 
@@ -65,7 +69,7 @@ inline float evaluateMonteCarlo(t_game *game) {
     field wQueens = board.whiteQueen;
     while (wQueens != 0) {
         short shift = findFirst(wQueens);
-        score += QUEEN_VALUE + pst_queen_white[shift];
+        score += pst_queen_white[shift];
         wQueens &= (wQueens - 1);
     }
 
@@ -73,7 +77,7 @@ inline float evaluateMonteCarlo(t_game *game) {
     field wRooks = board.whiteRook;
     while (wRooks != 0) {
         short shift = findFirst(wRooks);
-        score += ROOK_VALUE + pst_rook_white[shift];
+        score += pst_rook_white[shift];
         wRooks &= (wRooks - 1);
     }
 
@@ -81,7 +85,7 @@ inline float evaluateMonteCarlo(t_game *game) {
     field wBishops = board.whiteBishop;
     while (wBishops != 0) {
         short shift = findFirst(wBishops);
-        score += BISHOP_VALUE + pst_bishop_white[shift];
+        score += pst_bishop_white[shift];
         wBishops &= (wBishops - 1);
     }
 
@@ -89,7 +93,7 @@ inline float evaluateMonteCarlo(t_game *game) {
     field wKnights = board.whiteKnight;
     while (wKnights != 0) {
         short shift = findFirst(wKnights);
-        score += KNIGHT_VALUE + pst_knight_white[shift];
+        score += pst_knight_white[shift];
         wKnights &= (wKnights - 1);
     }
 
@@ -97,7 +101,7 @@ inline float evaluateMonteCarlo(t_game *game) {
     field wPawns = board.whitePawn;
     while (wPawns != 0) {
         short shift = findFirst(wPawns);
-        score += PAWN_VALUE + pst_pawn_white[shift];
+        score += pst_pawn_white[shift];
         wPawns &= (wPawns - 1);
     }
 
@@ -114,7 +118,7 @@ inline float evaluateMonteCarlo(t_game *game) {
     field bQueens = board.blackQueen;
     while (bQueens != 0) {
         short shift = findFirst(bQueens);
-        score -= QUEEN_VALUE + pst_queen_black[shift];
+        score -= pst_queen_black[shift];
         bQueens &= (bQueens - 1);
     }
 
@@ -122,7 +126,7 @@ inline float evaluateMonteCarlo(t_game *game) {
     field bRooks = board.blackRook;
     while (bRooks != 0) {
         short shift = findFirst(bRooks);
-        score -= ROOK_VALUE + pst_rook_black[shift];
+        score -= pst_rook_black[shift];
         bRooks &= (bRooks - 1);
     }
 
@@ -130,7 +134,7 @@ inline float evaluateMonteCarlo(t_game *game) {
     field bBishops = board.blackBishop;
     while (bBishops != 0) {
         short shift = findFirst(bBishops);
-        score -= BISHOP_VALUE + pst_bishop_black[shift];
+        score -= pst_bishop_black[shift];
         bBishops &= (bBishops - 1);
     }
 
@@ -138,7 +142,7 @@ inline float evaluateMonteCarlo(t_game *game) {
     field bKnights = board.blackKnight;
     while (bKnights != 0) {
         short shift = findFirst(bKnights);
-        score -= KNIGHT_VALUE + pst_knight_black[shift];
+        score -= pst_knight_black[shift];
         bKnights &= (bKnights - 1);
     }
 
@@ -146,10 +150,81 @@ inline float evaluateMonteCarlo(t_game *game) {
     field bPawns = board.blackPawn;
     while (bPawns != 0) {
         short shift = findFirst(bPawns);
-        score -= PAWN_VALUE + pst_pawn_black[shift];
+        score -= pst_pawn_black[shift];
         bPawns &= (bPawns - 1);
     }
 
+    // doubled pawns
+    // white Pawns
+    field wdPawns = board.whitePawn;
+    while (wdPawns != 0) {
+        short shift = findFirst(wdPawns);
+        uint64_t mask = 0;
+        int column = shift;
+
+        for (int i = 0; i < 8; i++) {
+            mask |= (1ULL << column);
+            column += 8;
+        }
+        if (countFigure(board.whitePawn & mask) > 1) score -= 1;
+        wdPawns &= (wdPawns - 1);
+    }
+
+    // doubled pawns
+    // black Pawns
+    field bdPawns = board.blackPawn;
+    while (bdPawns != 0) {
+        short shift = findFirst(bdPawns);
+        uint64_t mask = 0;
+        int column = shift;
+
+        for (int i = 0; i < 8; i++) {
+            mask |= (1ULL << column);
+            column += 8;
+        }
+        if (countFigure(board.blackPawn & mask) > 1) score += 1;
+        bdPawns &= (bdPawns - 1);
+    }
+
+    // isolated pawns
+    // white Pawns
+    field wiPawns = board.whitePawn;
+    while (wiPawns != 0) {
+        short shift = findFirst(wiPawns);
+        uint64_t mask = 0;
+        int column = shift-1;
+
+        for (int i = 0; i < 8; i++) {
+            // left column
+            mask |= (1ULL << column);
+            column += 2;
+            // right column
+            mask |= (1ULL << column);
+            column += 6;
+        }
+        if (countFigure(board.whitePawn & mask) > 0) score -= 1;
+        wiPawns &= (wiPawns - 1);
+    }
+
+    // isolated pawns
+    // black Pawns
+    field biPawns = board.blackPawn;
+    while (biPawns != 0) {
+        short shift = findFirst(biPawns);
+        uint64_t mask = 0;
+        int column = shift;
+
+        for (int i = 0; i < 8; i++) {
+            // left column
+            mask |= (1ULL << column);
+            column += 2;
+            // right column
+            mask |= (1ULL << column);
+            column += 6;
+        }
+        if (countFigure(board.blackPawn & mask) > 0) score += 1;
+        biPawns &= (biPawns - 1);
+    }
 
 //    printMoveStack(game, 4);
 //    printf("=> %6.4f\n", score);
