@@ -1,4 +1,5 @@
 #include "game.h"
+#include "hikaru.h"
 
 int main() {
 
@@ -13,7 +14,7 @@ int main() {
 
             clock_t before = clock();
 
-            evaluate2(&begin);
+            //evaluate2(&begin);
             clock_t difference = clock() - before;
 
             long double time = ((long double) difference) / CLOCKS_PER_SEC;
@@ -36,7 +37,7 @@ int main() {
 
             clock_t before = clock();
 
-            evaluate2(&middle);
+            //evaluate2(&middle);
 
             clock_t difference = clock() - before;
 
@@ -60,7 +61,7 @@ int main() {
 
             clock_t before = clock();
 
-            evaluate2(&end);
+            //evaluate2(&end);
 
             clock_t difference = clock() - before;
 
@@ -79,6 +80,8 @@ int main() {
         int numberOfIterations = 1000;
 
         game begin = t_game("r2qkbnr/pp1bpppp/2np4/1B6/3QP3/5N2/PPP2PPP/RNB1K2R", 0, 10000000);
+        MonteCarloTree *testTreeBegin = new MonteCarloTree(begin);
+
 
         long double begin_sum = 0;
 
@@ -86,7 +89,7 @@ int main() {
 
             clock_t before = clock();
 
-            std::vector<t_gameState> moves = generate_moves<true>(*begin.state);
+            t_gameState move = (t_gameState) monteCarlo(testTreeBegin,100,16,i).first;//generate_moves<true>(*begin.state);
 
             clock_t difference = clock() - before;
 
@@ -102,6 +105,7 @@ int main() {
         ///////////////////////////////////////
 
         game middle = t_game("2r2rk1/4ppbp/3p2p1/1N6/P7/1Pn1B2P/5PP1/2R2RK1", 0, 10000000);
+        MonteCarloTree *testTreeMiddle = new MonteCarloTree(middle);
 
 
         long double middle_sum = 0;
@@ -150,11 +154,13 @@ int main() {
     }
 
 
-    if (false) { // Benchmark Transposition Table
-        int numberOfMaxDepth = 8;
+    if (true) { // Benchmark Transposition Table
+        int numberOfMaxDepth = 30;
         int stellung = 1;
 
         game games = game(100000000);
+
+
 
 
         if (stellung == 1) {
@@ -164,7 +170,7 @@ int main() {
         } else if (stellung == 3) {
             games = game("8/8/6k1/8/8/4P1PP/r4R2/5K2", 0, 1000000000);
         }
-
+        MonteCarloTree *testTree = new MonteCarloTree(games);
 
         long double begin_sum = 0;
 
@@ -184,14 +190,14 @@ int main() {
             long int *searchedMoves = static_cast<long *>(calloc(1, sizeof(long int)));
             *searchedMoves = 0;
 
-            std::pair<t_gameState, float> move = alphaBetaHead2(&games, i, searchedMoves);
+            t_gameState move = (t_gameState) monteCarlo(testTree,100,16,i).first;//generate_moves<true>(*begin.state);
 
             clock_t difference = clock() - before;
 
             long double time = ((long double) difference) / CLOCKS_PER_SEC;
 
             printf("Depth: %i \t Time: %Lfs \t searched moves: %li \t \t best move: ", i, time, *searchedMoves);
-            printMove(move.first);
+            printMove(move);
             printf("\n");
         }
     }
